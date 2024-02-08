@@ -1,21 +1,27 @@
 package uk.gov.hmcts.reform.migration.service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 @Service
-public class DataMigrationServiceImpl implements DataMigrationService<Map<String, Object>> {
+@Slf4j
+@ConditionalOnProperty(value = "migration.wa.enabled", havingValue = "true")
+public class WaDataMigrationServiceImpl implements DataMigrationService<Map<String, Object>> {
 
     @Override
     public Predicate<CaseDetails> accepts() {
-        return caseDetails -> caseDetails == null ? false : true;
+        return Objects::nonNull;
     }
 
     @Override
     public Map<String, Object> migrate(Map<String, Object> data) {
+        data.put("preWorkAllocation", "Yes");
         return data;
     }
 }

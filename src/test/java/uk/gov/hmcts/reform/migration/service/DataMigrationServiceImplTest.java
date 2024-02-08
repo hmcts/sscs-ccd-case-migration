@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class DataMigrationServiceImplTest {
 
-    private DataMigrationServiceImpl service = new DataMigrationServiceImpl();
+    private WaDataMigrationServiceImpl service = new WaDataMigrationServiceImpl();
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -44,6 +44,5 @@ public class DataMigrationServiceImplTest {
     public void shouldReturnNullWhenDataIsNotPassed() {
         Map<String, Object> result = service.migrate(null);
         assertNull(result);
-        assertEquals(null, result);
     }
 }
