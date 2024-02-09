@@ -166,8 +166,8 @@ ext {
   restAssuredVersion = '4.3.0!!'
   lombokVersion = "1.18.30"
   junit_version = "4.12"
-  junitJupiterVersion = '5.10.2'
-  junitVintageVersion = '5.10.2'
+  junitJupiterVersion = '5.9.3'
+  junitVintageVersion = '5.9.3'
   powermockVersion = '2.0.9'
   springSecurity   =  '5.8.9'
   springCloudVersion = '2021.0.9'
@@ -200,7 +200,7 @@ dependencies {
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
-  testImplementation('org.junit.jupiter:junit-jupiter:5.10.2')
+  testImplementation('org.junit.jupiter:junit-jupiter:5.9.3')
   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${junitVintageVersion}"

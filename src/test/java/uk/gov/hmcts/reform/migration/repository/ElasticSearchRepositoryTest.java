@@ -29,37 +29,51 @@ public class ElasticSearchRepositoryTest {
 
     private static final String AUTH_TOKEN = "Test_Auth_Token";
 
-    private static final String INITIAL_QUERY = "{\n"
-        + "  \"query\": {\n"
-        + "    \"match_all\": {}\n"
-        + "  },\n"
-        + "  \"_source\": [\n"
-        + "    \"reference\"\n"
-        + "  ],\n"
-        + "  \"size\": 100,\n"
-        + "  \"sort\": [\n"
-        + "    {\n"
-        + "      \"reference.keyword\": \"asc\"\n"
-        + "    }\n"
-        + "  ]\n"
-        + "\n"
-        + "}";
+    private static final String INITIAL_QUERY = """
+            {
+              "query": {
+                    "bool": {
+                        "must_not": {
+                            "exists": {
+                                "field": "data.preWorkAllocation"
+                            }
+                        }
+                    }
+              },
+              "_source": [
+                "reference"
+              ],
+              "size": 100,
+              "sort": [
+                {
+                  "reference.keyword": "asc"
+                }
+              ]
 
-    private static final String SEARCH_AFTER_QUERY = "{\n"
-        + "  \"query\": {\n"
-        + "    \"match_all\": {}\n"
-        + "  },\n"
-        + "  \"_source\": [\n"
-        + "    \"reference\"\n"
-        + "  ],\n"
-        + "  \"size\": 100,\n"
-        + "  \"sort\": [\n"
-        + "    {\n"
-        + "      \"reference.keyword\": \"asc\"\n"
-        + "    }\n"
-        + "  ]\n"
-        + ",\"search_after\": [1677777777]\n"
-        + "}";
+            }""";
+
+    private static final String SEARCH_AFTER_QUERY = """
+            {
+              "query": {
+                    "bool": {
+                        "must_not": {
+                            "exists": {
+                                "field": "data.preWorkAllocation"
+                            }
+                        }
+                    }
+              },
+              "_source": [
+                "reference"
+              ],
+              "size": 100,
+              "sort": [
+                {
+                  "reference.keyword": "asc"
+                }
+              ]
+            ,"search_after": [1677777777]
+            }""";
 
     private static final int QUERY_SIZE = 100;
     private static final int CASE_PROCESS_LIMIT = 100;

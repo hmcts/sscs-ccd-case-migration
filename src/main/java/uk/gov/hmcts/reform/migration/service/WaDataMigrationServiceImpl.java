@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.wa.enabled", havingValue = "true")
@@ -21,7 +23,9 @@ public class WaDataMigrationServiceImpl implements DataMigrationService<Map<Stri
 
     @Override
     public Map<String, Object> migrate(Map<String, Object> data) {
-        data.put("preWorkAllocation", "Yes");
+        if (nonNull(data)) {
+            data.put("preWorkAllocation", "Yes");
+        }
         return data;
     }
 }
