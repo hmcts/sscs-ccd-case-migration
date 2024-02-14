@@ -26,7 +26,6 @@ public class IdamRepository {
     }
 
     public String generateUserToken() {
-        return idamClient.authenticateUser(idamUsername, idamPassword);
+        return idamClient.getAccessToken(idamUsername, idamPassword);
     }
-
 }
