@@ -7,4 +7,4 @@ COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/ccd-case-migration.jar /opt/app/
 
 EXPOSE 4999
-CMD [ "ccd-case-migration.jar" ]
+CMD [ "sscs-ccd-case-migration.jar" ]
