@@ -3,8 +3,8 @@
 @Library("Infrastructure")
 
 def type = "java"
-def product = "ccd"
-def component = "migration"
+def product = "sscs"
+def component = "ccd-case-migration"
 
 withPipeline(type, product, component) {
   enableAksStagingDeployment()
