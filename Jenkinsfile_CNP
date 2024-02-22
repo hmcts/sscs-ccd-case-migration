@@ -3,7 +3,7 @@
 @Library("Infrastructure")
 
 def type = "java"
-def product = "ccd"
+def product = "sscs"
 def component = "migration"
 
 withPipeline(type, product, component) {
