@@ -251,8 +251,8 @@ dependencyManagement {
 mainClassName = 'uk.gov.hmcts.reform.migration.CaseMigrationRunner'
 
 bootJar {
-  archiveFileName = 'ccd-case-migration.jar'
-  archiveBaseName = 'ccd-case-migration'
+  archiveFileName = 'sscs-ccd-case-migration.jar'
+  archiveBaseName = 'sscs-ccd-case-migration'
   archiveVersion = project.version.toString()
 }
 

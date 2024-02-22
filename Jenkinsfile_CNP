@@ -4,7 +4,7 @@
 
 def type = "java"
 def product = "sscs"
-def component = "migration"
+def component = "ccd-case-migration"
 
 withPipeline(type, product, component) {
   enableAksStagingDeployment()
