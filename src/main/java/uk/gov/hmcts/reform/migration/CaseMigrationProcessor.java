@@ -100,6 +100,7 @@ public class CaseMigrationProcessor {
             threadPool.awaitTermination(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             log.warn("Timed out waiting for thread pool to terminate");
+            Thread.currentThread().interrupt();
         }
     }
 
