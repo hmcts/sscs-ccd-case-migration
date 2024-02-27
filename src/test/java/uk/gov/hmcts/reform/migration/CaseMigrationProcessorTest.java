@@ -122,6 +122,7 @@ public class CaseMigrationProcessorTest {
         assertThrows(CaseMigrationException.class, () ->
             caseMigrationProcessor.migrateCases("Cast_Type1,Cast_Type2"));
     }
+    
     @Test
     public void shutdownThreadPoolTimedOut() throws InterruptedException {
         when(threadPool.awaitTermination(anyLong(), any())).thenThrow(new InterruptedException());
