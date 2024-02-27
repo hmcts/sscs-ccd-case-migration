@@ -59,13 +59,7 @@ public class CaseMigrationProcessor {
             () -> listOfCaseDetails.parallelStream()
                     .limit(caseProcessLimit)
                     .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails)));
-        threadPool.shutdown();
-        log.info("Waiting for thread pool to terminate");
-        try {
-            threadPool.awaitTermination(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            log.info("Timedout waiting for thread pool to terminate");
-        }
+        shutdownThreadPool(threadPool);
 
         log.info(
             """
@@ -97,6 +91,16 @@ public class CaseMigrationProcessor {
             log.info("Failed cases: {} ", getFailedCases());
         }
         log.info("Data migration of cases completed");
+    }
+
+    public void shutdownThreadPool(ForkJoinPool threadPool) {
+        threadPool.shutdown();
+        log.info("Waiting for thread pool to terminate");
+        try {
+            threadPool.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.info("Timed out waiting for thread pool to terminate");
+        }
     }
 
     private void validateCaseType(String caseType) {
