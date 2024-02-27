@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -51,9 +53,20 @@ public class CaseMigrationProcessor {
         log.info("Data migration of cases started for case type: {}", caseType);
         String userToken =  idamRepository.generateUserToken();
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(userToken, caseType);
-        listOfCaseDetails.stream()
-            .limit(caseProcessLimit)
-            .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails));
+
+        ForkJoinPool threadPool = new ForkJoinPool(25);
+        threadPool.submit(
+            () -> listOfCaseDetails.parallelStream()
+                    .limit(caseProcessLimit)
+                    .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails)));
+        threadPool.shutdown();
+        log.info("Waiting for thread pool to terminate");
+        try {
+            threadPool.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.info("Timedout waiting for thread pool to terminate");
+        }
+
         log.info(
             """
                 {}
