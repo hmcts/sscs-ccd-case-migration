@@ -38,7 +38,7 @@ public class WaDataMigrationServiceImpl implements DataMigrationService<Map<Stri
     }
 
     private void removeCaseReferenceIfNull(Map<String, Object> data) {
-        if (data.containsKey(CASE_REFERENCE) && data.get(CASE_REFERENCE)==null) {
+        if (data.containsKey(CASE_REFERENCE) && data.get(CASE_REFERENCE) == null) {
             data.remove(CASE_REFERENCE);
         }
     }
