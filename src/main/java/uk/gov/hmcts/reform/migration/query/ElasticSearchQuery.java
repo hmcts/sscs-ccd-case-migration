@@ -9,11 +9,18 @@ public class ElasticSearchQuery {
         {
           "query": {
                 "bool": {
-                    "must_not": {
-                        "exists": {
-                            "field": "data.preWorkAllocation"
+                    "must_not": [
+                        {
+                            "exists": {
+                                "field": "data.preWorkAllocation"
+                            }
+                        },
+                        {
+                            "match": {
+                                "state": "draft"
+                            }
                         }
-                    }
+                    ]
                 }
           },
           "_source": [

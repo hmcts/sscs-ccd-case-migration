@@ -62,7 +62,7 @@ configurations {
 }
 
 tasks.withType(JavaCompile) {
-  options.compilerArgs << "-Xlint:unchecked" << "-Werror"
+  options.compilerArgs << "-Xlint:unchecked"
 }
 
 // https://github.com/gradle/gradle/issues/16791

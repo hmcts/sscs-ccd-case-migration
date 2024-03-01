@@ -45,4 +45,63 @@ public class DataMigrationServiceImplTest {
         Map<String, Object> result = service.migrate(null);
         assertNull(result);
     }
+
+    @Test
+    public void removeNullNino() {
+        Map<String, Object> identity = new HashMap<>();
+        identity.put("dob", "1980-08-10");
+        identity.put("nino", null);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", Map.of(
+                     "appellant", Map.of(
+                         "identity", identity)));
+        data.put("field", "value");
+
+        Map<String, Object> result = service.migrate(data);
+
+        assertTrue(result.equals(Map.of(
+            "field", "value",
+            "appeal", Map.of(
+                "appellant", Map.of(
+                    "identity", Map.of("dob", "1980-08-10"))),
+            "preWorkAllocation", "Yes"
+        )));
+    }
+
+    @Test
+    public void removeNullCaseReference() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("caseReference", null);
+        data.put("field", "value");
+
+        Map<String, Object> result = service.migrate(data);
+
+        assertTrue(result.equals(Map.of(
+            "field", "value",
+            "preWorkAllocation", "Yes"
+        )));
+    }
+
+    @Test
+    public void keepValidNinoAndCaseReference() {
+        Map<String, Object> identity = new HashMap<>();
+        identity.put("dob", "1980-08-10");
+        identity.put("nino", "AB121212A");
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", Map.of(
+            "appellant", Map.of(
+                "identity", identity)));
+        data.put("caseReference", "REF/TEST/123");
+
+        Map<String, Object> result = service.migrate(data);
+
+        assertTrue(result.equals(Map.of(
+            "caseReference", "REF/TEST/123",
+            "appeal", Map.of(
+                "appellant", Map.of(
+                    "identity", Map.of("dob", "1980-08-10", "nino", "AB121212A"))),
+            "preWorkAllocation", "Yes"
+        )));
+    }
+
 }
