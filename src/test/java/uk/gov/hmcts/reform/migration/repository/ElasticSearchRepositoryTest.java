@@ -32,13 +32,20 @@ public class ElasticSearchRepositoryTest {
     private static final String INITIAL_QUERY = """
             {
               "query": {
-                    "bool": {
-                        "must_not": {
+                "bool": {
+                    "must_not": [
+                        {
                             "exists": {
                                 "field": "data.preWorkAllocation"
+                             }
+                            },
+                            {
+                                "match": {
+                                    "state": "draft"
                             }
                         }
-                    }
+                    ]
+                }
               },
               "_source": [
                 "reference"
@@ -55,13 +62,20 @@ public class ElasticSearchRepositoryTest {
     private static final String SEARCH_AFTER_QUERY = """
             {
               "query": {
-                    "bool": {
-                        "must_not": {
+                "bool": {
+                    "must_not": [
+                        {
                             "exists": {
                                 "field": "data.preWorkAllocation"
+                             }
+                            },
+                            {
+                                "match": {
+                                    "state": "draft"
                             }
                         }
-                    }
+                    ]
+                }
               },
               "_source": [
                 "reference"

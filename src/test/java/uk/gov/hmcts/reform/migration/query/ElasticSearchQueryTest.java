@@ -20,27 +20,33 @@ public class ElasticSearchQueryTest {
             .build();
         String query = elasticSearchQuery.getQuery();
         assertEquals("""
-                {
-                  "query": {
-                        "bool": {
-                            "must_not": {
-                                "exists": {
-                                    "field": "data.preWorkAllocation"
-                                }
-                            }
-                        }
-                  },
-                  "_source": [
-                    "reference"
-                  ],
-                  "size": 100,
-                  "sort": [
+        {
+          "query": {
+            "bool": {
+                "must_not": [
                     {
-                      "reference.keyword": "asc"
+                        "exists": {
+                            "field": "data.preWorkAllocation"
+                         }
+                        },
+                        {
+                            "match": {
+                                "state": "draft"
+                        }
                     }
-                  ]
-
-                }""", query);
+                ]
+            }
+          },
+          "_source": [
+            "reference"
+          ],
+          "size": 100,
+          "sort": [
+            {
+              "reference.keyword": "asc"
+            }
+          ]
+        }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 
     @Test
@@ -52,26 +58,33 @@ public class ElasticSearchQueryTest {
             .build();
         String query = elasticSearchQuery.getQuery();
         assertEquals("""
-                {
-                  "query": {
-                        "bool": {
-                            "must_not": {
-                                "exists": {
-                                    "field": "data.preWorkAllocation"
-                                }
-                            }
-                        }
-                  },
-                  "_source": [
-                    "reference"
-                  ],
-                  "size": 100,
-                  "sort": [
+        {
+          "query": {
+            "bool": {
+                "must_not": [
                     {
-                      "reference.keyword": "asc"
+                        "exists": {
+                            "field": "data.preWorkAllocation"
+                         }
+                        },
+                        {
+                            "match": {
+                                "state": "draft"
+                        }
                     }
-                  ]
-                ,"search_after": [1677777777]
-                }""", query);
+                ]
+            }
+          },
+          "_source": [
+            "reference"
+          ],
+          "size": 100,
+          "sort": [
+            {
+              "reference.keyword": "asc"
+            }
+          ],
+          "search_after": [1677777777]
+        }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 }
