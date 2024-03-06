@@ -29,12 +29,13 @@ import static org.mockito.Mockito.when;
 
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseMigrationProcessorTest {
+public class DwpCaseMigrationProcessorTest {
 
     private static final String USER_TOKEN = "Bearer eeeejjjttt";
-    private static final String EVENT_ID = "waCaseMigration";
-    private static final String EVENT_SUMMARY = "Migrate case for WA";
-    private static final String EVENT_DESCRIPTION = "Migrate case for WA";
+
+    private static final String EVENT_ID = "dwpCaseMigration";
+    private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
+    private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
     private static final String CASE_TYPE = "Test_Case_Type";
 
     @InjectMocks

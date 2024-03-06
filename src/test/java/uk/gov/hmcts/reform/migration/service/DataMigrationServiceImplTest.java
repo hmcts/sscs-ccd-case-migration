@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class DataMigrationServiceImplTest {
 
-    private WaDataMigrationServiceImpl service = new WaDataMigrationServiceImpl();
+    private DwpDataMigrationServiceImpl service = new DwpDataMigrationServiceImpl();
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {

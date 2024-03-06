@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class CaseMigrationProcessor {
-    private static final String EVENT_ID = "waCaseMigration";
-    private static final String EVENT_SUMMARY = "Migrate case for WA";
-    private static final String EVENT_DESCRIPTION = "Migrate case for WA";
+    private static final String EVENT_ID = "dwpCaseMigration";
+    private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
+    private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
     public static final String LOG_STRING = "-----------------------------------------";
 
     @Autowired

@@ -9,12 +9,14 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -100,10 +102,14 @@ public class ElasticSearchRepositoryTest {
     @Mock
     private AuthTokenGenerator authTokenGenerator;
 
+    @Mock
+    private ElasticSearchQuery elasticSearchQuery;
+
     @Before
     public void setUp() {
         elasticSearchRepository = new ElasticSearchRepository(coreCaseDataApi,
                                                               authTokenGenerator,
+                                                              elasticSearchQuery,
                                                               QUERY_SIZE,
                                                               CASE_PROCESS_LIMIT);
         when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
@@ -145,6 +151,8 @@ public class ElasticSearchRepositoryTest {
         caseDetails.add(details);
         when(searchResult.getCases()).thenReturn(caseDetails);
         when(searchResult.getTotal()).thenReturn(1);
+        when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
+        when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
         when(coreCaseDataApi.searchCases(
             USER_TOKEN,
             AUTH_TOKEN,
@@ -159,6 +167,7 @@ public class ElasticSearchRepositoryTest {
             CASE_TYPE,
             SEARCH_AFTER_QUERY
         )).thenReturn(searchAfterResult);
+
         List<CaseDetails> caseDetails1 = new ArrayList<>();
         CaseDetails details1 = mock(CaseDetails.class);
         caseDetails1.add(details1);
