@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.migration.query;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -62,7 +62,7 @@ public class ElasticSearchQueryTest {
                 }
             ]
         }
-        """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
+            """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 
     @Test
@@ -117,6 +117,6 @@ public class ElasticSearchQueryTest {
                 1677777777
             ]
         }
-        """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
+            """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 }

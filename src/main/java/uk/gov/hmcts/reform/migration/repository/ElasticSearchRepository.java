@@ -45,7 +45,6 @@ public class ElasticSearchRepository {
         String authToken = authTokenGenerator.generate();
 
         String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
-        log.info("INITIAL QUERY {}", initialQuery);
         SearchResult searchResult = coreCaseDataApi.searchCases(userToken, authToken, caseType, initialQuery);
 
         List<CaseDetails> caseDetails = new ArrayList<>();
@@ -55,8 +54,6 @@ public class ElasticSearchRepository {
             caseDetails.addAll(searchResultCases);
             String searchAfterValue = searchResultCases.get(searchResultCases.size() - 1).getId().toString();
 
-            log.info("ZZZZZZZZZZZZZZZZZZZZZZZZZZZ");
-
             boolean keepSearching;
             do {
                 String subsequentElasticSearchQuery = elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
@@ -64,7 +61,6 @@ public class ElasticSearchRepository {
                     coreCaseDataApi.searchCases(userToken, authToken, caseType, subsequentElasticSearchQuery);
 
                 keepSearching = false;
-                log.info("DDDDDDDDDDDDDDDDDDDDDDDDD {} {}", keepSearching, subsequentSearchResult.getCases().isEmpty());
                 if (subsequentSearchResult != null) {
                     caseDetails.addAll(subsequentSearchResult.getCases());
                     keepSearching = !subsequentSearchResult.getCases().isEmpty();

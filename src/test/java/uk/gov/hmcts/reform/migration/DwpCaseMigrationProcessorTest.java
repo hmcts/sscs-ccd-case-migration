@@ -33,9 +33,6 @@ public class DwpCaseMigrationProcessorTest {
 
     private static final String USER_TOKEN = "Bearer eeeejjjttt";
 
-    private static final String EVENT_ID = "dwpCaseMigration";
-    private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
-    private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
     private static final String CASE_TYPE = "Test_Case_Type";
 
     @InjectMocks
@@ -72,15 +69,11 @@ public class DwpCaseMigrationProcessorTest {
         when(elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE)).thenReturn(caseDetails);
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
         assertNotNull(listOfCaseDetails);
-        when(coreCaseDataService.update(USER_TOKEN, EVENT_ID, EVENT_SUMMARY,
-                                        EVENT_DESCRIPTION, CASE_TYPE, details.getId(), details.getJurisdiction()))
+        when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, details.getId(), details.getJurisdiction()))
             .thenReturn(details);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
         verify(coreCaseDataService, times(1))
             .update(USER_TOKEN,
-                    EVENT_ID,
-                    EVENT_SUMMARY,
-                    EVENT_DESCRIPTION,
                     CASE_TYPE,
                     details.getId(),
                     details.getJurisdiction());
@@ -99,15 +92,11 @@ public class DwpCaseMigrationProcessorTest {
         when(elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE)).thenReturn(caseDetails);
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
         assertNotNull(listOfCaseDetails);
-        when(coreCaseDataService.update(USER_TOKEN, EVENT_ID, EVENT_SUMMARY,
-                                        EVENT_DESCRIPTION, CASE_TYPE, details.getId(), details.getJurisdiction()))
+        when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, details.getId(), details.getJurisdiction()))
             .thenReturn(details);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
         verify(coreCaseDataService, times(1))
             .update(USER_TOKEN,
-                    EVENT_ID,
-                    EVENT_SUMMARY,
-                    EVENT_DESCRIPTION,
                     CASE_TYPE,
                     details.getId(),
                     details.getJurisdiction());

@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.migration.ccd;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -20,12 +19,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CoreCaseDataServiceTest {
-
     private static final String EVENT_ID = "migrateCase";
     private static final String CASE_TYPE = "CARE_SUPERVISION_EPO";
     private static final String CASE_ID = "123456789";
@@ -50,11 +48,6 @@ public class CoreCaseDataServiceTest {
     @Mock
     private DataMigrationService<Map<String, Object>> dataMigrationService;
 
-
-    @Before
-    public void setUp() {
-    }
-
     @Test
     public void shouldUpdateTheCase() {
         // given
@@ -65,12 +58,15 @@ public class CoreCaseDataServiceTest {
             .surname("Surname")
             .build();
 
-        CaseDetails caseDetails3 = createCaseDetails(CASE_ID, "case-3");
+        CaseDetails caseDetails3 = createCaseDetails(CASE_ID);
         setupMocks(userDetails, caseDetails3.getData());
+        when(dataMigrationService.getEventDescription()).thenReturn(EVENT_DESC);
+        when(dataMigrationService.getEventId()).thenReturn(EVENT_ID);
+        when(dataMigrationService.getEventSummary()).thenReturn(EVENT_SUMMARY);
 
         //when
-        CaseDetails update = underTest.update(AUTH_TOKEN, EVENT_ID, EVENT_SUMMARY, EVENT_DESC, CASE_TYPE,
-                                              caseDetails3.getId(), caseDetails3.getJurisdiction());
+        CaseDetails update = underTest.update(AUTH_TOKEN, CASE_TYPE, caseDetails3.getId(),
+                                              caseDetails3.getJurisdiction());
         //then
         assertThat(update.getId(), is(Long.parseLong(CASE_ID)));
         assertThat(update.getData().get("solicitorEmail"), is("Padmaja.Ramisetti@hmcts.net"));
@@ -81,7 +77,7 @@ public class CoreCaseDataServiceTest {
         assertThat(update.getData().get("appRespondentFMName"), is("TestRespondant"));
     }
 
-    private CaseDetails createCaseDetails(String id, String value) {
+    private CaseDetails createCaseDetails(String id) {
         LinkedHashMap<String, Object> data = new LinkedHashMap<>();
         data.put("solicitorEmail", "Padmaja.Ramisetti@hmcts.net");
         data.put("solicitorName", "PADMAJA");

@@ -16,7 +16,10 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -118,6 +121,7 @@ public class ElasticSearchRepositoryTest {
     @Test
     public void shouldReturnSearchResultsForCaseTypeElasticSearch() {
         SearchResult searchResult = mock(SearchResult.class);
+        when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(coreCaseDataApi.searchCases(
             USER_TOKEN,
             AUTH_TOKEN,
@@ -131,6 +135,7 @@ public class ElasticSearchRepositoryTest {
 
     @Test
     public void shouldNotReturnCaseDetailsForCaseTypeWhenSearchResultIsNull() {
+        when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(coreCaseDataApi.searchCases(
             USER_TOKEN,
             AUTH_TOKEN,
@@ -171,13 +176,11 @@ public class ElasticSearchRepositoryTest {
         List<CaseDetails> caseDetails1 = new ArrayList<>();
         CaseDetails details1 = mock(CaseDetails.class);
         caseDetails1.add(details1);
-        when(searchAfterResult.getCases()).thenReturn(caseDetails1);
+        when(searchAfterResult.getCases()).thenReturn(caseDetails1, List.of());
 
         List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
         assertNotNull(returnCaseDetails);
-
         verify(authTokenGenerator, times(1)).generate();
-
         verify(coreCaseDataApi, times(1)).searchCases(USER_TOKEN,
                                                       AUTH_TOKEN,
                                                       CASE_TYPE,
@@ -199,6 +202,8 @@ public class ElasticSearchRepositoryTest {
         caseDetails.add(details);
         when(searchResult.getCases()).thenReturn(caseDetails);
         when(searchResult.getTotal()).thenReturn(1);
+        when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
+        when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
         when(coreCaseDataApi.searchCases(
             USER_TOKEN,
             AUTH_TOKEN,

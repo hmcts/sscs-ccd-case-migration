@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
-public class DwpElasticSearchQuery implements ElasticSearchQuery{
+public class DwpElasticSearchQuery implements ElasticSearchQuery {
 
     private static final String START_QUERY = """
         {

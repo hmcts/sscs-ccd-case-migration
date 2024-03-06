@@ -15,6 +15,11 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
 public class DwpDataMigrationServiceImpl implements DataMigrationService<Map<String, Object>> {
+
+    private static final String EVENT_ID = "dwpCaseMigration";
+    private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
+    private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
+
     @Override
     public Predicate<CaseDetails> accepts() {
         return Objects::nonNull;
@@ -34,5 +39,21 @@ public class DwpDataMigrationServiceImpl implements DataMigrationService<Map<Str
             }
         }
         return data;
+    }
+
+
+    @Override
+    public String getEventId() {
+        return EVENT_ID;
+    }
+
+    @Override
+    public String getEventDescription() {
+        return EVENT_DESCRIPTION;
+    }
+
+    @Override
+    public String getEventSummary() {
+        return EVENT_SUMMARY;
     }
 }
