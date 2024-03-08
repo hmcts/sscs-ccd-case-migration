@@ -16,13 +16,15 @@ import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class CaseMigrationProcessor {
-    private static final String EVENT_ID = "migrateCase";
-    private static final String EVENT_SUMMARY = "Migrate Case";
-    private static final String EVENT_DESCRIPTION = "Migrate Case";
+    private static final String EVENT_ID = "waCaseMigration";
+    private static final String EVENT_SUMMARY = "Migrate case for WA";
+    private static final String EVENT_DESCRIPTION = "Migrate case for WA";
     public static final String LOG_STRING = "-----------------------------------------";
 
     @Autowired
@@ -51,9 +53,14 @@ public class CaseMigrationProcessor {
         log.info("Data migration of cases started for case type: {}", caseType);
         String userToken =  idamRepository.generateUserToken();
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(userToken, caseType);
-        listOfCaseDetails.stream()
-            .limit(caseProcessLimit)
-            .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails));
+
+        ForkJoinPool threadPool = new ForkJoinPool(25);
+        threadPool.submit(
+            () -> listOfCaseDetails.parallelStream()
+                    .limit(caseProcessLimit)
+                    .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails)));
+        shutdownThreadPool(threadPool);
+
         log.info(
             """
                 {}
@@ -84,6 +91,17 @@ public class CaseMigrationProcessor {
             log.info("Failed cases: {} ", getFailedCases());
         }
         log.info("Data migration of cases completed");
+    }
+
+    public void shutdownThreadPool(ForkJoinPool threadPool) {
+        threadPool.shutdown();
+        log.info("Waiting for thread pool to terminate");
+        try {
+            threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            log.warn("Timed out waiting for thread pool to terminate");
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void validateCaseType(String caseType) {

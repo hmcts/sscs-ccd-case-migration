@@ -8,7 +8,20 @@ public class ElasticSearchQuery {
     private static final String START_QUERY = """
         {
           "query": {
-            "match_all": {}
+            "bool": {
+                "must_not": [
+                    {
+                        "exists": {
+                            "field": "data.preWorkAllocation"
+                         }
+                        },
+                        {
+                            "match": {
+                                "state": "draft"
+                        }
+                    }
+                ]
+            }
           },
           "_source": [
             "reference"

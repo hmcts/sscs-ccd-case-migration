@@ -16,9 +16,12 @@ import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,9 +32,9 @@ import static org.mockito.Mockito.when;
 public class CaseMigrationProcessorTest {
 
     private static final String USER_TOKEN = "Bearer eeeejjjttt";
-    private static final String EVENT_ID = "migrateCase";
-    private static final String EVENT_SUMMARY = "Migrate Case";
-    private static final String EVENT_DESCRIPTION = "Migrate Case";
+    private static final String EVENT_ID = "waCaseMigration";
+    private static final String EVENT_SUMMARY = "Migrate case for WA";
+    private static final String EVENT_DESCRIPTION = "Migrate case for WA";
     private static final String CASE_TYPE = "Test_Case_Type";
 
     @InjectMocks
@@ -42,6 +45,9 @@ public class CaseMigrationProcessorTest {
 
     @Mock
     private DataMigrationService dataMigrationService;
+
+    @Mock
+    private ForkJoinPool threadPool;
 
     @Mock
     private ElasticSearchRepository elasticSearchRepository;
@@ -115,5 +121,12 @@ public class CaseMigrationProcessorTest {
     public void shouldThrowExceptionWhenMultipleCaseTypesPassed() {
         assertThrows(CaseMigrationException.class, () ->
             caseMigrationProcessor.migrateCases("Cast_Type1,Cast_Type2"));
+    }
+
+    @Test
+    public void shutdownThreadPoolTimedOut() throws InterruptedException {
+        when(threadPool.awaitTermination(anyLong(), any())).thenThrow(new InterruptedException());
+        caseMigrationProcessor.shutdownThreadPool(threadPool);
+        verify(threadPool, times(1)).shutdown();
     }
 }

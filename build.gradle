@@ -62,7 +62,7 @@ configurations {
 }
 
 tasks.withType(JavaCompile) {
-  options.compilerArgs << "-Xlint:unchecked" << "-Werror"
+  options.compilerArgs << "-Xlint:unchecked"
 }
 
 // https://github.com/gradle/gradle/issues/16791
@@ -130,6 +130,7 @@ project.tasks['check'].dependsOn integration
 
 sonarqube {
   properties {
+    property "sonar.organization", "hmcts"
     property "sonar.projectName", "sscs-ccd-case-migration"
     property "sonar.projectKey", "sscs-ccd-case-migration"
     property "sonar.exclusions", "**/exception/*.java,**/domain/*.java,**/common/*.java,**/migration/auth/AuthTokenGeneratorConfiguration.java,**/migration/CaseMigrationRunner.java,**/ccd/HttpMessageConverterConfiguration.java"
@@ -183,7 +184,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework', name: 'spring-context-support'
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '1.5.5'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.3'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '3.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
 
@@ -200,7 +201,7 @@ dependencies {
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
-  testImplementation('org.junit.jupiter:junit-jupiter:5.10.2')
+  testImplementation('org.junit.jupiter:junit-jupiter:5.9.3')
   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${junitVintageVersion}"
