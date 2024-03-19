@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(value = "migration.wa.enabled", havingValue = "true")
-public class WaElasticSearchQuery {
+public class WaElasticSearchQuery implements ElasticSearchQuery {
 
     private static final String START_QUERY = """
         {
