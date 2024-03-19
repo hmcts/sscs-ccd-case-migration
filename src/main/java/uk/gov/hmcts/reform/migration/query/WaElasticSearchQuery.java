@@ -40,10 +40,6 @@ public class WaElasticSearchQuery {
 
     private static final String SEARCH_AFTER = "\"search_after\": [%s]";
 
-    private String searchAfterValue;
-    private int size;
-    private boolean initialSearch;
-
     public String getQuery(String searchAfterValue, int size, boolean initialSearch) {
         if (initialSearch) {
             return getInitialQuery(size);

@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class WaElasticSearchQueryTest {
+class WaElasticSearchQueryTest {
     private static final int QUERY_SIZE = 100;
 
     @Test
-    public void shouldReturnQuery() {
+    void shouldReturnQuery() {
         WaElasticSearchQuery elasticSearchQuery = new WaElasticSearchQuery();
         String query = elasticSearchQuery.getQuery(null, QUERY_SIZE, true);
         assertEquals("""
@@ -42,7 +42,7 @@ public class WaElasticSearchQueryTest {
     }
 
     @Test
-    public void shouldReturnSearchAfterQuery() {
+    void shouldReturnSearchAfterQuery() {
         WaElasticSearchQuery elasticSearchQuery = new WaElasticSearchQuery();
         String query = elasticSearchQuery.getQuery("1677777777", QUERY_SIZE, false);
         assertEquals("""

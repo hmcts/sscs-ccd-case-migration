@@ -12,12 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DwpDataMigrationServiceImplTest {
+class DwpDataMigrationServiceImplTest {
 
     private final DwpDataMigrationServiceImpl dwpDataMigrationService = new DwpDataMigrationServiceImpl();
 
     @Test
-    public void shouldReturnTrueForCaseDetailsPassed() {
+    void shouldReturnTrueForCaseDetailsPassed() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
             .build();
@@ -25,12 +25,12 @@ public class DwpDataMigrationServiceImplTest {
     }
 
     @Test
-    public void shouldReturnFalseForCaseDetailsNull() {
+    void shouldReturnFalseForCaseDetailsNull() {
         assertFalse(dwpDataMigrationService.accepts().test(null));
     }
 
     @Test
-    public void shouldReturnPassedDataWhenMigrateCalled() {
+    void shouldReturnPassedDataWhenMigrateCalled() {
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> result = dwpDataMigrationService.migrate(data);
         assertNotNull(result);
@@ -38,7 +38,7 @@ public class DwpDataMigrationServiceImplTest {
     }
 
     @Test
-    public void shouldNotChangeExistingFields() {
+    void shouldNotChangeExistingFields() {
         Map<String, Object> data = new HashMap<>();
         data.put("poAttendanceConfirmed", "Yes");
         data.put("dwpIsOfficerAttending", "Yes");
@@ -51,13 +51,13 @@ public class DwpDataMigrationServiceImplTest {
     }
 
     @Test
-    public void shouldReturnNullWhenDataIsNotPassed() {
+    void shouldReturnNullWhenDataIsNotPassed() {
         Map<String, Object> result = dwpDataMigrationService.migrate(null);
         assertNull(result);
     }
 
     @Test
-    public void shouldReturnCorrectValuesForDwpMigration() {
+    void shouldReturnCorrectValuesForDwpMigration() {
         assertEquals("dwpCaseMigration", dwpDataMigrationService.getEventId());
         assertEquals("Migrate case for DWP Enhancements", dwpDataMigrationService.getEventDescription());
         assertEquals("Migrate case for DWP Enhancements", dwpDataMigrationService.getEventSummary());

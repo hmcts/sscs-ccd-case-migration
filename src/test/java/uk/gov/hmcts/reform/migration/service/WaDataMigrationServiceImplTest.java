@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WaDataMigrationServiceImplTest {
+class WaDataMigrationServiceImplTest {
 
     private final WaDataMigrationServiceImpl waDataMigrationService = new WaDataMigrationServiceImpl();
 
@@ -25,12 +25,12 @@ public class WaDataMigrationServiceImplTest {
     }
 
     @Test
-    public void shouldReturnFalseForCaseDetailsNull() {
+    void shouldReturnFalseForCaseDetailsNull() {
         assertFalse(waDataMigrationService.accepts().test(null));
     }
 
     @Test
-    public void shouldReturnPassedDataWhenMigrateCalled() {
+    void shouldReturnPassedDataWhenMigrateCalled() {
         Map<String, Object> data = new HashMap<>();
         Map<String, Object> result = waDataMigrationService.migrate(data);
         assertNotNull(result);
@@ -39,13 +39,13 @@ public class WaDataMigrationServiceImplTest {
     }
 
     @Test
-    public void shouldReturnNullWhenDataIsNotPassed() {
+    void shouldReturnNullWhenDataIsNotPassed() {
         Map<String, Object> result = waDataMigrationService.migrate(null);
         assertNull(result);
     }
 
     @Test
-    public void shouldReturnCorrectValuesForWaMigration() {
+    void shouldReturnCorrectValuesForWaMigration() {
         assertEquals("waCaseMigration", waDataMigrationService.getEventId());
         assertEquals("Migrate case for WA", waDataMigrationService.getEventDescription());
         assertEquals("Migrate case for WA", waDataMigrationService.getEventSummary());

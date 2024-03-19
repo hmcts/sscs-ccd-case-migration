@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class DwpElasticSearchQueryTest {
+class DwpElasticSearchQueryTest {
 
     private static final int QUERY_SIZE = 100;
 
     @Test
-    public void shouldReturnQuery() {
+    void shouldReturnQuery() {
         DwpElasticSearchQuery elasticSearchQuery = new DwpElasticSearchQuery();
         String query = elasticSearchQuery.getQuery(null, QUERY_SIZE, true);
         assertEquals("""
@@ -66,7 +66,7 @@ public class DwpElasticSearchQueryTest {
     }
 
     @Test
-    public void shouldReturnSearchAfterQuery() {
+    void shouldReturnSearchAfterQuery() {
         DwpElasticSearchQuery elasticSearchQuery = new DwpElasticSearchQuery();
         String query = elasticSearchQuery.getQuery("1677777777", QUERY_SIZE, false);
         assertEquals("""

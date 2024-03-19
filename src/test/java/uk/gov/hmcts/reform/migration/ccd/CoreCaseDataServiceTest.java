@@ -23,7 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CoreCaseDataServiceTest {
+class CoreCaseDataServiceTest {
     private static final String EVENT_ID = "migrateCase";
     private static final String CASE_TYPE = "CARE_SUPERVISION_EPO";
     private static final String CASE_ID = "123456789";
@@ -49,7 +49,7 @@ public class CoreCaseDataServiceTest {
     private DataMigrationService<Map<String, Object>> dataMigrationService;
 
     @Test
-    public void shouldUpdateTheCase() {
+    void shouldUpdateTheCase() {
         // given
         UserDetails userDetails = UserDetails.builder()
             .id("30")
