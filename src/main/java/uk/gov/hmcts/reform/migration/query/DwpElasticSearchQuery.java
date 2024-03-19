@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
-public class DwpElasticSearchQuery implements ElasticSearchQuery {
+public class DwpElasticSearchQuery extends AbstractElasticQuery implements ElasticSearchQuery {
 
-    private static final String START_QUERY = """
+    private static final String DWP_START_QUERY = """
         {
           "query": {
             "bool": {
@@ -53,23 +53,8 @@ public class DwpElasticSearchQuery implements ElasticSearchQuery {
           ]
           """;
 
-    private static final String END_QUERY = "\n}";
-
-    private static final String SEARCH_AFTER = "\"search_after\": [%s]";
-
-    public String getQuery(String searchAfterValue, int size, boolean initialSearch) {
-        if (initialSearch) {
-            return getInitialQuery(size);
-        } else {
-            return getSubsequentQuery(searchAfterValue, size);
-        }
-    }
-
-    private String getInitialQuery(int size) {
-        return String.format(START_QUERY, size) + END_QUERY;
-    }
-
-    private String getSubsequentQuery(String searchAfterValue, int size) {
-        return String.format(START_QUERY, size) + "," + String.format(SEARCH_AFTER, searchAfterValue) + END_QUERY;
+    @Override
+    protected String getStartQuery() {
+        return DWP_START_QUERY;
     }
 }
