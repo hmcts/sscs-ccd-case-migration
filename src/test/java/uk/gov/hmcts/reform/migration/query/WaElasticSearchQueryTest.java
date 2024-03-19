@@ -1,24 +1,16 @@
 package uk.gov.hmcts.reform.migration.query;
 
+import org.junit.jupiter.api.Test;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static junit.framework.TestCase.assertEquals;
-
-@RunWith(MockitoJUnitRunner.class)
-public class ElasticSearchQueryTest {
-
+class WaElasticSearchQueryTest {
     private static final int QUERY_SIZE = 100;
 
     @Test
-    public void shouldReturnQuery() {
-        ElasticSearchQuery elasticSearchQuery =  ElasticSearchQuery.builder()
-            .initialSearch(true)
-            .size(QUERY_SIZE)
-            .build();
-        String query = elasticSearchQuery.getQuery();
+    void shouldReturnQuery() {
+        WaElasticSearchQuery elasticSearchQuery = new WaElasticSearchQuery();
+        String query = elasticSearchQuery.getQuery(null, QUERY_SIZE, true);
         assertEquals("""
         {
           "query": {
@@ -50,13 +42,9 @@ public class ElasticSearchQueryTest {
     }
 
     @Test
-    public void shouldReturnSearchAfterQuery() {
-        ElasticSearchQuery elasticSearchQuery =  ElasticSearchQuery.builder()
-            .initialSearch(false)
-            .size(QUERY_SIZE)
-            .searchAfterValue("1677777777")
-            .build();
-        String query = elasticSearchQuery.getQuery();
+    void shouldReturnSearchAfterQuery() {
+        WaElasticSearchQuery elasticSearchQuery = new WaElasticSearchQuery();
+        String query = elasticSearchQuery.getQuery("1677777777", QUERY_SIZE, false);
         assertEquals("""
         {
           "query": {

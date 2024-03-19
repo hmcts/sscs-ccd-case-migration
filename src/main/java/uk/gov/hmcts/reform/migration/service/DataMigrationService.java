@@ -9,4 +9,10 @@ public interface DataMigrationService<T> {
     Predicate<CaseDetails> accepts();
 
     T migrate(Map<String, Object> data);
+
+    String getEventId();
+
+    String getEventDescription();
+
+    String getEventSummary();
 }

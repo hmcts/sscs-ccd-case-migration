@@ -27,9 +27,7 @@ public class CoreCaseDataService {
     @Autowired
     private DataMigrationService<Map<String, Object>> dataMigrationService;
 
-    public CaseDetails update(String authorisation, String eventId,
-                              String eventSummary,
-                              String eventDescription,
+    public CaseDetails update(String authorisation,
                               String caseType,
                               Long caseId,
                               String jurisdiction) {
@@ -42,7 +40,7 @@ public class CoreCaseDataService {
             jurisdiction,
             caseType,
             String.valueOf(caseId),
-            eventId);
+            dataMigrationService.getEventId());
 
         CaseDetails updatedCaseDetails = startEventResponse.getCaseDetails();
 
@@ -51,8 +49,8 @@ public class CoreCaseDataService {
             .event(
                 Event.builder()
                     .id(startEventResponse.getEventId())
-                    .summary(eventSummary)
-                    .description(eventDescription)
+                    .summary(dataMigrationService.getEventSummary())
+                    .description(dataMigrationService.getEventDescription())
                     .build()
             ).data(dataMigrationService.migrate(updatedCaseDetails.getData()))
             .build();

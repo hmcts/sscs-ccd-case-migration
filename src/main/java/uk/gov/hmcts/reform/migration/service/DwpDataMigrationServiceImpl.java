@@ -13,11 +13,12 @@ import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.wa.enabled", havingValue = "true")
-public class WaDataMigrationServiceImpl implements DataMigrationService<Map<String, Object>> {
-    private static final String EVENT_ID = "waCaseMigration";
-    private static final String EVENT_SUMMARY = "Migrate case for WA";
-    private static final String EVENT_DESCRIPTION = "Migrate case for WA";
+@ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
+public class DwpDataMigrationServiceImpl implements DataMigrationService<Map<String, Object>> {
+
+    private static final String EVENT_ID = "dwpCaseMigration";
+    private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
+    private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
 
     @Override
     public Predicate<CaseDetails> accepts() {
@@ -27,11 +28,21 @@ public class WaDataMigrationServiceImpl implements DataMigrationService<Map<Stri
     @Override
     public Map<String, Object> migrate(Map<String, Object> data) {
         if (nonNull(data)) {
-            data.put("preWorkAllocation", "Yes");
+            if (!data.containsKey("poAttendanceConfirmed")) {
+                data.put("poAttendanceConfirmed", "No");
+            }
+            if (!data.containsKey("dwpIsOfficerAttending")) {
+                data.put("dwpIsOfficerAttending", "No");
+            }
+            if (!data.containsKey("tribunalDirectPoToAttend")) {
+                data.put("tribunalDirectPoToAttend", "No");
+            }
         }
         return data;
     }
 
+
+    @Override
     public String getEventId() {
         return EVENT_ID;
     }
