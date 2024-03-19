@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class ElasticSearchQueryTest {
+public class DwpElasticSearchQueryTest {
 
     private static final int QUERY_SIZE = 100;
 

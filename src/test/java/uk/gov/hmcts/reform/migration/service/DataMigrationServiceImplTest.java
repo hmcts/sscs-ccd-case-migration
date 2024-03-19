@@ -17,32 +17,32 @@ import static org.junit.Assert.assertTrue;
 @RunWith(MockitoJUnitRunner.class)
 public class DataMigrationServiceImplTest {
 
-    private DwpDataMigrationServiceImpl service = new DwpDataMigrationServiceImpl();
+    private final WaDataMigrationServiceImpl waDataMigrationService = new WaDataMigrationServiceImpl();
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
             .build();
-        assertTrue(service.accepts().test(caseDetails));
+        assertTrue(waDataMigrationService.accepts().test(caseDetails));
     }
 
     @Test
     public void shouldReturnFalseForCaseDetailsNull() {
-        assertFalse(service.accepts().test(null));
+        assertFalse(waDataMigrationService.accepts().test(null));
     }
 
     @Test
     public void shouldReturnPassedDataWhenMigrateCalled() {
         Map<String, Object> data = new HashMap<>();
-        Map<String, Object> result = service.migrate(data);
+        Map<String, Object> result = waDataMigrationService.migrate(data);
         assertNotNull(result);
         assertEquals(data, result);
     }
 
     @Test
     public void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = service.migrate(null);
+        Map<String, Object> result = waDataMigrationService.migrate(null);
         assertNull(result);
     }
 }
