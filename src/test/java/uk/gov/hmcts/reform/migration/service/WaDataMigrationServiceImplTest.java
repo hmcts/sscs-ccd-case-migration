@@ -1,21 +1,18 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DataMigrationServiceImplTest {
+public class WaDataMigrationServiceImplTest {
 
     private final WaDataMigrationServiceImpl waDataMigrationService = new WaDataMigrationServiceImpl();
 
@@ -38,11 +35,19 @@ public class DataMigrationServiceImplTest {
         Map<String, Object> result = waDataMigrationService.migrate(data);
         assertNotNull(result);
         assertEquals(data, result);
+        assertTrue(data.containsKey("preWorkAllocation"));
     }
 
     @Test
     public void shouldReturnNullWhenDataIsNotPassed() {
         Map<String, Object> result = waDataMigrationService.migrate(null);
         assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnCorrectValuesForWaMigration() {
+        assertEquals("waCaseMigration", waDataMigrationService.getEventId());
+        assertEquals("Migrate case for WA", waDataMigrationService.getEventDescription());
+        assertEquals("Migrate case for WA", waDataMigrationService.getEventSummary());
     }
 }
