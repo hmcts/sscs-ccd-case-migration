@@ -8,9 +8,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.retry.annotation.EnableRetry;
 
 @Slf4j
 @SpringBootApplication
+@EnableRetry
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client"})
 @PropertySource("classpath:application.properties")
 public class CaseMigrationRunner implements CommandLineRunner {
