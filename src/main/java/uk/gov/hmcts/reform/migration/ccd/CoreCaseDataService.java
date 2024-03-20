@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.migration.ccd;
 
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -27,6 +30,9 @@ public class CoreCaseDataService {
     @Autowired
     private DataMigrationService<Map<String, Object>> dataMigrationService;
 
+    @Retryable(
+        retryFor = FeignException.class,
+        maxAttemptsExpression = "${case-migration.retry.max-retries}")
     public CaseDetails update(String authorisation,
                               String caseType,
                               Long caseId,
@@ -64,5 +70,12 @@ public class CoreCaseDataService {
             String.valueOf(updatedCaseDetails.getId()),
             true,
             caseDataContent);
+    }
+
+    @Retryable(
+        retryFor = FeignException.class,
+        maxAttemptsExpression = "${case-migration.retry.max-retries}")
+    public SearchResult getCases(String userToken, String caseType, String authToken, String initialQuery) {
+        return coreCaseDataApi.searchCases(userToken, authToken, caseType, initialQuery);
     }
 }

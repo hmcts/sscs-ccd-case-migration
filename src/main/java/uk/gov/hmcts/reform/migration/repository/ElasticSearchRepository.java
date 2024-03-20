@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class ElasticSearchRepository {
 
-    private final CoreCaseDataApi coreCaseDataApi;
+    private final CoreCaseDataService coreCaseDataService;
 
     private final AuthTokenGenerator authTokenGenerator;
 
@@ -28,12 +28,12 @@ public class ElasticSearchRepository {
     private ElasticSearchQuery elasticSearchQuery;
 
     @Autowired
-    public ElasticSearchRepository(CoreCaseDataApi coreCaseDataApi,
+    public ElasticSearchRepository(CoreCaseDataService coreCaseDataService,
                                    AuthTokenGenerator authTokenGenerator,
                                    ElasticSearchQuery elasticSearchQuery,
                                    @Value("${case-migration.elasticsearch.querySize}") int querySize,
                                    @Value("${case-migration.processing.limit}") int caseProcessLimit) {
-        this.coreCaseDataApi = coreCaseDataApi;
+        this.coreCaseDataService = coreCaseDataService;
         this.authTokenGenerator = authTokenGenerator;
         this.querySize = querySize;
         this.caseProcessLimit = caseProcessLimit;
@@ -45,8 +45,8 @@ public class ElasticSearchRepository {
         String authToken = authTokenGenerator.generate();
 
         String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
-        SearchResult searchResult = coreCaseDataApi.searchCases(userToken, authToken, caseType, initialQuery);
-
+        SearchResult searchResult =
+            coreCaseDataService.getCases(userToken, caseType, authToken, initialQuery);
         List<CaseDetails> caseDetails = new ArrayList<>();
 
         if (searchResult != null && searchResult.getTotal() > 0) {
@@ -58,7 +58,7 @@ public class ElasticSearchRepository {
             do {
                 String subsequentElasticSearchQuery = elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
                 SearchResult subsequentSearchResult =
-                    coreCaseDataApi.searchCases(userToken, authToken, caseType, subsequentElasticSearchQuery);
+                    coreCaseDataService.getCases(userToken, caseType, authToken, subsequentElasticSearchQuery);
 
                 keepSearching = false;
                 if (subsequentSearchResult != null) {
