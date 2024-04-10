@@ -15,30 +15,30 @@ class WaElasticSearchQueryTest {
         {
           "query": {
             "bool": {
-                "must_not": [
+                "should": [
                     {
-                        "exists": {
-                            "field": "data.preWorkAllocation"
-                         }
-                        },
-                        {
-                            "match": {
-                                "state": "draft"
+                        "bool": {
+                            "must_not": [
+                                { "exists": { "field": "data.preWorkAllocation" }},
+                                { "match": { "state": "draft" }}
+                            ]
+                        }
+                    },
+                    {
+                        "bool": {
+                            "must_not": [
+                                { "exists": { "field": "data.SearchCriteria.OtherCaseReferences" }},
+                                { "match": { "state": "draft" }}
+                            ]
                         }
                     }
-                ]
+                 ]
             }
           },
-          "_source": [
-            "reference"
-          ],
+          "_source": [ "reference" ],
           "size": 100,
-          "sort": [
-            {
-              "reference.keyword": "asc"
-            }
-          ]
-           }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
+          "sort": [ { "reference.keyword": "asc" } ]
+        }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 
     @Test
@@ -49,30 +49,30 @@ class WaElasticSearchQueryTest {
         {
           "query": {
             "bool": {
-                "must_not": [
+                "should": [
                     {
-                        "exists": {
-                            "field": "data.preWorkAllocation"
-                         }
-                        },
-                        {
-                            "match": {
-                                "state": "draft"
+                        "bool": {
+                            "must_not": [
+                                { "exists": { "field": "data.preWorkAllocation" }},
+                                { "match": { "state": "draft" }}
+                            ]
+                        }
+                    },
+                    {
+                        "bool": {
+                            "must_not": [
+                                { "exists": { "field": "data.SearchCriteria.OtherCaseReferences" }},
+                                { "match": { "state": "draft" }}
+                            ]
                         }
                     }
-                ]
+                 ]
             }
           },
-          "_source": [
-            "reference"
-          ],
+          "_source": [ "reference" ],
           "size": 100,
-          "sort": [
-            {
-              "reference.keyword": "asc"
-            }
-          ],
+          "sort": [ { "reference.keyword": "asc" } ],
           "search_after": [1677777777]
-           }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
+        }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 }
