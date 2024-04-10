@@ -38,7 +38,8 @@ class WaElasticSearchQueryTest {
           "_source": [ "reference" ],
           "size": 100,
           "sort": [ { "reference.keyword": "asc" } ]
-        }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
+        }
+            """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 
     @Test
@@ -73,6 +74,7 @@ class WaElasticSearchQueryTest {
           "size": 100,
           "sort": [ { "reference.keyword": "asc" } ],
           "search_after": [1677777777]
-        }""".replaceAll("\\s", ""), query.replaceAll("\\s", ""));
+        }
+            """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 }
