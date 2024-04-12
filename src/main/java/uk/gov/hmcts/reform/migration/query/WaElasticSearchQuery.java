@@ -11,30 +11,30 @@ public class WaElasticSearchQuery extends AbstractElasticQuery implements Elasti
         {
           "query": {
             "bool": {
-                "must_not": [
+                "should": [
                     {
-                        "exists": {
-                            "field": "data.preWorkAllocation"
-                         }
-                        },
-                        {
-                            "match": {
-                                "state": "draft"
+                        "bool": {
+                            "must_not": [
+                                { "exists": { "field": "data.preWorkAllocation" }},
+                                { "match": { "state": "draft" }}
+                            ]
+                        }
+                    },
+                    {
+                        "bool": {
+                            "must_not": [
+                                { "exists": { "field": "data.SearchCriteria.OtherCaseReferences" }},
+                                { "match": { "state": "draft" }}
+                            ]
                         }
                     }
-                ]
+                 ]
             }
           },
-          "_source": [
-            "reference"
-          ],
+          "_source": [ "reference" ],
           "size": %s,
-          "sort": [
-            {
-              "reference.keyword": "asc"
-            }
-          ]
-          """;
+          "sort": [ { "reference.keyword": "asc" } ]
+        """;
 
     @Override
     protected String getStartQuery() {
