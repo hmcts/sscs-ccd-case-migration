@@ -7,14 +7,19 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
+import uk.gov.hmcts.reform.sscs.ccd.config.CcdRequestDetails;
 
 @Slf4j
 @SpringBootApplication
 @EnableRetry
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client"})
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.sscs.client"})
 @PropertySource("classpath:application.properties")
+@ComponentScan(basePackages = {"uk.gov.hmcts.reform", "uk.gov.hmcts.reform.sscs",
+    "uk.gov.hmcts.reform.sscs.ccd.config"})
 public class CaseMigrationRunner implements CommandLineRunner {
 
     @Autowired
@@ -34,5 +39,15 @@ public class CaseMigrationRunner implements CommandLineRunner {
         } catch (Exception e) {
             log.error("Migration failed with the following reason: {}", e.getMessage(), e);
         }
+    }
+
+    @Bean
+    public CcdRequestDetails getRequestDetails(
+        @Value("${core_case_data.jurisdictionId}") String coreCaseDataJurisdictionId,
+        @Value("${core_case_data.caseTypeId}") String coreCaseDataCaseTypeId) {
+        return CcdRequestDetails.builder()
+            .caseTypeId(coreCaseDataCaseTypeId)
+            .jurisdictionId(coreCaseDataJurisdictionId)
+            .build();
     }
 }

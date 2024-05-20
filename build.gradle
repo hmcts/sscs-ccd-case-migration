@@ -189,15 +189,15 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '3.1.4'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '4.9.2'
 
+  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '5.5.0'
+
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
   testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.35.1'
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.7.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.4'
-
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
+  implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '7.4'
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.5.1'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
