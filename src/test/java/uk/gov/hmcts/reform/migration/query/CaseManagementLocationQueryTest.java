@@ -57,7 +57,8 @@ public class CaseManagementLocationQueryTest {
                                 "must_not": [
                                     { "exists": { "field": "data.caseManagementLocation" }},
                                     { "match": { "state": "draft" }},
-                                    { "match": { "state": "draftArchived" }}
+                                    { "match": { "state": "draftArchived" }},
+                                    { "match": { "state": "voidState" }}
                                 ]
                               }
                             }
