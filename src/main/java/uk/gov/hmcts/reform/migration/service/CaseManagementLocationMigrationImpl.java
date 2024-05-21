@@ -75,7 +75,7 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 
         RegionalProcessingCenter rpc = caseData.getRegionalProcessingCenter();
-        if (isNull(rpc)) {
+        if (isNull(rpc) || isNull(rpc.getEpimsId())) {
             rpc = regionalProcessingCenterService.getByPostcode(firstHalfOfPostcode);
         }
         String processingVenue = airLookupService.lookupAirVenueNameByPostCode(postCode, getBenefitType(caseData));
