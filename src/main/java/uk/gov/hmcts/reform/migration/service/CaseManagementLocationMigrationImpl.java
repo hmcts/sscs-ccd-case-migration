@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
 import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
@@ -82,7 +83,14 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         RegionalProcessingCenter rpc = caseData.getRegionalProcessingCenter();
         if (isNull(rpc) || isNull(rpc.getEpimsId())) {
             rpc = regionalProcessingCenterService.getByPostcode(firstHalfOfPostcode);
+        } else if (isNull(postCode) && !isNull(rpc.getPostcode())) {
+            postCode = rpc.getPostcode();
         }
+
+        if (isNull(rpc) || isNull(postCode)) {
+            throw new CaseMigrationException("Either rpc or postcode is null");
+        }
+
         String processingVenue = airLookupService.lookupAirVenueNameByPostCode(postCode, getBenefitType(caseData));
         String venueEpimsId = venueService.getEpimsIdForVenue(processingVenue);
         String regionId = getRegionId(venueEpimsId);
