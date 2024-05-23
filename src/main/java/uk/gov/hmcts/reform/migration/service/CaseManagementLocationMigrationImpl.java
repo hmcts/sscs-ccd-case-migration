@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
 import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
@@ -80,14 +81,21 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 
         RegionalProcessingCenter rpc = caseData.getRegionalProcessingCenter();
-        if (isNull(rpc) || isNull(rpc.getEpimsId())) {
+        if (isNull(rpc) || (isNull(rpc.getEpimsId()) && !isNull(firstHalfOfPostcode))) {
             rpc = regionalProcessingCenterService.getByPostcode(firstHalfOfPostcode);
+        } else if (isNull(postCode) && !isNull(rpc.getPostcode())) {
+            postCode = rpc.getPostcode();
         }
+
+        if (isNull(rpc) || isNull(postCode) || isNull(rpc.getEpimsId())) {
+            throw new CaseMigrationException("Either rpc or postcode is null");
+        }
+
         String processingVenue = airLookupService.lookupAirVenueNameByPostCode(postCode, getBenefitType(caseData));
         String venueEpimsId = venueService.getEpimsIdForVenue(processingVenue);
         String regionId = getRegionId(venueEpimsId);
 
-        if (!isNull(regionId) && !isNull(rpc)  && !isNull(rpc.getEpimsId())) {
+        if (!isNull(regionId) && !isNull(rpc.getEpimsId())) {
             return Map.of("region", regionId, "baseLocation", rpc.getEpimsId());
         }
         return null;
@@ -120,6 +128,11 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
                 .map(String::trim)
                 .filter(StringUtils::isNotEmpty)
                 .orElse(sscsCaseData.getAppeal().getAppellant().getAddress().getPostcode());
+        }
+
+        if (isNull(sscsCaseData.getAppeal().getAppellant())
+            || isNull(sscsCaseData.getAppeal().getAppellant().getAddress())) {
+            return null;
         }
 
         return sscsCaseData.getAppeal().getAppellant().getAddress().getPostcode();
