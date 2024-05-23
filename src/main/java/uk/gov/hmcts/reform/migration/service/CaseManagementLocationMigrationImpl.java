@@ -63,7 +63,10 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
     public Map<String, Object> migrate(Map<String, Object> data) {
         if (nonNull(data)) {
             if (!data.containsKey("caseManagementLocation")) {
-                data.put("caseManagementLocation", getManagementLocation(data));
+                Map<String, Object> managementLocation = getManagementLocation(data);
+                if (!isNull(managementLocation)) {
+                    data.put("caseManagementLocation", managementLocation);
+                }
             }
         }
 
@@ -83,7 +86,11 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         String processingVenue = airLookupService.lookupAirVenueNameByPostCode(postCode, getBenefitType(caseData));
         String venueEpimsId = venueService.getEpimsIdForVenue(processingVenue);
         String regionId = getRegionId(venueEpimsId);
-        return Map.of("region", regionId, "baseLocation", rpc.getEpimsId());
+
+        if (!isNull(regionId) && !isNull(rpc)  && !isNull(rpc.getEpimsId())) {
+            return Map.of("region", regionId, "baseLocation", rpc.getEpimsId());
+        }
+        return null;
     }
 
     private String getRegionId(String venueEpimsId) {
