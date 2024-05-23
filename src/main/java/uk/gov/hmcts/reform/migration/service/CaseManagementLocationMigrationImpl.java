@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sscs.service.RefDataService;
 import uk.gov.hmcts.reform.sscs.service.RegionalProcessingCenterService;
 import uk.gov.hmcts.reform.sscs.service.VenueService;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,6 +42,7 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
     private final VenueService venueService;
     private final RegionalProcessingCenterService regionalProcessingCenterService;
     private final AirLookupService airLookupService;
+    private HashMap<String, String> regiondIdsCache = new HashMap<>();
 
     public CaseManagementLocationMigrationImpl(RefDataService refDataService,
                                                VenueService venueService,
@@ -80,8 +82,22 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         }
         String processingVenue = airLookupService.lookupAirVenueNameByPostCode(postCode, getBenefitType(caseData));
         String venueEpimsId = venueService.getEpimsIdForVenue(processingVenue);
+        String regionId = getRegionId(venueEpimsId);
+        return Map.of("region", regionId, "baseLocation", rpc.getEpimsId());
+    }
+
+    private String getRegionId(String venueEpimsId) {
+        if (regiondIdsCache.containsKey(venueEpimsId)) {
+            return regiondIdsCache.get(venueEpimsId);
+        }
+
         CourtVenue courtVenue = refDataService.getCourtVenueRefDataByEpimsId(venueEpimsId);
-        return Map.of("region", courtVenue.getRegionId(), "baseLocation", rpc.getEpimsId());
+        if (!isNull(courtVenue)) {
+            String regionId = courtVenue.getRegionId();
+            regiondIdsCache.put(venueEpimsId, regionId);
+            return regionId;
+        }
+        return null;
     }
 
     private BenefitType getBenefitType(SscsCaseData caseData) {
