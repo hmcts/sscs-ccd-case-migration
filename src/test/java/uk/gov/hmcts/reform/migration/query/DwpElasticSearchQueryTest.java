@@ -18,50 +18,50 @@ class DwpElasticSearchQueryTest {
         DwpElasticSearchQuery elasticSearchQuery = new DwpElasticSearchQuery();
         String query = elasticSearchQuery.getQuery(null, QUERY_SIZE, true);
         assertEquals("""
-        {
-            "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "data.poAttendanceConfirmed"
+            {
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "bool": {
+                                    "must_not": {
+                                        "exists": {
+                                            "field": "data.poAttendanceConfirmed"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must_not": {
+                                        "exists": {
+                                            "field": "data.tribunalDirectPoToAttend"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must_not": {
+                                        "exists": {
+                                            "field": "data.dwpIsOfficerAttending"
+                                        }
                                     }
                                 }
                             }
-                        },
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "data.tribunalDirectPoToAttend"
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "data.dwpIsOfficerAttending"
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            "_source": [
-                "reference"
-            ],
-            "size": 100,
-            "sort": [
-                {
-                    "reference.keyword": "asc"
-                }
-            ]
-        }
+                        ]
+                    }
+                },
+                "_source": [
+                    "reference"
+                ],
+                "size": 100,
+                "sort": [
+                    {
+                        "reference.keyword": "asc"
+                    }
+                ]
+            }
             """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 
@@ -70,53 +70,53 @@ class DwpElasticSearchQueryTest {
         DwpElasticSearchQuery elasticSearchQuery = new DwpElasticSearchQuery();
         String query = elasticSearchQuery.getQuery("1677777777", QUERY_SIZE, false);
         assertEquals("""
-        {
-            "query": {
-                "bool": {
-                    "should": [
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "data.poAttendanceConfirmed"
+            {
+                "query": {
+                    "bool": {
+                        "should": [
+                            {
+                                "bool": {
+                                    "must_not": {
+                                        "exists": {
+                                            "field": "data.poAttendanceConfirmed"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must_not": {
+                                        "exists": {
+                                            "field": "data.tribunalDirectPoToAttend"
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "must_not": {
+                                        "exists": {
+                                            "field": "data.dwpIsOfficerAttending"
+                                        }
                                     }
                                 }
                             }
-                        },
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "data.tribunalDirectPoToAttend"
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            "bool": {
-                                "must_not": {
-                                    "exists": {
-                                        "field": "data.dwpIsOfficerAttending"
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            },
-            "_source": [
-                "reference"
-            ],
-            "size": 100,
-            "sort": [
-                {
-                    "reference.keyword": "asc"
-                }
-            ],
-            "search_after": [
-                1677777777
-            ]
-        }
+                        ]
+                    }
+                },
+                "_source": [
+                    "reference"
+                ],
+                "size": 100,
+                "sort": [
+                    {
+                        "reference.keyword": "asc"
+                    }
+                ],
+                "search_after": [
+                    1677777777
+                ]
+            }
             """.replaceAll("\\s", ""), query.replaceAll("\\s", ""));
     }
 }

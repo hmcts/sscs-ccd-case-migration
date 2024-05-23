@@ -51,7 +51,7 @@ public class DwpElasticSearchQuery extends AbstractElasticQuery implements Elast
               "reference.keyword": "asc"
             }
           ]
-          """;
+        """;
 
     @Override
     protected String getStartQuery() {
