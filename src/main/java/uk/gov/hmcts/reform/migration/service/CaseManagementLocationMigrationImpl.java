@@ -81,13 +81,13 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 
         RegionalProcessingCenter rpc = caseData.getRegionalProcessingCenter();
-        if (isNull(rpc) || isNull(rpc.getEpimsId())) {
+        if (isNull(rpc) || (isNull(rpc.getEpimsId()) && !isNull(firstHalfOfPostcode))) {
             rpc = regionalProcessingCenterService.getByPostcode(firstHalfOfPostcode);
         } else if (isNull(postCode) && !isNull(rpc.getPostcode())) {
             postCode = rpc.getPostcode();
         }
 
-        if (isNull(rpc) || isNull(postCode)) {
+        if (isNull(rpc) || isNull(postCode) || isNull(rpc.getEpimsId())) {
             throw new CaseMigrationException("Either rpc or postcode is null");
         }
 
