@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.model.CourtVenue;
 import uk.gov.hmcts.reform.sscs.service.AirLookupService;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -74,6 +76,41 @@ public class CaseManagementLocationMigrationImplTest {
         Map<String, Object> result = caseManagementLocationService.migrate(data);
         assertNotNull(result);
         assertEquals(data, result);
+    }
+
+    @Test
+    void shouldUseRpcPostCodeWhenPostCodeIsNull() {
+        SscsCaseData caseData = buildCaseData();
+        caseData.getAppeal().getAppellant().setAddress(null);
+        var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
+        caseData.setRegionalProcessingCenter(rpc);
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
+        when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
+        when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
+            .thenReturn(CourtVenue.builder().regionId("id").build());
+
+        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
+            refDataService, venueService, regionalProcessingCenterService, airLookupService);
+
+        Map<String, Object> result = caseManagementLocationService.migrate(data);
+        assertNotNull(result);
+        assertNotNull(result.get("caseManagementLocation"));
+    }
+
+    @Test
+    void shouldThrowCaseMigrationExceptionWhenAddressAndRpcIsNull() {
+        SscsCaseData caseData = buildCaseData();
+        caseData.getAppeal().getAppellant().setAddress(null);
+        caseData.setRegionalProcessingCenter(null);
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+
+        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
+            refDataService, venueService, regionalProcessingCenterService, airLookupService);
+
+        assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(data));
     }
 
     @Test
