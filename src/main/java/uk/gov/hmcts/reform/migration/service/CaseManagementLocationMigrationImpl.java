@@ -95,7 +95,7 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
         String venueEpimsId = venueService.getEpimsIdForVenue(processingVenue);
         String regionId = getRegionId(venueEpimsId);
 
-        if (!isNull(regionId) && !isNull(rpc)  && !isNull(rpc.getEpimsId())) {
+        if (!isNull(regionId) && !isNull(rpc.getEpimsId())) {
             return Map.of("region", regionId, "baseLocation", rpc.getEpimsId());
         }
         return null;
@@ -128,6 +128,10 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
                 .map(String::trim)
                 .filter(StringUtils::isNotEmpty)
                 .orElse(sscsCaseData.getAppeal().getAppellant().getAddress().getPostcode());
+        }
+
+        if (isNull(sscsCaseData.getAppeal().getAppellant()) || isNull(sscsCaseData.getAppeal().getAppellant().getAddress())) {
+            return null;
         }
 
         return sscsCaseData.getAppeal().getAppellant().getAddress().getPostcode();
