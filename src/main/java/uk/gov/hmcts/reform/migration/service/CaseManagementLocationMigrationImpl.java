@@ -130,7 +130,8 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
                 .orElse(sscsCaseData.getAppeal().getAppellant().getAddress().getPostcode());
         }
 
-        if (isNull(sscsCaseData.getAppeal().getAppellant()) || isNull(sscsCaseData.getAppeal().getAppellant().getAddress())) {
+        if (isNull(sscsCaseData.getAppeal().getAppellant())
+            || isNull(sscsCaseData.getAppeal().getAppellant().getAddress())) {
             return null;
         }
 
