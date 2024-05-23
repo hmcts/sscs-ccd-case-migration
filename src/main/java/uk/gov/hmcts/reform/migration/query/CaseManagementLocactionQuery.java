@@ -30,7 +30,7 @@ public class CaseManagementLocactionQuery extends AbstractElasticQuery implement
                   "size":  %s,
                   "sort": [
                     {
-                      "last_modified": "desc"
+                      "reference.keyword": "asc"
                     }
                   ]
         """;

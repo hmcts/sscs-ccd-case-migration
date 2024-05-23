@@ -36,7 +36,7 @@ public class CaseManagementLocationQueryTest {
                 "size": 100,
                 "sort": [
                     {
-                        "last_modified": "desc"
+                        "reference.keyword": "asc"
                     }
                 ]
             }
@@ -71,7 +71,7 @@ public class CaseManagementLocationQueryTest {
                 "size": 100,
                 "sort": [
                     {
-                        "last_modified": "desc"
+                        "reference.keyword": "asc"
                     }
                 ],
                 "search_after": [
