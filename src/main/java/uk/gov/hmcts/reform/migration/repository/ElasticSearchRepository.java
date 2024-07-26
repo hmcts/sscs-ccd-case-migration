@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.migration.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -15,7 +16,8 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ElasticSearchRepository {
+@ConditionalOnProperty(value = "migration.elastic.enabled", havingValue = "true")
+public class ElasticSearchRepository implements CcdRepository {
 
     private final CoreCaseDataService coreCaseDataService;
 

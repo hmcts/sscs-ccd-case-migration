@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.migration.ccd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
@@ -18,9 +21,9 @@ import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
 import java.util.Map;
 
+@Slf4j
 @Service
 public class CoreCaseDataService {
-
     @Autowired
     private IdamClient idamClient;
     @Autowired
