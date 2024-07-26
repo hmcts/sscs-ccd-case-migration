@@ -10,9 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.CcdRepository;
-import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.repository.IdamRepository;
-import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
 import java.util.ArrayList;
@@ -54,8 +52,8 @@ public class CaseMigrationProcessor {
         validateCaseType(caseType);
         log.info("Data migration of cases started for case type: {}", caseType);
         String userToken =  idamRepository.generateUserToken();
-        List<CaseDetails> listOfCaseDetails = elasticSearchEnabled ?
-            repository.findCaseByCaseType(userToken, caseType):
+        List<CaseDetails> listOfCaseDetails = elasticSearchEnabled
+            ? repository.findCaseByCaseType(userToken, caseType) :
             repository.loadCases();
 
         ForkJoinPool threadPool = new ForkJoinPool(25);

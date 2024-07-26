@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Service
 @ConditionalOnProperty(value = "migration.elastic.enabled", havingValue = "false")
-public class CaseLoader implements CcdRepository{
+public class CaseLoader implements CcdRepository {
 
     @Value("${migration.cases-file-name}")
     private String caseFile;
