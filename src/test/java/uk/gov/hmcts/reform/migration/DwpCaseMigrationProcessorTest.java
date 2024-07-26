@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.migration;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DwpCaseMigrationProcessorTest {
 
     private static final String USER_TOKEN = "Bearer eeeejjjttt";
@@ -53,9 +53,10 @@ public class DwpCaseMigrationProcessorTest {
     @Mock
     private IdamRepository idamRepository;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(caseMigrationProcessor, "caseProcessLimit", 1);
+        ReflectionTestUtils.setField(caseMigrationProcessor, "elasticSearchEnabled", true);
     }
 
     @Test
@@ -68,7 +69,7 @@ public class DwpCaseMigrationProcessorTest {
         caseDetails.add(details);
         when(elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE)).thenReturn(caseDetails);
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
-        assertNotNull(listOfCaseDetails);
+        Assertions.assertNotNull(listOfCaseDetails);
         when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, details.getId(), details.getJurisdiction()))
             .thenReturn(details);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
@@ -91,7 +92,7 @@ public class DwpCaseMigrationProcessorTest {
         caseDetails.add(details1);
         when(elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE)).thenReturn(caseDetails);
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
-        assertNotNull(listOfCaseDetails);
+        Assertions.assertNotNull(listOfCaseDetails);
         when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, details.getId(), details.getJurisdiction()))
             .thenReturn(details);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
