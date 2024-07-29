@@ -26,4 +26,11 @@ public class CaseLoaderTest {
         assertEquals(1L, result.get(0).getId());
         assertEquals("SSCS", result.get(0).getJurisdiction());
     }
+
+    @Test
+    void testDefaultImplementation() {
+        CaseLoader caseLoader = new CaseLoader("casesList.json");
+        var result = caseLoader.findCaseByCaseType("", "");
+        assertTrue(result.isEmpty());
+    }
 }
