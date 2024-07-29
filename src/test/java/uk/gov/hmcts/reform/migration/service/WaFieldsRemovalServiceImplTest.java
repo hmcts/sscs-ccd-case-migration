@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 public class WaFieldsRemovalServiceImplTest {
@@ -58,7 +61,8 @@ public class WaFieldsRemovalServiceImplTest {
 
     private static Stream<Arguments> getDataValues() {
         return Stream.of(
-            Arguments.of("scannedDocumentTypes", List.of("appellantEvidence", "representativeEvidence", "Other document", "dl16")),
+            Arguments.of("scannedDocumentTypes",
+                         List.of("appellantEvidence", "representativeEvidence", "Other document", "dl16")),
             Arguments.of("assignedCaseRoles", List.of("hearing-judge")),
             Arguments.of("previouslyAssignedCaseRoles", List.of("[CREATOR]", "hearing-judge"))
         );
