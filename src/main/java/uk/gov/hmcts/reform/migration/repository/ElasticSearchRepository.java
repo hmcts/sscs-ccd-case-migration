@@ -42,6 +42,7 @@ public class ElasticSearchRepository implements CcdRepository {
         this.elasticSearchQuery = elasticSearchQuery;
     }
 
+    @Override
     public List<CaseDetails> findCaseByCaseType(String userToken, String caseType) {
         log.info("Processing the Case Migration search for case type {}.", caseType);
         String authToken = authTokenGenerator.generate();

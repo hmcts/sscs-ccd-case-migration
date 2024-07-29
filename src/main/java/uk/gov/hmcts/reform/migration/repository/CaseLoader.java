@@ -18,16 +18,23 @@ import java.util.List;
 @ConditionalOnProperty(value = "migration.elastic.enabled", havingValue = "false")
 public class CaseLoader implements CcdRepository {
 
-    @Value("${migration.cases-file-name}")
     private String caseFile;
 
+    public CaseLoader(@Value("${migration.cases-file-name}") String caseFile) {
+        this.caseFile = caseFile;
+    }
+
+    @Override
     public List<CaseDetails> loadCases() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             InputStream stream = this.getClass().getClassLoader().getResourceAsStream(caseFile);
             log.info("Load cases from {} {}", caseFile, stream);
-            List<String> cases = objectMapper.readValue(stream, new TypeReference<>() {});
-            return cases.stream().map(this::process).toList();
+
+            if (stream != null) {
+                List<String> cases = objectMapper.readValue(stream, new TypeReference<>() {});
+                return cases.stream().map(this::process).toList();
+            }
         } catch (IOException e) {
             log.info("Failed to load cases from {}", this.getClass().getName());
         }
