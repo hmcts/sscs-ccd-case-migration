@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.migration.auth.AuthUtil;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
@@ -38,12 +38,12 @@ public class CoreCaseDataService {
                               String caseType,
                               Long caseId,
                               String jurisdiction) {
-        UserDetails userDetails = idamClient.getUserDetails(AuthUtil.getBearerToken(authorisation));
+        UserInfo userDetails = idamClient.getUserInfo(AuthUtil.getBearerToken(authorisation));
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
             AuthUtil.getBearerToken(authorisation),
             authTokenGenerator.generate(),
-            userDetails.getId(),
+            userDetails.getUid(),
             jurisdiction,
             caseType,
             String.valueOf(caseId),
@@ -65,7 +65,7 @@ public class CoreCaseDataService {
         return coreCaseDataApi.submitEventForCaseWorker(
             AuthUtil.getBearerToken(authorisation),
             authTokenGenerator.generate(),
-            userDetails.getId(),
+            userDetails.getUid(),
             updatedCaseDetails.getJurisdiction(),
             caseType,
             String.valueOf(updatedCaseDetails.getId()),

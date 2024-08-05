@@ -11,7 +11,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
-import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.migration.repository.CcdRepository;
 import uk.gov.hmcts.reform.migration.repository.IdamRepository;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
@@ -48,7 +48,7 @@ public class DwpCaseMigrationProcessorTest {
     private ForkJoinPool threadPool;
 
     @Mock
-    private ElasticSearchRepository elasticSearchRepository;
+    private CcdRepository elasticSearchRepository;
 
     @Mock
     private IdamRepository idamRepository;
@@ -56,51 +56,45 @@ public class DwpCaseMigrationProcessorTest {
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(caseMigrationProcessor, "caseProcessLimit", 1);
-        ReflectionTestUtils.setField(caseMigrationProcessor, "elasticSearchEnabled", true);
     }
 
     @Test
     public void shouldMigrateCasesOfACaseType() {
         when(dataMigrationService.accepts()).thenReturn(candidate -> true);
         when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
-        CaseDetails details = mock(CaseDetails.class);
-        when(details.getId()).thenReturn(1677777777L);
-        List<CaseDetails> caseDetails = new ArrayList<>();
-        caseDetails.add(details);
-        when(elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE)).thenReturn(caseDetails);
-        List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
+        CaseDetails caseDetails = mock(CaseDetails.class);
+        when(caseDetails.getId()).thenReturn(1677777777L);
+        List<CaseDetails> caseList = new ArrayList<>();
+        caseList.add(caseDetails);
+        when(elasticSearchRepository.findCases()).thenReturn(caseList);
+        List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCases();
         Assertions.assertNotNull(listOfCaseDetails);
-        when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, details.getId(), details.getJurisdiction()))
-            .thenReturn(details);
+        when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, caseDetails.getId(), caseDetails.getJurisdiction()))
+            .thenReturn(caseDetails);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
         verify(coreCaseDataService, times(1))
             .update(USER_TOKEN,
                     CASE_TYPE,
-                    details.getId(),
-                    details.getJurisdiction());
+                    caseDetails.getId(),
+                    caseDetails.getJurisdiction());
     }
 
     @Test
     public void shouldMigrateOnlyLimitedNumberOfCases() {
         when(dataMigrationService.accepts()).thenReturn(candidate -> true);
         when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
-        CaseDetails details = mock(CaseDetails.class);
-        when(details.getId()).thenReturn(1677777777L);
-        CaseDetails details1 = mock(CaseDetails.class);
-        List<CaseDetails> caseDetails = new ArrayList<>();
-        caseDetails.add(details);
-        caseDetails.add(details1);
-        when(elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE)).thenReturn(caseDetails);
-        List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
+        CaseDetails caseDetails = CaseDetails.builder().id(1677777777L).jurisdiction("SSCS").build();
+        List<CaseDetails> caseList = new ArrayList<>();
+        caseList.add(caseDetails);
+        caseList.add(CaseDetails.builder().build());
+        when(elasticSearchRepository.findCases()).thenReturn(caseList);
+        List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCases();
         Assertions.assertNotNull(listOfCaseDetails);
-        when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, details.getId(), details.getJurisdiction()))
-            .thenReturn(details);
+        when(coreCaseDataService.update(USER_TOKEN, CASE_TYPE, 1677777777L, "SSCS"))
+            .thenReturn(caseDetails);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
         verify(coreCaseDataService, times(1))
-            .update(USER_TOKEN,
-                    CASE_TYPE,
-                    details.getId(),
-                    details.getJurisdiction());
+            .update(USER_TOKEN, CASE_TYPE,1677777777L, "SSCS");
     }
 
     @Test

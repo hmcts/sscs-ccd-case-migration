@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class CaseMigrationProcessor {
-    public static final String LOG_STRING = "-----------------------------------------";
+    public static final String LOG_STRING = "-----------------------------------------\n";
 
     @Autowired
     private CoreCaseDataService coreCaseDataService;
@@ -45,53 +45,29 @@ public class CaseMigrationProcessor {
     @Value("${case-migration.processing.limit}")
     private int caseProcessLimit;
 
-    @Value("${migration.elastic.enabled}")
-    private boolean elasticSearchEnabled;
-
     public void migrateCases(String caseType) {
         validateCaseType(caseType);
         log.info("Data migration of cases started for case type: {}", caseType);
         String userToken =  idamRepository.generateUserToken();
-        List<CaseDetails> listOfCaseDetails = elasticSearchEnabled
-            ? repository.findCaseByCaseType(userToken, caseType) :
-            repository.loadCases();
+        List<CaseDetails> listOfCaseDetails = repository.findCases();
 
         ForkJoinPool threadPool = new ForkJoinPool(25);
-        threadPool.submit(
-            () -> listOfCaseDetails.parallelStream()
+        threadPool.submit(() -> listOfCaseDetails.parallelStream()
                     .limit(caseProcessLimit)
                     .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails)));
         shutdownThreadPool(threadPool);
-
-        log.info(
-            """
-                {}
-                Data migration completed
-                {}
-                Total number of processed cases:
-                {}
-                Total number of migrations performed:
-                {}
-                {}
+        log.info("""
+                {}Data migration completed\n{}
+                Total number of processed cases: {}
+                Total number of migrations performed: {}\n {}
                 """,
-            LOG_STRING,
-            LOG_STRING,
-            getMigratedCases().size() + getFailedCases().size(),
-            getMigratedCases().size(),
-            LOG_STRING
+                LOG_STRING, LOG_STRING,
+                getMigratedCases().size() + getFailedCases().size(), getMigratedCases().size(),
+                LOG_STRING
         );
 
-        if (getMigratedCases().isEmpty()) {
-            log.info("Migrated cases: NONE ");
-        } else {
-            log.info("Migrated cases: {} ", getMigratedCases());
-        }
-
-        if (getFailedCases().isEmpty()) {
-            log.info("Failed cases: NONE ");
-        } else {
-            log.info("Failed cases: {} ", getFailedCases());
-        }
+        log.info("Migrated cases: {}", getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
+        log.info("Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
         log.info("Data migration of cases completed");
     }
 

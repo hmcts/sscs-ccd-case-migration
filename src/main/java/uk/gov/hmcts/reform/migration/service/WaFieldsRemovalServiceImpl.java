@@ -13,7 +13,7 @@ import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.sscs12552.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "migration.waFieldsRemoval.enabled", havingValue = "true")
 public class WaFieldsRemovalServiceImpl  implements DataMigrationService<Map<String, Object>> {
     private static final String EVENT_ID = "waCaseMigration";
     private static final String EVENT_SUMMARY = "Migrate case for WA";
