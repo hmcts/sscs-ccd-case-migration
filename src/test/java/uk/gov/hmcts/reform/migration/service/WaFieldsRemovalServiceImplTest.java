@@ -17,6 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.EVENT_SUMMARY;
 
 @Slf4j
 public class WaFieldsRemovalServiceImplTest {
@@ -44,9 +47,9 @@ public class WaFieldsRemovalServiceImplTest {
 
     @Test
     void shouldReturnCorrectValuesForWaMigration() {
-        assertEquals("waCaseMigration", waFieldsRemovalService.getEventId());
-        assertEquals("Migrate case for WA", waFieldsRemovalService.getEventDescription());
-        assertEquals("Migrate case for WA", waFieldsRemovalService.getEventSummary());
+        assertEquals(EVENT_ID, waFieldsRemovalService.getEventId());
+        assertEquals(EVENT_DESCRIPTION, waFieldsRemovalService.getEventDescription());
+        assertEquals(EVENT_SUMMARY, waFieldsRemovalService.getEventSummary());
     }
 
     @ParameterizedTest

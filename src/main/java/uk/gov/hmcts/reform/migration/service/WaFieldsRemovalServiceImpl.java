@@ -15,9 +15,9 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @ConditionalOnProperty(value = "migration.waFieldsRemoval.enabled", havingValue = "true")
 public class WaFieldsRemovalServiceImpl  implements DataMigrationService<Map<String, Object>> {
-    private static final String EVENT_ID = "waCaseMigration";
-    private static final String EVENT_SUMMARY = "Remove WA fields with incorrect data type";
-    private static final String EVENT_DESCRIPTION = "Remove WA fields (scannedDocumentTypes, assignedCaseRoles, "
+    static final String EVENT_ID = "waCaseMigration";
+    static final String EVENT_SUMMARY = "Remove WA fields with incorrect data type";
+    static final String EVENT_DESCRIPTION = "Remove WA fields (scannedDocumentTypes, assignedCaseRoles, "
         + "previouslyAssignedCaseRoles) with incorrect data type";
 
     public Predicate<CaseDetails> accepts() {
