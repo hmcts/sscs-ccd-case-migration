@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CaseLoaderTest {
 
-    private static final String VALID_ENCODED_DATA_STRING = "eJyLrlYqSk1LLUrNS05VslIyNLOwNDYyNzc0NDUxMjSyVKrVQVNgbm" +
-        "BobGpkYmYGVGNkYqJUGwsAjiESMQ==";
+    private static final String VALID_ENCODED_DATA_STRING = "eJyLrlYqSk1LLUrNS05VslIyNLOwNDYyNzc0NDUxMjSyVKrVQVNgbmBobG"
+        + "pkYmYGVGNkYqJUGwsAjiESMQ==";
     private static final String INVALID_ENCODED_DATA_STRING = "xxxxxxxxxxxxxxx";
 
 
