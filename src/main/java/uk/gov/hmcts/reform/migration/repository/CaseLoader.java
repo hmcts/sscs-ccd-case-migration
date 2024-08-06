@@ -21,7 +21,7 @@ import java.util.zip.InflaterOutputStream;
 
 @Slf4j
 @Service
-@ConditionalOnProperty(value = "migration.elastic.enabled", havingValue = "false")
+@ConditionalOnProperty(value = "migration.caseList.source", havingValue = "INPUT_FILE")
 public class CaseLoader extends CcdRepository {
 
     private static final String JURISDICTION = "SSCS";
@@ -34,7 +34,7 @@ public class CaseLoader extends CcdRepository {
     }
 
     @Override
-    public List<CaseDetails> loadCases() {
+    public List<CaseDetails> findCases() {
         List<CaseDetails> cases = new ArrayList<>();
         try {
             JSONArray data = new JSONArray(decompressAndB64Decode(encodedDataString));

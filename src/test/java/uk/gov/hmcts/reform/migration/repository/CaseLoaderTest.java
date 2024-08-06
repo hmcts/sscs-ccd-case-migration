@@ -18,7 +18,7 @@ public class CaseLoaderTest {
     void givenValidEncodedString_thenReturnListOfCases() {
         CaseLoader caseLoader = new CaseLoader(VALID_ENCODED_DATA_STRING);
 
-        var result = caseLoader.loadCases();
+        var result = caseLoader.findCases();
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1689327711542129L, result.get(0).getId());
@@ -29,7 +29,7 @@ public class CaseLoaderTest {
     void givenInvalidEncodedString_thenReturnEmptyList() {
         CaseLoader caseLoader = new CaseLoader(INVALID_ENCODED_DATA_STRING);
 
-        var result = caseLoader.loadCases();
+        var result = caseLoader.findCases();
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }

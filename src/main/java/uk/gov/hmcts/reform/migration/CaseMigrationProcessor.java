@@ -48,10 +48,9 @@ public class CaseMigrationProcessor {
     public void migrateCases(String caseType) {
         validateCaseType(caseType);
         log.info("Data migration of cases started for case type: {}", caseType);
-        String userToken =  idamRepository.generateUserToken();
         List<CaseDetails> listOfCaseDetails = repository.findCases();
-
         ForkJoinPool threadPool = new ForkJoinPool(25);
+        String userToken =  idamRepository.generateUserToken();
         threadPool.submit(() -> listOfCaseDetails.parallelStream()
                     .limit(caseProcessLimit)
                     .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails)));

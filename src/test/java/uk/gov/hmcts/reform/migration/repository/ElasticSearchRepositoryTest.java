@@ -16,7 +16,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -134,7 +133,7 @@ public class ElasticSearchRepositoryTest {
             AUTH_TOKEN,
             INITIAL_QUERY
         )).thenReturn(searchResult);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCaseByCaseType();
+        List<CaseDetails> caseDetails = elasticSearchRepository.findCases();
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
@@ -143,7 +142,7 @@ public class ElasticSearchRepositoryTest {
     public void shouldNotReturnCaseDetailsForCaseTypeWhenSearchResultIsNull() {
         when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCaseByCaseType();
+        List<CaseDetails> caseDetails = elasticSearchRepository.findCases();
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
@@ -181,7 +180,7 @@ public class ElasticSearchRepositoryTest {
         caseDetails1.add(details1);
         when(searchAfterResult.getCases()).thenReturn(caseDetails1, List.of());
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCaseByCaseType();
+        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases();
         assertNotNull(returnCaseDetails);
         verify(authTokenGenerator, times(1)).generate();
         verify(coreCaseDataService, times(1)).getCases(USER_TOKEN,
@@ -223,7 +222,7 @@ public class ElasticSearchRepositoryTest {
             SEARCH_AFTER_QUERY
         )).thenReturn(null);
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCaseByCaseType();
+        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases();
         assertNotNull(returnCaseDetails);
 
         verify(authTokenGenerator, times(1)).generate();
@@ -238,11 +237,5 @@ public class ElasticSearchRepositoryTest {
                                                       SEARCH_AFTER_QUERY);
 
         assertEquals(1, returnCaseDetails.size());
-    }
-
-    @Test
-    void testDefaultImplementation() {
-        var result = elasticSearchRepository.loadCases();
-        assertTrue(result.isEmpty());
     }
 }

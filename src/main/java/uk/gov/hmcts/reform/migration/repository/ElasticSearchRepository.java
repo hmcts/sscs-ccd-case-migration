@@ -16,7 +16,7 @@ import java.util.List;
 
 @Repository
 @Slf4j
-@ConditionalOnProperty(value = "migration.elastic.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "migration.caseList.source", havingValue = "ELASTIC_SEARCH")
 public class ElasticSearchRepository extends CcdRepository {
 
     private final CoreCaseDataService coreCaseDataService;
@@ -49,7 +49,7 @@ public class ElasticSearchRepository extends CcdRepository {
     }
 
     @Override
-    public List<CaseDetails> findCaseByCaseType() {
+    public List<CaseDetails> findCases() {
         log.info("Processing the Case Migration search for case type {}.", caseType);
         String authToken = authTokenGenerator.generate();
 
