@@ -9,9 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CaseLoaderTest {
 
-    private static final String VALID_ENCODED_DATA_STRING = "eJyLrlYqSk1LLUrNS05VslIyNLO0NDYxNzUzsTQztTAw"
-        + "VtJRSq3ILC7JzEuPT0ksSYwvS8wpBSkMLkjMyyzOAMrnJhYUpKagyjoWJSZlJivV6qCZbm5gZmFgZm5kZmJsaWxugNN0N5AOXIY7pe"
-        + "alJ+ZkKtXGAgB1Yj3B";
+    private static final String VALID_ENCODED_DATA_STRING = "eJyLrlYqSk1LLUrNS05VslIyNLOwNDYyNzc0NDUxMjSyVKrVQVNgbm" +
+        "BobGpkYmYGVGNkYqJUGwsAjiESMQ==";
     private static final String INVALID_ENCODED_DATA_STRING = "xxxxxxxxxxxxxxx";
 
 
@@ -22,7 +21,7 @@ public class CaseLoaderTest {
         var result = caseLoader.loadCases();
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(1699347564965803L, result.get(0).getId());
+        assertEquals(1689327711542129L, result.get(0).getId());
         assertEquals("SSCS", result.get(0).getJurisdiction());
     }
 
