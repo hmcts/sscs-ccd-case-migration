@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.migration.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -15,11 +16,14 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class ElasticSearchRepository {
+@ConditionalOnProperty(value = "migration.caseList.source", havingValue = "ELASTIC_SEARCH")
+public class ElasticSearchRepository extends CcdRepository {
 
     private final CoreCaseDataService coreCaseDataService;
 
     private final AuthTokenGenerator authTokenGenerator;
+    private IdamRepository idamRepository;
+    private String caseType;
 
     private final int querySize;
 
@@ -30,21 +34,27 @@ public class ElasticSearchRepository {
     @Autowired
     public ElasticSearchRepository(CoreCaseDataService coreCaseDataService,
                                    AuthTokenGenerator authTokenGenerator,
+                                   IdamRepository idamRepository,
                                    ElasticSearchQuery elasticSearchQuery,
+                                   @Value("${migration.caseType}") String caseType,
                                    @Value("${case-migration.elasticsearch.querySize}") int querySize,
                                    @Value("${case-migration.processing.limit}") int caseProcessLimit) {
         this.coreCaseDataService = coreCaseDataService;
         this.authTokenGenerator = authTokenGenerator;
+        this.caseType = caseType;
+        this.idamRepository = idamRepository;
         this.querySize = querySize;
         this.caseProcessLimit = caseProcessLimit;
         this.elasticSearchQuery = elasticSearchQuery;
     }
 
-    public List<CaseDetails> findCaseByCaseType(String userToken, String caseType) {
+    @Override
+    public List<CaseDetails> findCases() {
         log.info("Processing the Case Migration search for case type {}.", caseType);
         String authToken = authTokenGenerator.generate();
 
         String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
+        String userToken =  idamRepository.generateUserToken();
         SearchResult searchResult =
             coreCaseDataService.getCases(userToken, caseType, authToken, initialQuery);
         List<CaseDetails> caseDetails = new ArrayList<>();

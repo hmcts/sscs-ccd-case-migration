@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
 import java.util.LinkedHashMap;
@@ -51,15 +51,14 @@ class CoreCaseDataServiceTest {
     @Test
     void shouldUpdateTheCase() {
         // given
-        UserDetails userDetails = UserDetails.builder()
-            .id("30")
-            .email("test@test.com")
-            .forename("Test")
-            .surname("Surname")
+        UserInfo userInfo = UserInfo.builder()
+            .uid("30")
+            .givenName("Test")
+            .familyName("Surname")
             .build();
 
         CaseDetails caseDetails3 = createCaseDetails(CASE_ID);
-        setupMocks(userDetails, caseDetails3.getData());
+        setupMocks(userInfo, caseDetails3.getData());
         when(dataMigrationService.getEventDescription()).thenReturn(EVENT_DESC);
         when(dataMigrationService.getEventId()).thenReturn(EVENT_ID);
         when(dataMigrationService.getEventSummary()).thenReturn(EVENT_SUMMARY);
@@ -91,8 +90,8 @@ class CoreCaseDataServiceTest {
             .build();
     }
 
-    private void setupMocks(UserDetails userDetails, Map<String, Object> data) {
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
+    private void setupMocks(UserInfo userInfo, Map<String, Object> data) {
+        when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(userInfo);
 
         when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
 

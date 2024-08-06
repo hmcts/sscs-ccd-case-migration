@@ -104,6 +104,8 @@ public class ElasticSearchRepositoryTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+    @Mock
+    private IdamRepository idamRepository;
 
     @Mock
     private ElasticSearchQuery elasticSearchQuery;
@@ -112,15 +114,18 @@ public class ElasticSearchRepositoryTest {
     public void setUp() {
         elasticSearchRepository = new ElasticSearchRepository(coreCaseDataService,
                                                               authTokenGenerator,
+                                                              idamRepository,
                                                               elasticSearchQuery,
+                                                              CASE_TYPE,
                                                               QUERY_SIZE,
                                                               CASE_PROCESS_LIMIT);
-        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
     }
 
     @Test
     public void shouldReturnSearchResultsForCaseTypeElasticSearch() {
         SearchResult searchResult = mock(SearchResult.class);
+        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
+        when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(coreCaseDataService.getCases(
             USER_TOKEN,
@@ -128,26 +133,29 @@ public class ElasticSearchRepositoryTest {
             AUTH_TOKEN,
             INITIAL_QUERY
         )).thenReturn(searchResult);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
+        List<CaseDetails> caseDetails = elasticSearchRepository.findCases();
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
 
     @Test
     public void shouldNotReturnCaseDetailsForCaseTypeWhenSearchResultIsNull() {
+        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
+        List<CaseDetails> caseDetails = elasticSearchRepository.findCases();
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
 
     @Test
     public void shouldReturnSearchResultsAndCaseDetailsForCaseTypeElasticSearch() {
-        SearchResult searchResult = mock(SearchResult.class);
         List<CaseDetails> caseDetails = new ArrayList<>();
         CaseDetails details = mock(CaseDetails.class);
-        when(details.getId()).thenReturn(1677777777L);
         caseDetails.add(details);
+        SearchResult searchResult = mock(SearchResult.class);
+        when(details.getId()).thenReturn(1677777777L);
+        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
+        when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         when(searchResult.getCases()).thenReturn(caseDetails);
         when(searchResult.getTotal()).thenReturn(1);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
@@ -172,7 +180,7 @@ public class ElasticSearchRepositoryTest {
         caseDetails1.add(details1);
         when(searchAfterResult.getCases()).thenReturn(caseDetails1, List.of());
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
+        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases();
         assertNotNull(returnCaseDetails);
         verify(authTokenGenerator, times(1)).generate();
         verify(coreCaseDataService, times(1)).getCases(USER_TOKEN,
@@ -189,11 +197,13 @@ public class ElasticSearchRepositoryTest {
 
     @Test
     public void shouldReturnOnlyInitialCaseDetailsWhenSearchAfterReturnsNullSearchResults() {
-        SearchResult searchResult = mock(SearchResult.class);
         List<CaseDetails> caseDetails = new ArrayList<>();
         CaseDetails details = mock(CaseDetails.class);
         when(details.getId()).thenReturn(1677777777L);
         caseDetails.add(details);
+        SearchResult searchResult = mock(SearchResult.class);
+        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
+        when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         when(searchResult.getCases()).thenReturn(caseDetails);
         when(searchResult.getTotal()).thenReturn(1);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
@@ -212,7 +222,7 @@ public class ElasticSearchRepositoryTest {
             SEARCH_AFTER_QUERY
         )).thenReturn(null);
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCaseByCaseType(USER_TOKEN, CASE_TYPE);
+        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases();
         assertNotNull(returnCaseDetails);
 
         verify(authTokenGenerator, times(1)).generate();
