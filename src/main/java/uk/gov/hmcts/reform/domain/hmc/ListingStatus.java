@@ -1,4 +1,5 @@
 package uk.gov.hmcts.reform.domain.hmc;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

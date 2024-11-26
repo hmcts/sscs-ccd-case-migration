@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.domain.hmc;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor

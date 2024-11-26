@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.domain.hmc;
 
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.HEARING;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.State;
 
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.HEARING;
 
 @Getter
 @RequiredArgsConstructor

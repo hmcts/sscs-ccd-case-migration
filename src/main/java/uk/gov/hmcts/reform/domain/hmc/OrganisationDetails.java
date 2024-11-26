@@ -1,4 +1,5 @@
 package uk.gov.hmcts.reform.domain.hmc;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

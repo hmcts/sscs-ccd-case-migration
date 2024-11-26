@@ -1,17 +1,18 @@
 package uk.gov.hmcts.reform.domain.hmc;
 
-import static uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason.LAPSED;
-import static uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason.STRUCK_OUT;
-import static uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason.WITHDRAWN;
+import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.sscs.ccd.domain.EventType;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.reform.sscs.ccd.domain.EventType;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
-import uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason;
+
+import static uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason.LAPSED;
+import static uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason.STRUCK_OUT;
+import static uk.gov.hmcts.reform.sscs.reference.data.model.CancellationReason.WITHDRAWN;
 
 @Slf4j
 public final class HearingsEventMappers {

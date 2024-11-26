@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +7,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 
 @SuppressWarnings({"PMD.UseObjectForClearerAPI"})
 @FeignClient(name = "hmc-hearing", url = "${hmc.url}")

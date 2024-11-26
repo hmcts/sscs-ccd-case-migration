@@ -1,22 +1,24 @@
 package uk.gov.hmcts.reform.domain.hmc;
 
-import static uk.gov.hmcts.reform.sscs.ccd.domain.EventType.HANDLING_ERROR;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.EventType.HEARING_BOOKED;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.EventType.UPDATE_CASE_ONLY;
-
-import java.util.function.BiFunction;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.EventType;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingStatus;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
+import java.util.function.BiFunction;
+
+import static uk.gov.hmcts.reform.sscs.ccd.domain.EventType.HANDLING_ERROR;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.EventType.HEARING_BOOKED;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.EventType.UPDATE_CASE_ONLY;
+
+
 @RequiredArgsConstructor
 @Getter
 public enum HmcStatus {
     HEARING_REQUESTED("Hearing requested", null, HearingStatus.AWAITING_LISTING, "", ""),
-    AWAITING_LISTING("Awaiting listing", (response, caseData) -> UPDATE_CASE_ONLY, HearingStatus.AWAITING_LISTING, "Awaiting Listing ",
-                     "Hearing is waiting to be listed"),
+    AWAITING_LISTING("Awaiting listing", (response, caseData) -> UPDATE_CASE_ONLY, HearingStatus.AWAITING_LISTING,
+            "Awaiting Listing ", "Hearing is waiting to be listed"),
     LISTED("Listed", (response, caseData) -> HEARING_BOOKED, HearingStatus.LISTED, "Hearing Listed",
            "New hearing %s has been listed and added to case"),
     UPDATE_REQUESTED("Update requested", null, null, "", ""),
