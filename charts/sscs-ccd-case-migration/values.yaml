@@ -31,3 +31,4 @@ job:
     MIGRATION_CASETYPE: Benefit
     MIGRATION_QUERY_SIZE: 10000
     MIGRATION_CASE_LIMIT: 1000
+    HMC_API_URL: "http://hmc-cft-hearing-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
