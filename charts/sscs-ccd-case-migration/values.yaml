@@ -22,6 +22,9 @@ job:
           alias: app-insights-connection-string
         - name: encoded-data-string-wa-fields-removal
           alias: WA_FIELDS_ENCODED_DATA_STRING
+        - name: encoded-data-string-hearing-outcome-migration
+          alias: HEARING_OUTCOME_ENCODED_DATA_STRING
+
   environment:
     MIGRATION_WA_ENABLED: true
     IDAM_CLIENT_ID: sscs
