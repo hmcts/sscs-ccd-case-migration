@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.sscs.ccd.config.CcdRequestDetails;
 @Slf4j
 @SpringBootApplication
 @EnableRetry
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client", "uk.gov.hmcts.reform.sscs.client"})
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client","uk.gov.hmcts.reform.migration.hmc", "uk.gov.hmcts.reform.sscs.client"})
 @PropertySource("classpath:application.properties")
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform", "uk.gov.hmcts.reform.sscs",
     "uk.gov.hmcts.reform.sscs.ccd.config"})

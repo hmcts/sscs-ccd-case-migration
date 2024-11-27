@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
+import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApi;
+import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
 import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 
