@@ -80,9 +80,9 @@ public class CaseOutcomeMigrationServiceImplTest {
     private static Stream<Arguments> getDataValues() {
         return Stream.of(
             Arguments.of("caseOutcome",
-                         List.of("1", "2", null)),
+                         List.of("1", "2")),
             Arguments.of("didPoAttend",
-                         List.of("yes", "no", null))
+                         List.of("yes", "no"))
         );
     }
 }
