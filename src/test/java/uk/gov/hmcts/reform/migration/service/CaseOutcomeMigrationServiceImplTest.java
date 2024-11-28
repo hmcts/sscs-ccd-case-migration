@@ -34,7 +34,8 @@ public class CaseOutcomeMigrationServiceImplTest {
     @Mock
     private HmcHearingsApiService hmcHearingsApiService;
 
-    CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService = new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
+    CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
+        new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -73,9 +74,8 @@ public class CaseOutcomeMigrationServiceImplTest {
         assertNotNull(result);
         assertNull(result.get(key));
     }
-
-//    need to add hearing details to the test data
-//    need to add extra tests (skip over empty case outcome, logging exceptions)
+    // need to add hearing details to the test data
+    // need to add extra tests (skip over empty case outcome, logging exceptions)
 
     private static Stream<Arguments> getDataValues() {
         return Stream.of(

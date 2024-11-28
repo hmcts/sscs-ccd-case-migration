@@ -53,9 +53,8 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
                 if (caseData.getCaseOutcome().getCaseOutcome() == null) {
                     log.info("case outcome is empty for case {}, continuing to next case", caseId);
                     return data;
-                }
-                else {
-                    HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId, HmcStatus.COMPLETED);
+                } else {
+                    HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId,HmcStatus.COMPLETED);
                     List<CaseHearing> hmcHearings = response.getCaseHearings();
 
                     if (hmcHearings.isEmpty()) {
@@ -64,22 +63,23 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
                     }
                     if (hmcHearings.size() > 1) {
                         log.info("More than one completed hearing found for case id {}", caseId);
-                    }
-                    else {
+                    } else {
                         String hearingID = hmcHearings.get(0).getHearingId().toString();
                         log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
 
                         HearingOutcome hearingOutcome = buildHearingOutcome(caseData, hearingID);
                         data.put("hearingOutcomes", hearingOutcome);
-    //                    check whether you can add another hearing outcome onto migrated case
-                        log.info("case outcome found with value {} and set to null for case {}", data.get("caseOutcome"), caseId);
+                        //check whether you can add another hearing outcome onto migrated case
+                        log.info("case outcome found with value {} and set to null for case {}",
+                                 data.get("caseOutcome"), caseId);
                         data.put("caseOutcome", null);
-                        log.info("did Po Attend found with value {} and set to null for case {}", data.get("didPoAttend"), caseId);
+                        log.info("did Po Attend found with value {} and set to null for case {}",
+                                 data.get("didPoAttend"), caseId);
                         data.put("didPoAttend", null);
                     }
                 }
             } catch (Exception e) {
-                log.error("Error migrating case outcome for case {}", data.get("caseReference"), e);
+                log.error("Error migrating case outcome for case {}", data.get("reference"), e);
             }
         }
         return data;
