@@ -17,15 +17,10 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
 public class HearingGetResponse {
 
     @NonNull
-    private RequestDetails requestDetails;
-
-    @NonNull
     private HearingDetails hearingDetails;
 
     @NonNull
     private CaseDetails caseDetails;
 
-    @NonNull
-    private HearingResponse hearingResponse;
 
 }
