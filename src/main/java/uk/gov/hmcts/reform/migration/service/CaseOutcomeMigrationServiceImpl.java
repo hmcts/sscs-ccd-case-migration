@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -46,8 +46,11 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
         if (nonNull(data)) {
 
             try {
-                SscsCaseData caseData = new ObjectMapper().registerModule(new JavaTimeModule())
-                    .convertValue(data, SscsCaseData.class);
+
+                SscsCaseData caseData = JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
+                    .build().convertValue(data, SscsCaseData.class);
+
                 String caseId = caseData.getCaseReference();
 
                 if (caseData.getCaseOutcome().getCaseOutcome() == null) {
