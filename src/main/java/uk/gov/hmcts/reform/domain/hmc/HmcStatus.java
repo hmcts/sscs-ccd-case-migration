@@ -28,7 +28,7 @@ public enum HmcStatus {
               "An error has occurred when trying to process the hearing with id %s"),
     CANCELLATION_REQUESTED("Cancellation requested", null, null, "", ""),
     CANCELLATION_SUBMITTED("Cancellation submitted", null, null, "", ""),
-    CANCELLED("Cancelled", HearingsEventMappers::cancelledHandler, HearingStatus.CANCELLED,
+    CANCELLED("Cancelled", null, HearingStatus.CANCELLED,
               "Hearing Cancelled.",
               "The hearing with id %s has been successfully cancelled"),
     AWAITING_ACTUALS("Awaiting Actuals", null, HearingStatus.AWAITING_ACTUALS, "", ""),

@@ -23,11 +23,6 @@ public class HearingResponse {
 
     private Long responseVersion;
 
-    @JsonProperty("laCaseStatus")
-    private ListAssistCaseStatus listAssistCaseStatus;
-
-    private ListingStatus listingStatus;
-
     private String hearingCancellationReason;
 
     @JsonProperty("hearingDaySchedule")

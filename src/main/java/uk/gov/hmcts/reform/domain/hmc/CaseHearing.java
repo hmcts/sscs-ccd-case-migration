@@ -23,11 +23,9 @@ public class CaseHearing {
     @JsonProperty("hearingID")
     private Long hearingId;
     private Boolean hearingIsLinkedFlag;
-    private ListingStatus hearingListingStatus;
     private LocalDateTime hearingRequestDateTime;
     private String hearingType;
     private HmcStatus hmcStatus;
     private LocalDateTime lastResponseReceivedDateTime;
-    private ListAssistCaseStatus listAssistCaseStatus;
     private Long requestVersion;
 }
