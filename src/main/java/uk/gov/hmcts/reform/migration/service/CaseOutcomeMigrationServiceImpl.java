@@ -27,7 +27,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @ConditionalOnProperty(value = "migration.hearingOutcomesMigration.enabled", havingValue = "true")
 public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Map<String, Object>> {
-    static final String EVENT_ID = "hearingOutcomeMigration";
+    static final String EVENT_ID = "caseManagementLocationMigration";
     static final String EVENT_SUMMARY = "Migrate Case Outcome fields to Hearing Outcome";
     static final String EVENT_DESCRIPTION = "Migrate Case Outcome fields (caseOutcome, didPoAttend) "
         + "to Hearing Outcome with values from hmcHearings and Hearings";
@@ -42,47 +42,46 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
         return Objects::nonNull;
     }
 
-    public Map<String, Object> migrate(Map<String, Object> data) {
+    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
         if (nonNull(data)) {
 
-            try {
+            SscsCaseData caseData = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .build().convertValue(data, SscsCaseData.class);
 
-                SscsCaseData caseData = JsonMapper.builder()
-                    .addModule(new JavaTimeModule())
-                    .build().convertValue(data, SscsCaseData.class);
+            String caseId = caseDetails.getId().toString();
 
-                String caseId = caseData.getCaseReference();
+            if (caseData.getCaseOutcome().getCaseOutcome() == null) {
+                log.info("case outcome is empty for case id {}, continuing to next case", caseId);
+                return data;
+            } else {
+                HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId,HmcStatus.COMPLETED);
+                List<CaseHearing> hmcHearings = response.getCaseHearings();
 
-                if (caseData.getCaseOutcome().getCaseOutcome() == null) {
-                    log.info("case outcome is empty for case {}, continuing to next case", caseId);
+                if (hmcHearings.isEmpty()) {
+                    log.info("No completed hearings found for case id {}", caseId);
                     return data;
-                } else {
-                    HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId,HmcStatus.COMPLETED);
-                    List<CaseHearing> hmcHearings = response.getCaseHearings();
-
-                    if (hmcHearings.isEmpty()) {
-                        log.info("No completed hearings found for case id {}", caseId);
-                        return data;
-                    }
-                    if (hmcHearings.size() > 1) {
-                        log.info("More than one completed hearing found for case id {}", caseId);
-                    } else {
-                        String hearingID = hmcHearings.get(0).getHearingId().toString();
-                        log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
-
-                        HearingOutcome hearingOutcome = buildHearingOutcome(caseData, hearingID);
-                        data.put("hearingOutcomes", hearingOutcome);
-                        //check whether you can add another hearing outcome onto migrated case
-                        log.info("case outcome found with value {} and set to null for case {}",
-                                 data.get("caseOutcome"), caseId);
-                        data.put("caseOutcome", null);
-                        log.info("did Po Attend found with value {} and set to null for case {}",
-                                 data.get("didPoAttend"), caseId);
-                        data.put("didPoAttend", null);
-                    }
                 }
-            } catch (Exception e) {
-                log.error("Error migrating case outcome for case {}", data.get("reference"), e);
+                if (hmcHearings.size() > 1) {
+                    log.info("More than one completed hearing found for case id {}", caseId);
+                } else {
+                    String hearingID = hmcHearings.get(0).getHearingId().toString();
+                    log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
+
+                    Map<String, Object> hearingOutcomeMap = buildHearingOutcomeMap(caseData, hearingID);
+
+                    //Map<String, Object> testing = Map.of("hearingOutcomes", hearingOutcome);
+
+                    data.put("hearingOutcomes", hearingOutcomeMap);
+
+                    //check whether you can add another hearing outcome onto migrated case
+                    log.info("case outcome found with value {} and set to null for case id {}",
+                             data.get("caseOutcome"), caseId);
+                    data.put("caseOutcome", null);
+                    log.info("did Po Attend found with value {} and set to null for case id {}",
+                             data.get("didPoAttend"), caseId);
+                    data.put("didPoAttend", null);
+                }
             }
         }
         return data;
@@ -94,7 +93,7 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
             .findFirst().orElse(Hearing.builder().build()).getValue();
     }
 
-    private static HearingOutcome buildHearingOutcome(SscsCaseData caseData, String hearingID) {
+    private static Map<String, Object> buildHearingOutcomeMap(SscsCaseData caseData, String hearingID) {
         HearingDetails selectedHearingDetails = getHearingDetails(caseData, hearingID);
 
         HearingOutcomeDetails hearingOutcomeDetails = HearingOutcomeDetails.builder()
@@ -110,7 +109,7 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
 
         HearingOutcome hearingOutcome = HearingOutcome.builder().value(hearingOutcomeDetails).build();
 
-        return hearingOutcome;
+        return Map.of("hearingOutcomes", hearingOutcome);
     }
 
     public String getEventId() {

@@ -44,20 +44,23 @@ public class CaseOutcomeMigrationServiceImplTest {
     @Mock
     private HmcHearingsApiService hmcHearingsApiService;
 
+
+
     private final Venue venue = Venue.builder().name("venue 1 name").build();
     private final String epims = "123456";
     private final String hearingOutcomeId = "2208";
     private final LocalDateTime start = LocalDateTime.of(2024,6,30,10,00);
     private final LocalDateTime end = LocalDateTime.of(2024,6,30,13,00);
 
+    private final  CaseDetails caseDetails = CaseDetails.builder()
+        .id(1234L)
+        .build();
+
     CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
         new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L)
-            .build();
         assertThat(caseOutcomeMigrationService.accepts().test(caseDetails)).isTrue();
     }
 
@@ -68,7 +71,7 @@ public class CaseOutcomeMigrationServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() {
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(null);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(null, null);
         assertThat(result).isNull();
     }
 
@@ -107,7 +110,7 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
             new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(data);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(data, caseDetails);
         assertThat(result).isNotNull();
 
         HearingOutcome hearingOutcome = HearingOutcome.builder()
@@ -123,7 +126,7 @@ public class CaseOutcomeMigrationServiceImplTest {
                        .build())
             .build();
 
-        assertThat(result.get("hearingOutcomes")).isEqualTo(hearingOutcome);
+        assertThat(result.get("hearingOutcomes")).isEqualTo(Map.of("hearingOutcomes", hearingOutcome));
         assertThat(result.get("caseOutcome")).isNull();
         assertThat(result.get("didPoAttend")).isNull();
     }
@@ -137,7 +140,7 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
             new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(data);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(data, caseDetails);
         assertThat(result).isNotNull();
         assertThat(result.get("hearingOutcomes")).isNull();
         assertThat(result.get("caseOutcome")).isNull();
@@ -163,7 +166,7 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
             new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(data);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(data, caseDetails);
         assertThat(result).isNotNull();
         assertThat(result.get("hearingOutcomes")).isNull();
         assertThat(result.get("caseOutcome")).isEqualTo(hearingOutcomeId);
@@ -185,7 +188,7 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
             new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(data);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(data, caseDetails);
         assertThat(result).isNotNull();
         assertThat(result.get("hearingOutcomes")).isNull();
         assertThat(result.get("caseOutcome")).isEqualTo(hearingOutcomeId);

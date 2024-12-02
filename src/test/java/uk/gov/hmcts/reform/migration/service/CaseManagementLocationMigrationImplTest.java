@@ -45,12 +45,12 @@ public class CaseManagementLocationMigrationImplTest {
         new CaseManagementLocationMigrationImpl(refDataService, venueService, regionalProcessingCenterService,
                                                 airLookupService);
 
+    private final  CaseDetails caseDetails = CaseDetails.builder()
+        .id(1234L)
+        .build();
 
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L)
-            .build();
         assertTrue(caseManagementLocationService.accepts().test(caseDetails));
     }
 
@@ -73,7 +73,7 @@ public class CaseManagementLocationMigrationImplTest {
             .thenReturn(CourtVenue.builder().regionId("id").build());
         CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
             refDataService, venueService, regionalProcessingCenterService, airLookupService);
-        Map<String, Object> result = caseManagementLocationService.migrate(data);
+        Map<String, Object> result = caseManagementLocationService.migrate(data, caseDetails);
         assertNotNull(result);
         assertEquals(data, result);
     }
@@ -94,7 +94,7 @@ public class CaseManagementLocationMigrationImplTest {
         CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
             refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
-        Map<String, Object> result = caseManagementLocationService.migrate(data);
+        Map<String, Object> result = caseManagementLocationService.migrate(data, caseDetails);
         assertNotNull(result);
         assertNotNull(result.get("caseManagementLocation"));
     }
@@ -110,7 +110,7 @@ public class CaseManagementLocationMigrationImplTest {
         CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
             refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
-        assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(data));
+        assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(data, caseDetails));
     }
 
     @Test
@@ -130,14 +130,14 @@ public class CaseManagementLocationMigrationImplTest {
         CaseManagementLocationMigrationImpl caseManagementLocationService =
             new CaseManagementLocationMigrationImpl(refDataService, venueService, regionalProcessingCenterService,
                                                     airLookupService);
-        Map<String, Object> result = caseManagementLocationService.migrate(data);
+        Map<String, Object> result = caseManagementLocationService.migrate(data, caseDetails);
         assertNotNull(result);
         assertEquals(data, result);
     }
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = caseManagementLocationService.migrate(null);
+        Map<String, Object> result = caseManagementLocationService.migrate(null, null);
         assertNull(result);
     }
 

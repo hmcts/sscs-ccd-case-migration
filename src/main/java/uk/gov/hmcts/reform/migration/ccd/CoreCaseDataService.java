@@ -59,7 +59,7 @@ public class CoreCaseDataService {
                     .summary(dataMigrationService.getEventSummary())
                     .description(dataMigrationService.getEventDescription())
                     .build()
-            ).data(dataMigrationService.migrate(updatedCaseDetails.getData()))
+            ).data(dataMigrationService.migrate(updatedCaseDetails.getData(), updatedCaseDetails))
             .build();
 
         return coreCaseDataApi.submitEventForCaseWorker(

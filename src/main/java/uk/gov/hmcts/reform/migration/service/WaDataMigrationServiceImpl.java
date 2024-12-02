@@ -25,7 +25,7 @@ public class WaDataMigrationServiceImpl implements DataMigrationService<Map<Stri
     }
 
     @Override
-    public Map<String, Object> migrate(Map<String, Object> data) {
+    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
         if (nonNull(data)) {
             data.put("preWorkAllocation", "Yes");
         }
