@@ -28,6 +28,7 @@ import static java.util.Objects.nonNull;
 @ConditionalOnProperty(value = "migration.hearingOutcomesMigration.enabled", havingValue = "true")
 public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Map<String, Object>> {
     static final String EVENT_ID = "caseManagementLocationMigration";
+    // ASK UMA TO CHECK WHAT EVENT SUMMARY AND EVENT DESCRIPTION SHOULD BE
     static final String EVENT_SUMMARY = "Migrate Case Outcome fields to Hearing Outcome";
     static final String EVENT_DESCRIPTION = "Migrate Case Outcome fields (caseOutcome, didPoAttend) "
         + "to Hearing Outcome with values from hmcHearings and Hearings";
