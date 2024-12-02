@@ -70,14 +70,12 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
 
                     Map<String, Object> hearingOutcomeMap = buildHearingOutcomeMap(caseData, hearingID);
 
-                    //Map<String, Object> testing = Map.of("hearingOutcomes", hearingOutcome);
-
                     data.put("hearingOutcomes", hearingOutcomeMap);
 
-                    //check whether you can add another hearing outcome onto migrated case
                     log.info("case outcome found with value {} and set to null for case id {}",
                              data.get("caseOutcome"), caseId);
                     data.put("caseOutcome", null);
+
                     log.info("did Po Attend found with value {} and set to null for case id {}",
                              data.get("didPoAttend"), caseId);
                     data.put("didPoAttend", null);
