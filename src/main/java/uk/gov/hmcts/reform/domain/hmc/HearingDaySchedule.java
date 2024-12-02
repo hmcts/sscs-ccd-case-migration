@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -20,16 +19,8 @@ public class HearingDaySchedule {
 
     private LocalDateTime hearingEndDateTime;
 
-    private String listAssistSessionID;
-
     @JsonProperty("hearingVenueId")
     private String hearingVenueEpimsId;
 
-    private String hearingRoomId;
 
-    private String hearingJudgeId;
-
-    private List<String> panelMemberIds;
-
-    private List<Attendees> attendees;
 }

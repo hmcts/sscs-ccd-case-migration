@@ -19,15 +19,9 @@ import java.util.List;
 public class CaseHearing {
     private List<HearingChannel> hearingChannels;
     private List<HearingDaySchedule> hearingDaySchedule;
-    private String hearingGroupRequestId;
     @JsonProperty("hearingID")
     private Long hearingId;
-    private Boolean hearingIsLinkedFlag;
-    private ListingStatus hearingListingStatus;
     private LocalDateTime hearingRequestDateTime;
     private String hearingType;
     private HmcStatus hmcStatus;
-    private LocalDateTime lastResponseReceivedDateTime;
-    private ListAssistCaseStatus listAssistCaseStatus;
-    private Long requestVersion;
 }

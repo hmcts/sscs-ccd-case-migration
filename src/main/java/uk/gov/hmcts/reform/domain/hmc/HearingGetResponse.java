@@ -9,8 +9,6 @@ import lombok.NonNull;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,18 +17,10 @@ import java.util.List;
 public class HearingGetResponse {
 
     @NonNull
-    private RequestDetails requestDetails;
-
-    @NonNull
     private HearingDetails hearingDetails;
 
     @NonNull
     private CaseDetails caseDetails;
 
-    @NonNull
-    private List<PartyDetails> partyDetails;
-
-    @NonNull
-    private HearingResponse hearingResponse;
 
 }
