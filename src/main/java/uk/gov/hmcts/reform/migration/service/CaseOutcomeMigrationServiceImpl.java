@@ -54,18 +54,20 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
             String caseId = caseDetails.getId().toString();
 
             if (caseData.getCaseOutcome().getCaseOutcome() == null) {
-                log.info("case outcome is empty for case id {}, continuing to next case", caseId);
+                log.info("Skipping case for case outcome migration. Case id: {} Reason: Case outcome is empty", caseId);
                 return data;
             } else {
                 HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId,HmcStatus.COMPLETED);
                 List<CaseHearing> hmcHearings = response.getCaseHearings();
 
                 if (hmcHearings.isEmpty()) {
-                    log.info("No completed hearings found for case id {}", caseId);
+                    log.info("Skipping case for case outcome migration. Case id: {} " +
+                                 "Reason: No completed hearings found", caseId);
                     return data;
                 }
                 if (hmcHearings.size() > 1) {
-                    log.info("More than one completed hearing found for case id {}", caseId);
+                    log.info("Skipping case for case outcome migration. Case id: {} " +
+                                 "Reason: More than one completed hearing found", caseId);
                 } else {
                     String hearingID = hmcHearings.get(0).getHearingId().toString();
                     log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
