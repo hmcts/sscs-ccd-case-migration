@@ -55,13 +55,13 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
             if (caseData.getHearingOutcomes() != null) {
                 log.info("Skipping case for case outcome migration. Case id: {} Reason: Hearing outcome already exists",
                          caseId);
-                throw new Exception("Hearing outcome already exists");
+                throw new Exception("Skipping case for case outcome migration. Hearing outcome already exists");
             }
 
             if (caseData.getCaseOutcome().getCaseOutcome() == null) {
 
                 log.info("Skipping case for case outcome migration. Case id: {} Reason: Case outcome is empty", caseId);
-                throw new Exception("Case outcome is empty");
+                throw new Exception("Skipping case for case outcome migration. Case outcome is empty");
 
             } else {
                 HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId,HmcStatus.COMPLETED);
@@ -70,12 +70,13 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
                 if (hmcHearings.isEmpty()) {
                     log.info("Skipping case for case outcome migration. Case id: {} "
                                  + "Reason: No completed hearings found", caseId);
-                    throw new Exception("No completed hearings found");
+                    throw new Exception("Skipping case for case outcome migration. No completed hearings found");
                 }
                 if (hmcHearings.size() > 1) {
                     log.info("Skipping case for case outcome migration. Case id: {} "
                                  + "Reason: More than one completed hearing found", caseId);
-                    throw new Exception("More than one completed hearing found");
+                    throw new Exception("Skipping case for case outcome migration. "
+                                            + "More than one completed hearing found");
                 } else {
                     String hearingID = hmcHearings.get(0).getHearingId().toString();
                     log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
