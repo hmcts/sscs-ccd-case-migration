@@ -44,7 +44,7 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
         return Objects::nonNull;
     }
 
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
+    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
         if (nonNull(data)) {
 
             SscsCaseData caseData = JsonMapper.builder()
@@ -53,9 +53,17 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
 
             String caseId = caseDetails.getId().toString();
 
+            if (caseData.getHearingOutcomes() != null) {
+                log.info("Skipping case for case outcome migration. Case id: {} Reason: Hearing outcome already exists",
+                         caseId);
+                throw new Exception("Hearing outcome already exists");
+            }
+
             if (caseData.getCaseOutcome().getCaseOutcome() == null) {
+
                 log.info("Skipping case for case outcome migration. Case id: {} Reason: Case outcome is empty", caseId);
-                return data;
+                throw new Exception("Case outcome is empty");
+
             } else {
                 HearingsGetResponse response = hmcHearingsApiService.getHearingsRequest(caseId,HmcStatus.COMPLETED);
                 List<CaseHearing> hmcHearings = response.getCaseHearings();
@@ -63,11 +71,12 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
                 if (hmcHearings.isEmpty()) {
                     log.info("Skipping case for case outcome migration. Case id: {} "
                                  + "Reason: No completed hearings found", caseId);
-                    return data;
+                    throw new Exception("No completed hearings found");
                 }
                 if (hmcHearings.size() > 1) {
                     log.info("Skipping case for case outcome migration. Case id: {} "
                                  + "Reason: More than one completed hearing found", caseId);
+                    throw new Exception("More than one completed hearing found");
                 } else {
                     String hearingID = hmcHearings.get(0).getHearingId().toString();
                     log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
@@ -83,6 +92,8 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
                     log.info("did Po Attend found with value {} and set to null for case id {}",
                              data.get("didPoAttend"), caseId);
                     data.put("didPoAttend", null);
+
+                    log.info("Completed migration for case outcome migration. Case id: {}", caseId);
                 }
             }
         }

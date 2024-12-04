@@ -59,7 +59,7 @@ public class DwpCaseMigrationProcessorTest {
     }
 
     @Test
-    public void shouldMigrateCasesOfACaseType() {
+    public void shouldMigrateCasesOfACaseType() throws Exception {
         when(dataMigrationService.accepts()).thenReturn(candidate -> true);
         when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         CaseDetails caseDetails = mock(CaseDetails.class);
@@ -80,7 +80,7 @@ public class DwpCaseMigrationProcessorTest {
     }
 
     @Test
-    public void shouldMigrateOnlyLimitedNumberOfCases() {
+    public void shouldMigrateOnlyLimitedNumberOfCases() throws Exception {
         when(dataMigrationService.accepts()).thenReturn(candidate -> true);
         when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         CaseDetails caseDetails = CaseDetails.builder().id(1677777777L).jurisdiction("SSCS").build();

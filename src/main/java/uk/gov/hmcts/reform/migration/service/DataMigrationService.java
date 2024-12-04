@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 public interface DataMigrationService<T> {
     Predicate<CaseDetails> accepts();
 
-    T migrate(Map<String, Object> data, CaseDetails caseDetails);
+    T migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception;
 
     String getEventId();
 

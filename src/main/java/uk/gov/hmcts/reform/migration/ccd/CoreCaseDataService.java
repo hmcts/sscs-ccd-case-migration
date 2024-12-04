@@ -37,7 +37,7 @@ public class CoreCaseDataService {
     public CaseDetails update(String authorisation,
                               String caseType,
                               Long caseId,
-                              String jurisdiction) {
+                              String jurisdiction) throws Exception {
         UserInfo userDetails = idamClient.getUserInfo(AuthUtil.getBearerToken(authorisation));
 
         StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
