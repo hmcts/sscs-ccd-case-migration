@@ -61,7 +61,7 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
     }
 
     @Override
-    public Map<String, Object> migrate(Map<String, Object> data) {
+    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
         if (nonNull(data)) {
             if (!data.containsKey("caseManagementLocation")) {
                 Map<String, Object> managementLocation = getManagementLocation(data);

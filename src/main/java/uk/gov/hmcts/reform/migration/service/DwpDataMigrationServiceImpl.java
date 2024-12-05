@@ -26,7 +26,7 @@ public class DwpDataMigrationServiceImpl implements DataMigrationService<Map<Str
     }
 
     @Override
-    public Map<String, Object> migrate(Map<String, Object> data) {
+    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
         if (nonNull(data)) {
             if (!data.containsKey("poAttendanceConfirmed")) {
                 data.put("poAttendanceConfirmed", "No");
