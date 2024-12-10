@@ -24,7 +24,7 @@ public class WaFieldsRemovalServiceImpl  implements DataMigrationService<Map<Str
         return Objects::nonNull;
     }
 
-    public Map<String, Object> migrate(Map<String, Object> data) {
+    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
         if (nonNull(data)) {
             if (data.containsKey("scannedDocumentTypes")) {
                 log.info("Scanned document types found {}", data.get("scannedDocumentTypes"));

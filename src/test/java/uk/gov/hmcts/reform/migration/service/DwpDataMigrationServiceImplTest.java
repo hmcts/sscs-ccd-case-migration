@@ -16,11 +16,12 @@ class DwpDataMigrationServiceImplTest {
 
     private final DwpDataMigrationServiceImpl dwpDataMigrationService = new DwpDataMigrationServiceImpl();
 
+    private final CaseDetails caseDetails = CaseDetails.builder()
+        .id(1234L)
+        .build();
+
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L)
-            .build();
         assertTrue(dwpDataMigrationService.accepts().test(caseDetails));
     }
 
@@ -32,7 +33,7 @@ class DwpDataMigrationServiceImplTest {
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() {
         Map<String, Object> data = new HashMap<>();
-        Map<String, Object> result = dwpDataMigrationService.migrate(data);
+        Map<String, Object> result = dwpDataMigrationService.migrate(data, caseDetails);
         assertNotNull(result);
         assertEquals(data, result);
     }
@@ -43,7 +44,7 @@ class DwpDataMigrationServiceImplTest {
         data.put("poAttendanceConfirmed", "Yes");
         data.put("dwpIsOfficerAttending", "Yes");
         data.put("tribunalDirectPoToAttend", "Yes");
-        Map<String, Object> result = dwpDataMigrationService.migrate(data);
+        Map<String, Object> result = dwpDataMigrationService.migrate(data, caseDetails);
         assertNotNull(result);
         assertEquals("Yes", data.get("poAttendanceConfirmed"));
         assertEquals("Yes", data.get("dwpIsOfficerAttending"));
@@ -52,7 +53,7 @@ class DwpDataMigrationServiceImplTest {
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = dwpDataMigrationService.migrate(null);
+        Map<String, Object> result = dwpDataMigrationService.migrate(null, null);
         assertNull(result);
     }
 

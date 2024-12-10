@@ -49,7 +49,7 @@ class CoreCaseDataServiceTest {
     private DataMigrationService<Map<String, Object>> dataMigrationService;
 
     @Test
-    void shouldUpdateTheCase() {
+    void shouldUpdateTheCase() throws Exception {
         // given
         UserInfo userInfo = UserInfo.builder()
             .uid("30")
@@ -90,7 +90,7 @@ class CoreCaseDataServiceTest {
             .build();
     }
 
-    private void setupMocks(UserInfo userInfo, Map<String, Object> data) {
+    private void setupMocks(UserInfo userInfo, Map<String, Object> data) throws Exception {
         when(idamClient.getUserInfo(AUTH_TOKEN)).thenReturn(userInfo);
 
         when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
@@ -106,7 +106,7 @@ class CoreCaseDataServiceTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(dataMigrationService.migrate(data))
+        when(dataMigrationService.migrate(data, caseDetails))
             .thenReturn(data);
 
         when(coreCaseDataApi.startEventForCaseWorker(AUTH_TOKEN, AUTH_TOKEN, "30",

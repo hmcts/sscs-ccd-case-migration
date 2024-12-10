@@ -66,7 +66,7 @@ public class CaseMigrationProcessor {
         );
 
         log.info("Migrated cases: {}", getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
-        log.info("Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
+        log.info("Failed/Skipped Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
         log.info("Data migration of cases completed");
     }
 

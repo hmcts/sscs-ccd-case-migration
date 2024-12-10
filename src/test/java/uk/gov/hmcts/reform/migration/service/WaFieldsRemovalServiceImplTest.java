@@ -26,11 +26,12 @@ public class WaFieldsRemovalServiceImplTest {
 
     WaFieldsRemovalServiceImpl waFieldsRemovalService = new WaFieldsRemovalServiceImpl();
 
+    private final CaseDetails caseDetails = CaseDetails.builder()
+        .id(1234L)
+        .build();
+
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L)
-            .build();
         assertTrue(waFieldsRemovalService.accepts().test(caseDetails));
     }
 
@@ -41,7 +42,7 @@ public class WaFieldsRemovalServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() {
-        Map<String, Object> result = waFieldsRemovalService.migrate(null);
+        Map<String, Object> result = waFieldsRemovalService.migrate(null, null);
         assertNull(result);
     }
 
@@ -57,7 +58,7 @@ public class WaFieldsRemovalServiceImplTest {
     void shouldReturnPassedDataWhenMigrateCalled(String key, List<String> value) {
         Map<String, Object> data = new HashMap<>();
         data.put(key, value);
-        Map<String, Object> result = waFieldsRemovalService.migrate(data);
+        Map<String, Object> result = waFieldsRemovalService.migrate(data, caseDetails);
         assertNotNull(result);
         assertNull(result.get(key));
     }
