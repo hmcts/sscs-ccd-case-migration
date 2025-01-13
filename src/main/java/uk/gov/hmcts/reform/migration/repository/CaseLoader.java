@@ -29,7 +29,7 @@ public class CaseLoader extends CcdRepository {
 
     private String encodedDataString;
 
-    public CaseLoader(@Value("${migration.hearingOutcomesGapsMigration.encoded-data-string}")
+    public CaseLoader(@Value("${migration.caseOutcomeGapsMigration.encoded-data-string}")
                       String encodedDataString) {
         this.encodedDataString = encodedDataString;
     }

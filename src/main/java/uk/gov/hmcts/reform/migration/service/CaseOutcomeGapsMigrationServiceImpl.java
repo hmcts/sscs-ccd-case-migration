@@ -16,7 +16,7 @@ import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.hearingOutcomesGapsMigration.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "migration.caseOutcomeGapsMigration.enabled", havingValue = "true")
 public class CaseOutcomeGapsMigrationServiceImpl  implements DataMigrationService<Map<String, Object>> {
     static final String EVENT_ID = "removeCaseOutcome";
     static final String EVENT_SUMMARY = "Remove old case outcome";
