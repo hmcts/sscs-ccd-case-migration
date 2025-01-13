@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
 import java.util.Map;
@@ -36,17 +35,11 @@ public class CaseOutcomeGapsMigrationServiceImpl  implements DataMigrationServic
 
             String caseId = caseDetails.getId().toString();
 
-//            caseData.getAppeal().getHearingOptions().getHearingRoute();
-//            caseData.getSchedulingAndListingFields().getHearingRoute();
-//            caseData.getRegionalProcessingCenter().getHearingRoute();
-//            caseDetails.getData().get("hearingRoute").toString();
+            String hearingRoute = caseDetails.getData().get("hearingRoute").toString();
 
-            HearingRoute hearingRoute = caseData.getRegionalProcessingCenter().getHearingRoute();;
-
-            log.info("hearingRoute {}", hearingRoute);
-
-            if (hearingRoute != HearingRoute.GAPS) {
-                log.info("Skipping case for case outcome migration. Case id: {} Reason: Hearing Route is not gaps it is {}",
+            if (!hearingRoute.equalsIgnoreCase("gaps")) {
+                log.info("Skipping case for case outcome migration. Case id: {} "
+                             + "Reason: Hearing Route is not gaps it is {}",
                          caseId, hearingRoute);
                 throw new Exception("Skipping case for case outcome migration. Hearing Route is not gaps");
             }

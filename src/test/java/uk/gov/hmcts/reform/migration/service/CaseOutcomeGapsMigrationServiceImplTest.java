@@ -9,8 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
-import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.RegionalProcessingCenter;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 
@@ -18,7 +16,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_SUMMARY;
@@ -31,6 +28,7 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
     private final  CaseDetails caseDetails = CaseDetails.builder()
         .id(1234L)
+        .data(Map.of("hearingRoute", "gaps"))
         .build();
 
     CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
@@ -65,7 +63,6 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
         CaseOutcome caseOutcome = CaseOutcome.builder().caseOutcome("1234").didPoAttend(YesNo.YES).build();
 
         SscsCaseData caseData = SscsCaseData.builder()
-            .regionalProcessingCenter(RegionalProcessingCenter.builder().hearingRoute(HearingRoute.GAPS).build())
             .caseOutcome(caseOutcome)
             .build();
 
@@ -83,6 +80,11 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
     @Test
     void shouldThrowErrorWhenMigrateCalledWithNonGapsCase() throws Exception {
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .data(Map.of("hearingRoute", "listAssist"))
+            .build();
+
         SscsCaseData caseData = buildCaseData();
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
@@ -96,7 +98,6 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
     @Test
     void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() throws Exception {
         SscsCaseData caseData = SscsCaseData.builder()
-            .regionalProcessingCenter(RegionalProcessingCenter.builder().hearingRoute(HearingRoute.GAPS).build())
             .build();
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
