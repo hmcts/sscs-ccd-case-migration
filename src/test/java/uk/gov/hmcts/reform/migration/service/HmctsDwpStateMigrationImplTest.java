@@ -10,27 +10,28 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.State;
+
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static uk.gov.hmcts.reform.migration.service.hmctsDwpStateMigrationImpl.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.hmctsDwpStateMigrationImpl.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.hmctsDwpStateMigrationImpl.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class hmctsDwpStateMigrationImplTest {
+public class HmctsDwpStateMigrationImplTest {
 
     private final  CaseDetails caseDetails = CaseDetails.builder()
         .state(State.DORMANT_APPEAL_STATE.toString())
         .id(1234L)
         .build();
 
-    hmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl =
-        new hmctsDwpStateMigrationImpl();
+    HmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl =
+        new HmctsDwpStateMigrationImpl();
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
