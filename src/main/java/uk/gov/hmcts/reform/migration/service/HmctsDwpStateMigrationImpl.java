@@ -18,8 +18,10 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @ConditionalOnProperty(value = "migration.hmctsDwpStateMigration.enabled", havingValue = "true")
 public class HmctsDwpStateMigrationImpl implements DataMigrationService<Map<String, Object>> {
+
     @Autowired
     private JsonMapper jsonMapper;
+
     static final String EVENT_ID = "clearExpiredFilters";
     static final String EVENT_SUMMARY = "Cleared expired filters";
     static final String EVENT_DESCRIPTION = "Cleared expired filters";
