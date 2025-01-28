@@ -87,7 +87,7 @@ public class HmctsDwpStateMigrationImplTest {
 
     @Test
     void shouldThrowErrorWhenMigrateCalledWithCaseStatusNotDormantOrVoid() throws Exception {
-        CaseDetails caseDetails = CaseDetails.builder()
+        CaseDetails validAppealCaseDetails = CaseDetails.builder()
             .state(State.VALID_APPEAL.toString())
             .id(1234L)
             .build();
@@ -99,7 +99,7 @@ public class HmctsDwpStateMigrationImplTest {
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
-        assertThatThrownBy(() -> hmctsDwpStateMigrationImpl.migrate(data, caseDetails))
+        assertThatThrownBy(() -> hmctsDwpStateMigrationImpl.migrate(data, validAppealCaseDetails))
             .hasMessageContaining("Skipping case for hmctsDwpState migration. State is not void or dormant");
     }
 }
