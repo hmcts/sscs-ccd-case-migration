@@ -84,4 +84,22 @@ public class HmctsDwpStateMigrationImplTest {
                                       + " 'failedSendingFurtherEvidence'");
 
     }
+
+    @Test
+    void shouldThrowErrorWhenMigrateCalledWithCaseStatusNotDormantOrVoid() throws Exception {
+        CaseDetails validAppealCaseDetails = CaseDetails.builder()
+            .state(State.VALID_APPEAL.toString())
+            .id(1234L)
+            .build();
+
+        SscsCaseData caseData = SscsCaseData.builder()
+            .hmctsDwpState("failedSendingFurtherEvidence")
+            .build();
+
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+
+        assertThatThrownBy(() -> hmctsDwpStateMigrationImpl.migrate(data, validAppealCaseDetails))
+            .hasMessageContaining("Skipping case for hmctsDwpState migration. State is not void or dormant");
+    }
 }
