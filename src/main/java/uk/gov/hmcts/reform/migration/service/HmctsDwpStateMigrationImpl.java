@@ -43,6 +43,15 @@ public class HmctsDwpStateMigrationImpl implements DataMigrationService<Map<Stri
                          caseId, caseData.getHmctsDwpState());
                 throw new Exception("Skipping case for hmctsDwpState migration. Reason: hmctsDwpState is not"
                                         + " 'failedSendingFurtherEvidence'");
+            }
+
+            if (!caseDetails.getState().equalsIgnoreCase("voidState")
+                && !caseDetails.getState().equalsIgnoreCase("dormantAppealState")) {
+
+                log.info("Skipping case for hmctsDwpState migration. Case id: {} Reason: state is not void or dormant,"
+                             + "it is {}", caseId, caseDetails.getState());
+                throw new Exception("Skipping case for hmctsDwpState migration. State is not void or dormant");
+
             } else {
                 log.info("case {} has hmctsDwpState as failedSendingFurtherEvidence. "
                              + "Removing it and setting it to null", caseId);
