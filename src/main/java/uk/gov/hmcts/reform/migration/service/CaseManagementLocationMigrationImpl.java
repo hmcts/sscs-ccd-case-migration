@@ -82,7 +82,7 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
 
         RegionalProcessingCenter rpc = caseData.getRegionalProcessingCenter();
         if (isNull(rpc) || (isNull(rpc.getEpimsId()) && !isNull(firstHalfOfPostcode))) {
-            rpc = regionalProcessingCenterService.getByPostcode(firstHalfOfPostcode);
+            rpc = regionalProcessingCenterService.getByPostcode(firstHalfOfPostcode, caseData.isIbcCase());
         } else if (isNull(postCode) && !isNull(rpc.getPostcode())) {
             postCode = rpc.getPostcode();
         }
