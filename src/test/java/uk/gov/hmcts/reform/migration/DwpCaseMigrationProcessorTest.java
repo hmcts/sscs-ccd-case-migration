@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.migration;
 
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ public class DwpCaseMigrationProcessorTest {
     private CoreCaseDataService coreCaseDataService;
 
     @Mock
-    private DataMigrationService dataMigrationService;
+    private DataMigrationService<Map<String, Object>> dataMigrationService;
 
     @Mock
     private ForkJoinPool threadPool;
