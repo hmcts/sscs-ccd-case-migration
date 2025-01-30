@@ -192,7 +192,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.0.3'
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.3'
 
-  implementation group: 'com.github.hmcts', name: 'sscs-common', version: 'spring-boot-3-SNAPSHOT'
+  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '6.0.0'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBoot.class.package.implementationVersion
   testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.6.0'
