@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -17,9 +19,10 @@ public class CompletedHearingsOutcomesMigration extends CaseOutcomeMigration
 
     private final HmcHearingsApiService hmcHearingsApiService;
 
-    public CompletedHearingsOutcomesMigration(HmcHearingsApiService hmcHearingsApiService,
+    public CompletedHearingsOutcomesMigration(JsonMapper jsonMapper,
+                                              HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService) {
-        super(hearingOutcomeService);
+        super(hearingOutcomeService, jsonMapper);
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 

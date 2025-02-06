@@ -1,20 +1,20 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
@@ -27,9 +27,11 @@ public abstract class CaseOutcomeMigration implements DataMigrationService<Map<S
     static final String EVENT_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
+    private final JsonMapper jsonMapper;
 
-    public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService) {
+    public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService, JsonMapper jsonMapper) {
         this.hearingOutcomeService = hearingOutcomeService;
+        this.jsonMapper = jsonMapper;
     }
 
 
@@ -40,18 +42,15 @@ public abstract class CaseOutcomeMigration implements DataMigrationService<Map<S
 
     public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
         if (nonNull(data)) {
-            final SscsCaseData caseData = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build().convertValue(data, SscsCaseData.class);
+            final SscsCaseData caseData = jsonMapper.convertValue(data, SscsCaseData.class);
 
             String caseId = caseDetails.getId().toString();
 
-            if (nonNull(caseData.getHearingOutcomes()) ||
-                isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome())) {
-                log.info(SKIPPING_CASE_MSG + "|Case id: {}|Case outcome: {}|Hearing outcome: {}|" +
-                             "Reason: Hearing outcome already exists or Case outcome is empty",
-                         caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes()
-                );
+            if (nonNull(caseData.getHearingOutcomes())
+                || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome())) {
+                log.info(SKIPPING_CASE_MSG + "|Case id: {}|Case outcome: {}|Hearing outcome: {}|"
+                             + "Reason: Hearing outcome already exists or Case outcome is empty",
+                         caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes());
                 throw new Exception(SKIPPING_CASE_MSG + ", Hearing outcome already exists or Case outcome is empty");
             }
 

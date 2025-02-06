@@ -1,22 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.EVENT_SUMMARY;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
-
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +25,20 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.Venue;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 import uk.gov.hmcts.reform.sscs.reference.data.model.HearingChannel;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
 @ExtendWith(MockitoExtension.class)
 public class CompletedHearingsOutcomesMigrationTest {
@@ -48,6 +47,7 @@ public class CompletedHearingsOutcomesMigrationTest {
     private HearingOutcomeService hearingOutcomeService;
     @Mock
     private HmcHearingsApiService hmcHearingsApiService;
+    private JsonMapper jsonMapper = new JsonMapper();
 
 
 
@@ -65,7 +65,8 @@ public class CompletedHearingsOutcomesMigrationTest {
 
     @BeforeEach
     public void setUp() {
-        caseOutcomeMigrationService = new CompletedHearingsOutcomesMigration(hmcHearingsApiService, hearingOutcomeService);
+        caseOutcomeMigrationService =
+            new CompletedHearingsOutcomesMigration(jsonMapper, hmcHearingsApiService, hearingOutcomeService);
     }
 
     @Test
@@ -101,8 +102,7 @@ public class CompletedHearingsOutcomesMigrationTest {
             .pipSscsCaseData(SscsPipCaseData.builder().build())
             .finalDecisionCaseData(SscsFinalDecisionCaseData.builder().build())
             .build();
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         var caseHearing = CaseHearing.builder().hearingId(1L)
             .hearingDaySchedule(List.of(
@@ -144,25 +144,20 @@ public class CompletedHearingsOutcomesMigrationTest {
         caseData.setHearingOutcomes(new ArrayList<>());
         caseData.getHearingOutcomes().add(HearingOutcome.builder().value(
             HearingOutcomeDetails.builder().completedHearingId("1").build()).build());
-
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
             .hasMessageContaining("Hearing outcome already exists");
-
     }
 
     @Test
     void shouldThrowErrorWhenMigrateCalledWithNoCaseOutcomeInData() {
         SscsCaseData caseData = buildCaseData();
 
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
             .hasMessageContaining("Case outcome is empty");
-
     }
 
     @Test
@@ -178,8 +173,7 @@ public class CompletedHearingsOutcomesMigrationTest {
                 CaseHearing.builder().hearingId(2L).build()
             )).build());
 
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
             .hasMessageContaining("Zero or More than one hearing found");
@@ -195,8 +189,7 @@ public class CompletedHearingsOutcomesMigrationTest {
         when(hmcHearingsApiService.getHearingsRequest(any(),any())).thenReturn(
             HearingsGetResponse.builder().caseHearings(List.of()).build());
 
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
             .hasMessageContaining("Skipping case for case outcome migration, Zero or More than one hearing found");
