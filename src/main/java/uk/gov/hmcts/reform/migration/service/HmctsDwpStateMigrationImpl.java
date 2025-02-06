@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,12 @@ public class HmctsDwpStateMigrationImpl implements DataMigrationService<Map<Stri
     static final String EVENT_SUMMARY = "Cleared expired filters";
     static final String EVENT_DESCRIPTION = "Cleared expired filters";
 
+    private final JsonMapper jsonMapper;
+
+    public HmctsDwpStateMigrationImpl(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
+    }
+
     public Predicate<CaseDetails> accepts() {
         return Objects::nonNull;
     }
@@ -30,9 +35,7 @@ public class HmctsDwpStateMigrationImpl implements DataMigrationService<Map<Stri
     public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
         if (nonNull(data)) {
 
-            SscsCaseData caseData = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build().convertValue(data, SscsCaseData.class);
+            SscsCaseData caseData = jsonMapper.convertValue(data, SscsCaseData.class);
 
             String caseId = caseDetails.getId().toString();
 

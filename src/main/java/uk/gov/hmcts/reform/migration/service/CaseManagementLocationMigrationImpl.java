@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -39,16 +38,19 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
     private static final String EVENT_SUMMARY = "Migrate case for Case Management Location";
     private static final String EVENT_DESCRIPTION = "Migrate case for Case Management Location";
 
+    private final JsonMapper jsonMapper;
     private final RefDataService refDataService;
     private final VenueService venueService;
     private final RegionalProcessingCenterService regionalProcessingCenterService;
     private final AirLookupService airLookupService;
     private HashMap<String, String> regiondIdsCache = new HashMap<>();
 
-    public CaseManagementLocationMigrationImpl(RefDataService refDataService,
+    public CaseManagementLocationMigrationImpl(JsonMapper jsonMapper,
+                                               RefDataService refDataService,
                                                VenueService venueService,
                                                RegionalProcessingCenterService regionalProcessingCenterService,
                                                AirLookupService airLookupService) {
+        this.jsonMapper = jsonMapper;
         this.refDataService = refDataService;
         this.venueService = venueService;
         this.regionalProcessingCenterService = regionalProcessingCenterService;
@@ -75,8 +77,7 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
     }
 
     private Map<String, Object> getManagementLocation(Map<String, Object> data) {
-        SscsCaseData caseData = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(data, SscsCaseData.class);
+        SscsCaseData caseData = jsonMapper.convertValue(data, SscsCaseData.class);
         String postCode = resolvePostCode(caseData);
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 
