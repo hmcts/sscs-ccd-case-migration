@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.YES;
@@ -122,7 +123,7 @@ public class CaseManagementLocationMigrationImplTest {
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
-        when(regionalProcessingCenterService.getByPostcode(anyString())).thenReturn(rpc);
+        when(regionalProcessingCenterService.getByPostcode(anyString(), anyBoolean())).thenReturn(rpc);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
