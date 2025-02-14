@@ -1,8 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,18 +19,18 @@ import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.E
 import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
-
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 public class HmctsDwpStateMigrationImplTest {
+
+    private JsonMapper jsonMapper = new JsonMapper();
 
     private final  CaseDetails caseDetails = CaseDetails.builder()
         .state(State.DORMANT_APPEAL_STATE.toString())
         .id(1234L)
         .build();
 
-    HmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl =
-        new HmctsDwpStateMigrationImpl();
+    HmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl = new HmctsDwpStateMigrationImpl(jsonMapper);
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -63,8 +62,7 @@ public class HmctsDwpStateMigrationImplTest {
             .hmctsDwpState("failedSendingFurtherEvidence")
             .build();
 
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         Map<String, Object> result = hmctsDwpStateMigrationImpl.migrate(data, caseDetails);
         assertThat(result).isNotNull();
@@ -73,11 +71,10 @@ public class HmctsDwpStateMigrationImplTest {
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithHmctsDwpStateNotFailedSendingFurtherEvidence() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithHmctsDwpStateNotFailedSendingFurtherEvidence() {
         SscsCaseData caseData = buildCaseData();
 
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         assertThatThrownBy(() -> hmctsDwpStateMigrationImpl.migrate(data, caseDetails))
             .hasMessageContaining("Skipping case for hmctsDwpState migration. Reason: hmctsDwpState is not"
