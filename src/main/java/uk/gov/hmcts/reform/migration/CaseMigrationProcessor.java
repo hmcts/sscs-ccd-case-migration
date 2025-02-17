@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.migration;
 
+import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,32 +10,21 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
-import uk.gov.hmcts.reform.migration.repository.CcdRepository;
-import uk.gov.hmcts.reform.migration.repository.IdamRepository;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
-public class CaseMigrationProcessor {
+public abstract class CaseMigrationProcessor implements DataMigrationService<Map<String, Object>> {
+
     public static final String LOG_STRING = "-----------------------------------------\n";
 
     @Autowired
     private CoreCaseDataService coreCaseDataService;
-
-    @Autowired
-    private DataMigrationService<Map<String, Object>> dataMigrationService;
-
-    @Autowired
-    private CcdRepository repository;
-
-    @Autowired
-    private IdamRepository idamRepository;
 
     @Getter
     private List<Long> migratedCases = new ArrayList<>();
@@ -48,17 +38,18 @@ public class CaseMigrationProcessor {
     public void migrateCases(String caseType) {
         validateCaseType(caseType);
         log.info("Data migration of cases started for case type: {}", caseType);
-        List<CaseDetails> listOfCaseDetails = repository.findCases();
         ForkJoinPool threadPool = new ForkJoinPool(25);
-        String userToken =  idamRepository.generateUserToken();
-        threadPool.submit(() -> listOfCaseDetails.parallelStream()
-                    .limit(caseProcessLimit)
-                    .forEach(caseDetails -> updateCase(userToken, caseType, caseDetails)));
+        threadPool.submit(() -> getMigrationCases()
+            .parallelStream()
+            .limit(caseProcessLimit)
+            .forEach(caseDetails -> updateCase(caseType, caseDetails)));
         shutdownThreadPool(threadPool);
         log.info("""
-                {}Data migration completed\n{}
+                {}Data migration completed
+                {}
                 Total number of processed cases: {}
-                Total number of migrations performed: {}\n {}
+                Total number of migrations performed: {}
+                 {}
                 """,
                 LOG_STRING, LOG_STRING,
                 getMigratedCases().size() + getFailedCases().size(), getMigratedCases().size(),
@@ -68,17 +59,6 @@ public class CaseMigrationProcessor {
         log.info("Migrated cases: {}", getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
         log.info("Failed/Skipped Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
         log.info("Data migration of cases completed");
-    }
-
-    public void shutdownThreadPool(ForkJoinPool threadPool) {
-        threadPool.shutdown();
-        log.info("Waiting for thread pool to terminate");
-        try {
-            threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            log.warn("Timed out waiting for thread pool to terminate");
-            Thread.currentThread().interrupt();
-        }
     }
 
     private void validateCaseType(String caseType) {
@@ -91,17 +71,17 @@ public class CaseMigrationProcessor {
         }
     }
 
-    private void updateCase(String authorisation, String caseType, CaseDetails caseDetails) {
-        if (dataMigrationService.accepts().test(caseDetails)) {
+    private void updateCase(String caseType, CaseDetails caseDetails) {
+        if (accepts().test(caseDetails)) {
             Long id = caseDetails.getId();
             log.info("Updating case {}", id);
             try {
                 log.debug("Case data: {}", caseDetails.getData());
                 coreCaseDataService.update(
-                    authorisation,
                     caseType,
                     caseDetails.getId(),
-                    caseDetails.getJurisdiction()
+                    caseDetails.getJurisdiction(),
+                    this
                 );
                 log.info("Case {} successfully updated", id);
                 migratedCases.add(id);
@@ -111,6 +91,17 @@ public class CaseMigrationProcessor {
             }
         } else {
             log.info("Case {} does not meet criteria for migration", caseDetails.getId());
+        }
+    }
+
+    public void shutdownThreadPool(ForkJoinPool threadPool) {
+        threadPool.shutdown();
+        log.info("Waiting for thread pool to terminate");
+        try {
+            threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            log.warn("Timed out waiting for thread pool to terminate");
+            Thread.currentThread().interrupt();
         }
     }
 }

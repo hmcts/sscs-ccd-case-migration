@@ -32,7 +32,7 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
         .build();
 
     CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
-        new CaseOutcomeGapsMigrationServiceImpl();
+        new CaseOutcomeGapsMigrationServiceImpl(null);
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -46,7 +46,7 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() throws Exception {
-        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(null, null);
+        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(null);
         assertThat(result).isNull();
     }
 
@@ -68,10 +68,11 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
-            new CaseOutcomeGapsMigrationServiceImpl();
-        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(data, caseDetails);
+            new CaseOutcomeGapsMigrationServiceImpl(null);
+        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(caseDetails);
         assertThat(result).isNotNull();
 
         assertThat(result.get("caseOutcome")).isNull();
@@ -79,7 +80,7 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithNonGapsCase() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithNonGapsCase() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(1234L)
             .data(Map.of("hearingRoute", "listAssist"))
@@ -89,24 +90,26 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
-        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
             .hasMessageContaining("Skipping case for case outcome migration. Hearing Route is not gaps");
 
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() {
         SscsCaseData caseData = SscsCaseData.builder()
             .build();
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
-            new CaseOutcomeGapsMigrationServiceImpl();
+            new CaseOutcomeGapsMigrationServiceImpl(null);
 
-        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
             .hasMessageContaining("Skipping case for case outcome migration. Case outcome is empty");
 
     }

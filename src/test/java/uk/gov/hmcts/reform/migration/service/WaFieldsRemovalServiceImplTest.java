@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.E
 @Slf4j
 public class WaFieldsRemovalServiceImplTest {
 
-    WaFieldsRemovalServiceImpl waFieldsRemovalService = new WaFieldsRemovalServiceImpl();
+    WaFieldsRemovalServiceImpl waFieldsRemovalService = new WaFieldsRemovalServiceImpl(null);
 
     private final CaseDetails caseDetails = CaseDetails.builder()
         .id(1234L)
@@ -42,7 +42,7 @@ public class WaFieldsRemovalServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() {
-        Map<String, Object> result = waFieldsRemovalService.migrate(null, null);
+        Map<String, Object> result = waFieldsRemovalService.migrate(null);
         assertNull(result);
     }
 
@@ -58,7 +58,8 @@ public class WaFieldsRemovalServiceImplTest {
     void shouldReturnPassedDataWhenMigrateCalled(String key, List<String> value) {
         Map<String, Object> data = new HashMap<>();
         data.put(key, value);
-        Map<String, Object> result = waFieldsRemovalService.migrate(data, caseDetails);
+        caseDetails.setData(data);
+        Map<String, Object> result = waFieldsRemovalService.migrate(caseDetails);
         assertNotNull(result);
         assertNull(result.get(key));
     }

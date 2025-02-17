@@ -1,12 +1,8 @@
 package uk.gov.hmcts.reform.migration.repository;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.io.ByteArrayOutputStream;
@@ -20,21 +16,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.InflaterOutputStream;
 
 @Slf4j
-@Service
-@ConditionalOnProperty(value = "migration.caseList.source", havingValue = "INPUT_FILE")
-public class CaseLoader extends CcdRepository {
+public class CaseLoader {
 
     private static final String JURISDICTION = "SSCS";
     private static final String ID_COLUMN = "reference";
 
-    private String encodedDataString;
+    private final String encodedDataString;
 
-    public CaseLoader(@Value("${migration.caseOutcomeGapsMigration.encoded-data-string}")
-                      String encodedDataString) {
+    public CaseLoader(String encodedDataString) {
         this.encodedDataString = encodedDataString;
     }
 
-    @Override
     public List<CaseDetails> findCases() {
         List<CaseDetails> cases = new ArrayList<>();
         try {
@@ -58,6 +50,6 @@ public class CaseLoader extends CcdRepository {
         try (OutputStream inflaterOutputStream = new InflaterOutputStream(outputStream)) {
             inflaterOutputStream.write(Base64.getDecoder().decode(b64Compressed));
         }
-        return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+        return outputStream.toString(StandardCharsets.UTF_8);
     }
 }

@@ -2,32 +2,38 @@ package uk.gov.hmcts.reform.migration.service;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.hmctsDwpStateMigration.enabled", havingValue = "true")
-public class HmctsDwpStateMigrationImpl implements DataMigrationService<Map<String, Object>> {
+public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     static final String EVENT_ID = "clearExpiredFilters";
     static final String EVENT_SUMMARY = "Cleared expired filters";
     static final String EVENT_DESCRIPTION = "Cleared expired filters";
 
-    public Predicate<CaseDetails> accepts() {
-        return Objects::nonNull;
+    private final String encodedDataString;
+
+    public HmctsDwpStateMigrationImpl(@Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
+                                               String encodedDataString) {
+        this.encodedDataString = encodedDataString;
     }
 
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
+    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
+        var data = caseDetails.getData();
         if (nonNull(data)) {
 
             SscsCaseData caseData = JsonMapper.builder()
@@ -52,14 +58,22 @@ public class HmctsDwpStateMigrationImpl implements DataMigrationService<Map<Stri
         return data;
     }
 
+    @Override
+    public List<CaseDetails> getMigrationCases() {
+        return new CaseLoader(encodedDataString).findCases();
+    }
+
+    @Override
     public String getEventId() {
         return EVENT_ID;
     }
 
+    @Override
     public String getEventDescription() {
         return EVENT_DESCRIPTION;
     }
 
+    @Override
     public String getEventSummary() {
         return EVENT_SUMMARY;
     }

@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.migration.query;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(value = "migration.case-management-location.enabled", havingValue = "true")
-public class CaseManagementLocactionQuery extends AbstractElasticQuery implements ElasticSearchQuery {
+public class CaseManagementLocactionQuery extends ElasticSearchQuery {
+
     private static final String CASE_MANAGEMENT_LOCATION_QUERY = """
                 {
                   "query": {

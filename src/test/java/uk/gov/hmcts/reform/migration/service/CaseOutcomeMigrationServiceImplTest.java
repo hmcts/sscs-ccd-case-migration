@@ -49,15 +49,15 @@ public class CaseOutcomeMigrationServiceImplTest {
     private final Venue venue = Venue.builder().name("venue 1 name").build();
     private final String epims = "123456";
     private final String hearingOutcomeId = "2208";
-    private final LocalDateTime start = LocalDateTime.of(2024,6,30,10,00);
-    private final LocalDateTime end = LocalDateTime.of(2024,6,30,13,00);
+    private final LocalDateTime start = LocalDateTime.of(2024,6,30,10,0);
+    private final LocalDateTime end = LocalDateTime.of(2024,6,30,13,0);
 
     private final  CaseDetails caseDetails = CaseDetails.builder()
         .id(1234L)
         .build();
 
     CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
-        new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
+        new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService, null);
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -71,7 +71,7 @@ public class CaseOutcomeMigrationServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() throws Exception {
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(null, null);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(null);
         assertThat(result).isNull();
     }
 
@@ -107,10 +107,11 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
-            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
-        Map<String, Object> result = caseOutcomeMigrationService.migrate(data, caseDetails);
+            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService, null);
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(caseDetails);
         assertThat(result).isNotNull();
 
         HearingOutcome hearingOutcome = HearingOutcome.builder()
@@ -132,7 +133,7 @@ public class CaseOutcomeMigrationServiceImplTest {
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithHearingOutcomeInData() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithHearingOutcomeInData() {
         SscsCaseData caseData = buildCaseData();
         caseData.setHearingOutcomes(new ArrayList<>());
         caseData.getHearingOutcomes().add(HearingOutcome.builder().value(
@@ -140,32 +141,34 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
-            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
+            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService, null);
 
-        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Hearing outcome already exists");
 
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithNoCaseOutcomeInData() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithNoCaseOutcomeInData() {
         SscsCaseData caseData = buildCaseData();
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
-            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
+            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService, null);
 
-        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Case outcome is empty");
 
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithMultipleHearings() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithMultipleHearings() {
         CaseOutcome caseOutcome = CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build();
         SscsCaseData caseData = SscsCaseData.builder()
             .caseOutcome(caseOutcome)
@@ -179,17 +182,18 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
-            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
+            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService, null);
 
-        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("More than one completed hearing found");
 
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithNoHearings() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithNoHearings() {
         CaseOutcome caseOutcome = CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build();
         SscsCaseData caseData = SscsCaseData.builder()
             .caseOutcome(caseOutcome)
@@ -200,11 +204,12 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
         CaseOutcomeMigrationServiceImpl caseOutcomeMigrationService =
-            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService);
+            new CaseOutcomeMigrationServiceImpl(hmcHearingsApiService, null);
 
-        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("No completed hearings found");
     }
 }

@@ -31,7 +31,7 @@ public class HmctsDwpStateMigrationImplTest {
         .build();
 
     HmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl =
-        new HmctsDwpStateMigrationImpl();
+        new HmctsDwpStateMigrationImpl(null);
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -45,7 +45,7 @@ public class HmctsDwpStateMigrationImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() throws Exception {
-        Map<String, Object> result = hmctsDwpStateMigrationImpl.migrate(null, null);
+        Map<String, Object> result = hmctsDwpStateMigrationImpl.migrate(null);
         assertThat(result).isNull();
     }
 
@@ -65,21 +65,23 @@ public class HmctsDwpStateMigrationImplTest {
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
-        Map<String, Object> result = hmctsDwpStateMigrationImpl.migrate(data, caseDetails);
+        Map<String, Object> result = hmctsDwpStateMigrationImpl.migrate(caseDetails);
         assertThat(result).isNotNull();
 
         assertThat(result.get("hmctsDwpState")).isNull();
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithHmctsDwpStateNotFailedSendingFurtherEvidence() throws Exception {
+    void shouldThrowErrorWhenMigrateCalledWithHmctsDwpStateNotFailedSendingFurtherEvidence() {
         SscsCaseData caseData = buildCaseData();
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
 
-        assertThatThrownBy(() -> hmctsDwpStateMigrationImpl.migrate(data, caseDetails))
+        assertThatThrownBy(() -> hmctsDwpStateMigrationImpl.migrate(caseDetails))
             .hasMessageContaining("Skipping case for hmctsDwpState migration. Reason: hmctsDwpState is not"
                                       + " 'failedSendingFurtherEvidence'");
 

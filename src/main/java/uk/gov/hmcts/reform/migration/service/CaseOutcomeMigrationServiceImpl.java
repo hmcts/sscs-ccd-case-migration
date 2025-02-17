@@ -3,13 +3,16 @@ package uk.gov.hmcts.reform.migration.service;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
+import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Hearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
@@ -18,30 +21,30 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.hearingOutcomesMigration.enabled", havingValue = "true")
-public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Map<String, Object>> {
+public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
+
     static final String EVENT_ID = "caseOutcomeMigration";
     static final String EVENT_SUMMARY = "Hearing outcome linked to hearing date";
     static final String EVENT_DESCRIPTION = "";
 
     private final HmcHearingsApiService hmcHearingsApiService;
+    private final String encodedDataString;
 
-    public CaseOutcomeMigrationServiceImpl(HmcHearingsApiService hmcHearingsApiService) {
+    public CaseOutcomeMigrationServiceImpl(HmcHearingsApiService hmcHearingsApiService,
+                                           @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
+                                           String encodedDataString) {
         this.hmcHearingsApiService = hmcHearingsApiService;
+        this.encodedDataString = encodedDataString;
     }
 
-    public Predicate<CaseDetails> accepts() {
-        return Objects::nonNull;
-    }
-
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
+    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
+        var data = caseDetails.getData();
         if (nonNull(data)) {
 
             SscsCaseData caseData = JsonMapper.builder()
@@ -98,6 +101,26 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
         return data;
     }
 
+    @Override
+    public List<CaseDetails> getMigrationCases() {
+        return new CaseLoader(encodedDataString).findCases();
+    }
+
+    @Override
+    public String getEventId() {
+        return EVENT_ID;
+    }
+
+    @Override
+    public String getEventDescription() {
+        return EVENT_DESCRIPTION;
+    }
+
+    @Override
+    public String getEventSummary() {
+        return EVENT_SUMMARY;
+    }
+
     private static HearingDetails getHearingDetails(SscsCaseData caseData, String hearingID) {
         return caseData.getHearings().stream()
             .filter(hearing -> hearing.getValue().getHearingId().equalsIgnoreCase(hearingID))
@@ -121,17 +144,5 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
         HearingOutcome hearingOutcome = HearingOutcome.builder().value(hearingOutcomeDetails).build();
 
         return Map.of("hearingOutcomes", hearingOutcome);
-    }
-
-    public String getEventId() {
-        return EVENT_ID;
-    }
-
-    public String getEventDescription() {
-        return EVENT_DESCRIPTION;
-    }
-
-    public String getEventSummary() {
-        return EVENT_SUMMARY;
     }
 }

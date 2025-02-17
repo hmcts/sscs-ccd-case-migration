@@ -2,12 +2,16 @@ package uk.gov.hmcts.reform.migration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
+import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.query.CaseManagementLocactionQuery;
+import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
 import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
@@ -21,9 +25,7 @@ import uk.gov.hmcts.reform.sscs.service.VenueService;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -33,22 +35,28 @@ import static uk.gov.hmcts.reform.sscs.service.RegionalProcessingCenterService.g
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.case-management-location.enabled", havingValue = "true")
-public class CaseManagementLocationMigrationImpl implements DataMigrationService<Map<String, Object>> {
+public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor {
 
     private static final String EVENT_ID = "caseManagementLocationMigration";
     private static final String EVENT_SUMMARY = "Migrate case for Case Management Location";
     private static final String EVENT_DESCRIPTION = "Migrate case for Case Management Location";
 
+    private final CaseManagementLocactionQuery searchQuery;
+    private final ElasticSearchRepository repository;
     private final RefDataService refDataService;
     private final VenueService venueService;
     private final RegionalProcessingCenterService regionalProcessingCenterService;
     private final AirLookupService airLookupService;
     private HashMap<String, String> regiondIdsCache = new HashMap<>();
 
-    public CaseManagementLocationMigrationImpl(RefDataService refDataService,
+    public CaseManagementLocationMigrationImpl(CaseManagementLocactionQuery searchQuery,
+                                               ElasticSearchRepository repository,
+                                               RefDataService refDataService,
                                                VenueService venueService,
                                                RegionalProcessingCenterService regionalProcessingCenterService,
                                                AirLookupService airLookupService) {
+        this.searchQuery = searchQuery;
+        this.repository = repository;
         this.refDataService = refDataService;
         this.venueService = venueService;
         this.regionalProcessingCenterService = regionalProcessingCenterService;
@@ -56,12 +64,13 @@ public class CaseManagementLocationMigrationImpl implements DataMigrationService
     }
 
     @Override
-    public Predicate<CaseDetails> accepts() {
-        return Objects::nonNull;
+    public List<CaseDetails> getMigrationCases() {
+        return repository.findCases(searchQuery);
     }
 
     @Override
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
+    public Map<String, Object> migrate(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
         if (nonNull(data)) {
             if (!data.containsKey("caseManagementLocation")) {
                 Map<String, Object> managementLocation = getManagementLocation(data);

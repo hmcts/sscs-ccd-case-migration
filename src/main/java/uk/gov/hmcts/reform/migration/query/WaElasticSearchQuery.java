@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.migration.query;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(value = "migration.wa.enabled", havingValue = "true")
-public class WaElasticSearchQuery extends AbstractElasticQuery implements ElasticSearchQuery {
+public class WaElasticSearchQuery extends ElasticSearchQuery {
 
     private static final String WA_START_QUERY = """
         {

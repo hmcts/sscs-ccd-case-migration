@@ -64,8 +64,8 @@ class CoreCaseDataServiceTest {
         when(dataMigrationService.getEventSummary()).thenReturn(EVENT_SUMMARY);
 
         //when
-        CaseDetails update = underTest.update(AUTH_TOKEN, CASE_TYPE, caseDetails3.getId(),
-                                              caseDetails3.getJurisdiction());
+        CaseDetails update = underTest.update(CASE_TYPE, caseDetails3.getId(),
+                                              caseDetails3.getJurisdiction(), dataMigrationService);
         //then
         assertThat(update.getId(), is(Long.parseLong(CASE_ID)));
         assertThat(update.getData().get("solicitorEmail"), is("Padmaja.Ramisetti@hmcts.net"));
@@ -106,7 +106,7 @@ class CoreCaseDataServiceTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(dataMigrationService.migrate(data, caseDetails))
+        when(dataMigrationService.migrate(caseDetails))
             .thenReturn(data);
 
         when(coreCaseDataApi.startEventForCaseWorker(AUTH_TOKEN, AUTH_TOKEN, "30",
