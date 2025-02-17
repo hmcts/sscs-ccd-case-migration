@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.migration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -44,16 +43,13 @@ public class CaseManagementLocationMigrationImplTest {
     @Mock
     AirLookupService airLookupService;
 
-    private CaseManagementLocationMigrationImpl caseManagementLocationService;
+    private final CaseManagementLocationMigrationImpl caseManagementLocationService =
+        new CaseManagementLocationMigrationImpl(refDataService, venueService, regionalProcessingCenterService,
+                                                airLookupService);
 
-    private final  CaseDetails caseDetails = CaseDetails.builder().id(1234L).build();
-
-    @BeforeEach
-    public void setUp() {
-        caseManagementLocationService =
-            new CaseManagementLocationMigrationImpl(refDataService, venueService,
-                                                    regionalProcessingCenterService, airLookupService);
-    }
+    private final  CaseDetails caseDetails = CaseDetails.builder()
+        .id(1234L)
+        .build();
 
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
@@ -76,6 +72,8 @@ public class CaseManagementLocationMigrationImplTest {
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
+        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
+            refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
         Map<String, Object> result = caseManagementLocationService.migrate(data, caseDetails);
         assertNotNull(result);
@@ -94,6 +92,8 @@ public class CaseManagementLocationMigrationImplTest {
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
+        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
+            refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
         Map<String, Object> result = caseManagementLocationService.migrate(data, caseDetails);
         assertNotNull(result);
@@ -107,6 +107,9 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.setRegionalProcessingCenter(null);
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+
+        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
+            refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
         assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(data, caseDetails));
     }
@@ -125,6 +128,9 @@ public class CaseManagementLocationMigrationImplTest {
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
+        CaseManagementLocationMigrationImpl caseManagementLocationService =
+            new CaseManagementLocationMigrationImpl(refDataService, venueService, regionalProcessingCenterService,
+                                                    airLookupService);
 
         Map<String, Object> result = caseManagementLocationService.migrate(data, caseDetails);
         assertNotNull(result);

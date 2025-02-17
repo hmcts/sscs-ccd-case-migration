@@ -29,7 +29,8 @@ public class HmctsDwpStateMigrationImplTest {
         .id(1234L)
         .build();
 
-    HmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl = new HmctsDwpStateMigrationImpl();
+    HmctsDwpStateMigrationImpl hmctsDwpStateMigrationImpl =
+        new HmctsDwpStateMigrationImpl();
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -71,7 +72,7 @@ public class HmctsDwpStateMigrationImplTest {
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithHmctsDwpStateNotFailedSendingFurtherEvidence() {
+    void shouldThrowErrorWhenMigrateCalledWithHmctsDwpStateNotFailedSendingFurtherEvidence() throws Exception {
         SscsCaseData caseData = buildCaseData();
 
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
