@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,9 @@ public abstract class CaseOutcomeMigration implements DataMigrationService<Map<S
     static final String EVENT_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
-    private final JsonMapper jsonMapper;
 
-    public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService, JsonMapper jsonMapper) {
+    public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService) {
         this.hearingOutcomeService = hearingOutcomeService;
-        this.jsonMapper = jsonMapper;
     }
 
 
@@ -42,7 +41,8 @@ public abstract class CaseOutcomeMigration implements DataMigrationService<Map<S
 
     public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
         if (nonNull(data)) {
-            final SscsCaseData caseData = jsonMapper.convertValue(data, SscsCaseData.class);
+            final SscsCaseData caseData = new ObjectMapper().registerModule(new JavaTimeModule())
+                    .convertValue(data, SscsCaseData.class);
 
             String caseId = caseDetails.getId().toString();
 

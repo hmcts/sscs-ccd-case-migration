@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +43,6 @@ public class CaseManagementLocationMigrationImplTest {
     RegionalProcessingCenterService regionalProcessingCenterService;
     @Mock
     AirLookupService airLookupService;
-    private JsonMapper jsonMapper = new JsonMapper();
 
     private CaseManagementLocationMigrationImpl caseManagementLocationService;
 
@@ -51,7 +51,7 @@ public class CaseManagementLocationMigrationImplTest {
     @BeforeEach
     public void setUp() {
         caseManagementLocationService =
-            new CaseManagementLocationMigrationImpl(jsonMapper, refDataService, venueService,
+            new CaseManagementLocationMigrationImpl(refDataService, venueService,
                                                     regionalProcessingCenterService, airLookupService);
     }
 
@@ -70,7 +70,8 @@ public class CaseManagementLocationMigrationImplTest {
         SscsCaseData caseData = buildCaseData();
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(rpc);
-        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
@@ -87,7 +88,8 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.getAppeal().getAppellant().setAddress(null);
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(rpc);
-        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
@@ -103,7 +105,8 @@ public class CaseManagementLocationMigrationImplTest {
         SscsCaseData caseData = buildCaseData();
         caseData.getAppeal().getAppellant().setAddress(null);
         caseData.setRegionalProcessingCenter(null);
-        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(data, caseDetails));
     }
@@ -114,7 +117,8 @@ public class CaseManagementLocationMigrationImplTest {
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(null);
         caseData.getAppeal().getAppellant().setIsAppointee(YES);
-        var data = jsonMapper.convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
 
         when(regionalProcessingCenterService.getByPostcode(anyString(), anyBoolean())).thenReturn(rpc);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
