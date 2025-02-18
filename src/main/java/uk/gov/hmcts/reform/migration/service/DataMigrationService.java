@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import java.util.List;
-import java.util.Objects;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public interface DataMigrationService<T> {

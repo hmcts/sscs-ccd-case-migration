@@ -8,10 +8,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

@@ -62,7 +62,8 @@ public class DwpCaseMigrationProcessorTest {
         when(elasticSearchRepository.findCases(null)).thenReturn(caseList);
         List<CaseDetails> listOfCaseDetails = elasticSearchRepository.findCases(null);
         Assertions.assertNotNull(listOfCaseDetails);
-        when(coreCaseDataService.update(CASE_TYPE, caseDetails.getId(), caseDetails.getJurisdiction(), dataMigrationService))
+        when(coreCaseDataService
+                 .update(CASE_TYPE, caseDetails.getId(), caseDetails.getJurisdiction(), dataMigrationService))
             .thenReturn(caseDetails);
         caseMigrationProcessor.migrateCases(CASE_TYPE);
         verify(coreCaseDataService, times(1))

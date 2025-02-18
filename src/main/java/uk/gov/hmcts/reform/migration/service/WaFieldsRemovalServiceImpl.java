@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-
-import java.util.Map;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
+
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.nonNull;
 

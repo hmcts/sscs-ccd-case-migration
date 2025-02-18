@@ -1,18 +1,18 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import static java.time.LocalDateTime.now;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT;
-
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-
-import java.util.Map;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.query.SixMonthsOldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+
+import java.util.List;
+import java.util.Map;
+
+import static java.time.LocalDateTime.now;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT;
 
 @Service
 @Slf4j

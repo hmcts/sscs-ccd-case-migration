@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.migration;
 
-import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 

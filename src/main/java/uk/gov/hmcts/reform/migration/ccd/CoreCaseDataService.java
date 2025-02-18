@@ -12,9 +12,9 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
+import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.Map;
-import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 @Slf4j
 @Service
