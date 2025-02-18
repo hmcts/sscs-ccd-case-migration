@@ -11,7 +11,7 @@ public class SixMonthsOldDraftsSearchQuery extends ElasticSearchQuery {
             "bool": {
               "must": [
                 { "match": { "state": "draft" }},
-                { "range": { "created_date": { "lte": "now-6M/M" }}}
+                { "range": { "created_date": { "lte": "now-6M" }}}
               ]
             }
           },
