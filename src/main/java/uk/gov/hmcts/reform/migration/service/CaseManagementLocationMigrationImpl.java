@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.CaseManagementLocactionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
@@ -47,14 +48,16 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
     private final VenueService venueService;
     private final RegionalProcessingCenterService regionalProcessingCenterService;
     private final AirLookupService airLookupService;
-    private HashMap<String, String> regiondIdsCache = new HashMap<>();
+    private final HashMap<String, String> regiondIdsCache = new HashMap<>();
 
-    public CaseManagementLocationMigrationImpl(CaseManagementLocactionQuery searchQuery,
+    public CaseManagementLocationMigrationImpl(CoreCaseDataService coreCaseDataService,
+                                               CaseManagementLocactionQuery searchQuery,
                                                ElasticSearchRepository repository,
                                                RefDataService refDataService,
                                                VenueService venueService,
                                                RegionalProcessingCenterService regionalProcessingCenterService,
                                                AirLookupService airLookupService) {
+        super(coreCaseDataService);
         this.searchQuery = searchQuery;
         this.repository = repository;
         this.refDataService = refDataService;

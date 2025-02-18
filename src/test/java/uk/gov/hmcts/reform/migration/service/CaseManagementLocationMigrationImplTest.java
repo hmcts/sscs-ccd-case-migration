@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.YES;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseManagementLocationMigrationImplTest {
@@ -49,13 +48,17 @@ public class CaseManagementLocationMigrationImplTest {
     @Mock
     ElasticSearchRepository repository;
 
-    private final CaseManagementLocationMigrationImpl caseManagementLocationService =
-        new CaseManagementLocationMigrationImpl(searchQuery, repository, refDataService, venueService,
-                                                regionalProcessingCenterService, airLookupService);
+    private CaseManagementLocationMigrationImpl caseManagementLocationService;
 
-    private final  CaseDetails caseDetails = CaseDetails.builder()
-        .id(1234L)
-        .build();
+    private final  CaseDetails caseDetails = CaseDetails.builder().id(1234L).build();
+
+    @BeforeEach
+    void setUp() {
+        caseManagementLocationService =
+            new CaseManagementLocationMigrationImpl(null, searchQuery, repository, refDataService,
+                                                    venueService, regionalProcessingCenterService, airLookupService);
+    }
+
 
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
@@ -72,16 +75,16 @@ public class CaseManagementLocationMigrationImplTest {
         SscsCaseData caseData = buildCaseData();
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(rpc);
+        var data = buildCaseDataMap(caseData);
+        caseDetails.setData(data);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
-        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
-            searchQuery, repository, refDataService, venueService, regionalProcessingCenterService, airLookupService);
+
         Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
+
         assertNotNull(result);
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
         assertEquals(data, result);
     }
 
@@ -91,17 +94,15 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.getAppeal().getAppellant().setAddress(null);
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(rpc);
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = buildCaseDataMap(caseData);
         caseDetails.setData(data);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
-        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
-            searchQuery, repository, refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
         Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
+
         assertNotNull(result);
         assertNotNull(result.get("caseManagementLocation"));
     }
@@ -111,12 +112,8 @@ public class CaseManagementLocationMigrationImplTest {
         SscsCaseData caseData = buildCaseData();
         caseData.getAppeal().getAppellant().setAddress(null);
         caseData.setRegionalProcessingCenter(null);
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        var data = buildCaseDataMap(caseData);
         caseDetails.setData(data);
-
-        CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
-            searchQuery, repository, refDataService, venueService, regionalProcessingCenterService, airLookupService);
 
         assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(caseDetails));
     }
@@ -125,28 +122,25 @@ public class CaseManagementLocationMigrationImplTest {
     void shouldReturnPassedDataWhenMigrateCalledAndRpcIsNull() {
         SscsCaseData caseData = buildCaseData();
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
+        when(regionalProcessingCenterService.getByPostcode(anyString(), anyBoolean())).thenReturn(rpc);
         caseData.setRegionalProcessingCenter(null);
         caseData.getAppeal().getAppellant().setIsAppointee(YES);
-        when(regionalProcessingCenterService.getByPostcode(anyString(), anyBoolean())).thenReturn(rpc);
+        var data = buildCaseDataMap(caseData);
+        caseDetails.setData(data);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
-        CaseManagementLocationMigrationImpl caseManagementLocationService =
-            new CaseManagementLocationMigrationImpl(searchQuery, repository, refDataService, venueService,
-                                                    regionalProcessingCenterService, airLookupService);
 
         Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
 
         assertNotNull(result);
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
         assertEquals(data, result);
     }
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = caseManagementLocationService.migrate(null);
+        Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
         assertNull(result);
     }
 

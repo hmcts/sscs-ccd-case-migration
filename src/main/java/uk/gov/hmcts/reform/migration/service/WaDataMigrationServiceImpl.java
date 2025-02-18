@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.WaElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 
@@ -25,7 +26,9 @@ public class WaDataMigrationServiceImpl extends CaseMigrationProcessor {
     private final WaElasticSearchQuery elasticSearchQuery;
     private final ElasticSearchRepository repository;
 
-    public WaDataMigrationServiceImpl(WaElasticSearchQuery elasticSearchQuery, ElasticSearchRepository repository) {
+    public WaDataMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
+                                      WaElasticSearchQuery elasticSearchQuery, ElasticSearchRepository repository) {
+        super(coreCaseDataService);
         this.elasticSearchQuery = elasticSearchQuery;
         this.repository = repository;
     }

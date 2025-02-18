@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.SixMonthsOldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 
@@ -26,8 +27,10 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
     private final SixMonthsOldDraftsSearchQuery searchQuery;
     private final ElasticSearchRepository repository;
 
-    public OldDraftAppealsArchiveService(SixMonthsOldDraftsSearchQuery searchQuery,
+    public OldDraftAppealsArchiveService(CoreCaseDataService coreCaseDataService,
+                                         SixMonthsOldDraftsSearchQuery searchQuery,
                                          ElasticSearchRepository repository) {
+        super(coreCaseDataService);
         this.searchQuery = searchQuery;
         this.repository = repository;
     }

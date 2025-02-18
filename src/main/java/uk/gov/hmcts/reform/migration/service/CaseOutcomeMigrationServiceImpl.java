@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Hearing;
@@ -36,9 +37,11 @@ public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
     private final HmcHearingsApiService hmcHearingsApiService;
     private final String encodedDataString;
 
-    public CaseOutcomeMigrationServiceImpl(HmcHearingsApiService hmcHearingsApiService,
+    public CaseOutcomeMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
+                                           HmcHearingsApiService hmcHearingsApiService,
                                            @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
                                            String encodedDataString) {
+        super(coreCaseDataService);
         this.hmcHearingsApiService = hmcHearingsApiService;
         this.encodedDataString = encodedDataString;
     }

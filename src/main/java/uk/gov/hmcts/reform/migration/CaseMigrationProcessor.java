@@ -27,13 +27,17 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
     private CoreCaseDataService coreCaseDataService;
 
     @Getter
-    private List<Long> migratedCases = new ArrayList<>();
+    private final List<Long> migratedCases = new ArrayList<>();
 
     @Getter
-    private List<Long> failedCases = new ArrayList<>();
+    private final List<Long> failedCases = new ArrayList<>();
 
     @Value("${case-migration.processing.limit}")
     private int caseProcessLimit;
+
+    public CaseMigrationProcessor(CoreCaseDataService coreCaseDataService) {
+        this.coreCaseDataService = coreCaseDataService;
+    }
 
     public void migrateCases(String caseType) {
         validateCaseType(caseType);

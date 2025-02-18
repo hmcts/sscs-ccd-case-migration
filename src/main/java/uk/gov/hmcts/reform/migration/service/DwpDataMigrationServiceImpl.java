@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.DwpElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 
@@ -25,8 +26,10 @@ public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
     private final DwpElasticSearchQuery elasticSearchQuery;
     private final ElasticSearchRepository repository;
 
-    public DwpDataMigrationServiceImpl(DwpElasticSearchQuery elasticSearchQuery,
+    public DwpDataMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
+                                       DwpElasticSearchQuery elasticSearchQuery,
                                        ElasticSearchRepository repository) {
+        super(coreCaseDataService);
         this.elasticSearchQuery = elasticSearchQuery;
         this.repository = repository;
     }
@@ -52,7 +55,6 @@ public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
     public List<CaseDetails> getMigrationCases() {
         return repository.findCases(elasticSearchQuery);
     }
-
 
     @Override
     public String getEventId() {

@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 
 import java.util.List;
@@ -25,8 +26,10 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
 
     private final String encodedDataString;
 
-    public WaFieldsRemovalServiceImpl(@Value("${migration.waFieldsRemoval.encoded-data-string}")
-                                               String encodedDataString) {
+    public WaFieldsRemovalServiceImpl(CoreCaseDataService coreCaseDataService,
+                                      @Value("${migration.waFieldsRemoval.encoded-data-string}")
+                                      String encodedDataString) {
+        super(coreCaseDataService);
         this.encodedDataString = encodedDataString;
     }
 
