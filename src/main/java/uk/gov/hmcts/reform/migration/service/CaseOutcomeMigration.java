@@ -45,6 +45,14 @@ public abstract class CaseOutcomeMigration implements DataMigrationService<Map<S
                 .convertValue(data, SscsCaseData.class);
 
             String caseId = caseDetails.getId().toString();
+            String hearingRoute = caseDetails.getData().get("hearingRoute").toString();
+
+            if (!hearingRoute.equalsIgnoreCase("listAssist")) {
+                log.info(SKIPPING_CASE_MSG + " |Case id: {} "
+                                + "Reason: Hearing Route is not list assist it is {}",
+                        caseId, hearingRoute);
+                throw new Exception(SKIPPING_CASE_MSG + ". Hearing Route is not list assist");
+            }
 
             if (nonNull(caseData.getHearingOutcomes())
                 || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome())) {

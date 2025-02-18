@@ -8,14 +8,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
+import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
+import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
-import uk.gov.hmcts.reform.sscs.ccd.domain.Hearing;
-import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.JointParty;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsDeprecatedFields;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsFinalDecisionCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsPipCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Venue;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 import uk.gov.hmcts.reform.sscs.reference.data.model.HearingChannel;
@@ -27,17 +31,20 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.CASE_OUTCOME_MIGRATION_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.CASE_OUTCOME_MIGRATION_ID;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.CASE_OUTCOME_MIGRATION_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_ID;
+import static uk.gov.hmcts.reform.migration.service.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-public class CaseOutcomeMigrationServiceImplTest {
+public class CompletedHearingsOutcomesMigrationTest {
 
+    @Mock
+    private HearingOutcomeService hearingOutcomeService;
     @Mock
     private HmcHearingsApiService hmcHearingsApiService;
 
@@ -100,6 +107,26 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         Map<String, Object> result = caseOutcomeMigrationService.migrate(caseDetails);
 
+        SscsCaseData caseData = SscsCaseData.builder()
+            .caseOutcome(CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build())
+            .jointParty(JointParty.builder().build())
+            .sscsDeprecatedFields(SscsDeprecatedFields.builder().build())
+            .pipSscsCaseData(SscsPipCaseData.builder().build())
+            .finalDecisionCaseData(SscsFinalDecisionCaseData.builder().build())
+            .build();
+
+        var caseHearing = CaseHearing.builder().hearingId(1L)
+            .hearingDaySchedule(List.of(
+                HearingDaySchedule.builder().hearingVenueEpimsId(epims)
+                    .hearingStartDateTime(start.minusHours(1))
+                    .hearingEndDateTime(end.minusHours(1))
+                    .build())
+            )
+            .hearingChannels(List.of(HearingChannel.FACE_TO_FACE))
+            .build();
+        when(hmcHearingsApiService.getHearingsRequest(eq(caseDetails.getId().toString()),eq(HmcStatus.COMPLETED)))
+            .thenReturn(HearingsGetResponse.builder().caseHearings(List.of(caseHearing)).build());
+
         assertThat(result).isNotNull();
         HearingOutcome hearingOutcome = HearingOutcome.builder()
             .value(HearingOutcomeDetails.builder()
@@ -113,6 +140,13 @@ public class CaseOutcomeMigrationServiceImplTest {
                        .hearingEndDateTime(end)
                        .build())
             .build();
+
+        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(caseData)))
+            .thenReturn(Map.of("hearingOutcomes", hearingOutcome));
+
+        Map<String, Object> result = caseOutcomeMigrationService.migrate(data, caseDetails);
+
+        assertThat(result).isNotNull();
         assertThat(result.get("hearingOutcomes")).isEqualTo(Map.of("hearingOutcomes", hearingOutcome));
         assertThat(result.get("caseOutcome")).isNull();
         assertThat(result.get("didPoAttend")).isNull();
@@ -152,7 +186,7 @@ public class CaseOutcomeMigrationServiceImplTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("More than one completed hearing found");
+            .hasMessageContaining("Zero or More than one hearing found");
     }
 
     @Test
@@ -165,6 +199,6 @@ public class CaseOutcomeMigrationServiceImplTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("No completed hearings found");
+            .hasMessageContaining("Skipping case for case outcome migration, Zero or More than one hearing found");
     }
 }
