@@ -36,15 +36,12 @@ import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceI
 import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
-
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 public class CaseOutcomeMigrationServiceImplTest {
 
     @Mock
     private HmcHearingsApiService hmcHearingsApiService;
-
-
 
     private final Venue venue = Venue.builder().name("venue 1 name").build();
     private final String epims = "123456";
@@ -97,6 +94,7 @@ public class CaseOutcomeMigrationServiceImplTest {
                                                        .build()).build();
         hearings.add(hearing1);
 
+
         SscsCaseData caseData = SscsCaseData.builder()
             .caseOutcome(caseOutcome)
             .hearings(hearings)
@@ -148,7 +146,6 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Hearing outcome already exists");
-
     }
 
     @Test
@@ -164,7 +161,6 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Case outcome is empty");
-
     }
 
     @Test
@@ -189,7 +185,6 @@ public class CaseOutcomeMigrationServiceImplTest {
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("More than one completed hearing found");
-
     }
 
     @Test

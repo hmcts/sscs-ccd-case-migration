@@ -48,14 +48,14 @@ public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
         if (nonNull(data)) {
 
             SscsCaseData caseData = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build().convertValue(data, SscsCaseData.class);
+                    .addModule(new JavaTimeModule())
+                    .build().convertValue(data, SscsCaseData.class);
 
             String caseId = caseDetails.getId().toString();
 
             if (caseData.getHearingOutcomes() != null) {
                 log.info("Skipping case for case outcome migration. Case id: {} Reason: Hearing outcome already exists",
-                         caseId);
+                        caseId);
                 throw new Exception("Skipping case for case outcome migration. Hearing outcome already exists");
             }
 
@@ -70,14 +70,14 @@ public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
 
                 if (hmcHearings.isEmpty()) {
                     log.info("Skipping case for case outcome migration. Case id: {} "
-                                 + "Reason: No completed hearings found", caseId);
+                            + "Reason: No completed hearings found", caseId);
                     throw new Exception("Skipping case for case outcome migration. No completed hearings found");
                 }
                 if (hmcHearings.size() > 1) {
                     log.info("Skipping case for case outcome migration. Case id: {} "
-                                 + "Reason: More than one completed hearing found", caseId);
+                            + "Reason: More than one completed hearing found", caseId);
                     throw new Exception("Skipping case for case outcome migration. "
-                                            + "More than one completed hearing found");
+                            + "More than one completed hearing found");
                 } else {
                     String hearingID = hmcHearings.get(0).getHearingId().toString();
                     log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
@@ -87,11 +87,11 @@ public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
                     data.put("hearingOutcomes", hearingOutcomeMap);
 
                     log.info("case outcome found with value {} and set to null for case id {}",
-                             data.get("caseOutcome"), caseId);
+                            data.get("caseOutcome"), caseId);
                     data.put("caseOutcome", null);
 
                     log.info("did Po Attend found with value {} and set to null for case id {}",
-                             data.get("didPoAttend"), caseId);
+                            data.get("didPoAttend"), caseId);
                     data.put("didPoAttend", null);
 
                     log.info("Completed migration for case outcome migration. Case id: {}", caseId);
@@ -123,23 +123,23 @@ public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
 
     private static HearingDetails getHearingDetails(SscsCaseData caseData, String hearingID) {
         return caseData.getHearings().stream()
-            .filter(hearing -> hearing.getValue().getHearingId().equalsIgnoreCase(hearingID))
-            .findFirst().orElse(Hearing.builder().build()).getValue();
+                .filter(hearing -> hearing.getValue().getHearingId().equalsIgnoreCase(hearingID))
+                .findFirst().orElse(Hearing.builder().build()).getValue();
     }
 
     private static Map<String, Object> buildHearingOutcomeMap(SscsCaseData caseData, String hearingID) {
         HearingDetails selectedHearingDetails = getHearingDetails(caseData, hearingID);
 
         HearingOutcomeDetails hearingOutcomeDetails = HearingOutcomeDetails.builder()
-            .completedHearingId(hearingID)
-            .hearingStartDateTime(selectedHearingDetails.getStart())
-            .hearingEndDateTime(selectedHearingDetails.getEnd())
-            .hearingOutcomeId(caseData.getCaseOutcome().getCaseOutcome())
-            .didPoAttendHearing(caseData.getCaseOutcome().getDidPoAttend())
-            .hearingChannelId(selectedHearingDetails.getHearingChannel())
-            .venue(selectedHearingDetails.getVenue())
-            .epimsId(selectedHearingDetails.getEpimsId())
-            .build();
+                .completedHearingId(hearingID)
+                .hearingStartDateTime(selectedHearingDetails.getStart())
+                .hearingEndDateTime(selectedHearingDetails.getEnd())
+                .hearingOutcomeId(caseData.getCaseOutcome().getCaseOutcome())
+                .didPoAttendHearing(caseData.getCaseOutcome().getDidPoAttend())
+                .hearingChannelId(selectedHearingDetails.getHearingChannel())
+                .venue(selectedHearingDetails.getVenue())
+                .epimsId(selectedHearingDetails.getEpimsId())
+                .build();
 
         HearingOutcome hearingOutcome = HearingOutcome.builder().value(hearingOutcomeDetails).build();
 

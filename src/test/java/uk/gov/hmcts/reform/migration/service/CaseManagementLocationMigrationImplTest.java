@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseManagementLocationMigrationImplTest {
+
     @Mock
     RefDataService refDataService;
     @Mock
@@ -73,7 +74,6 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.setRegionalProcessingCenter(rpc);
         var data = new ObjectMapper().registerModule(new JavaTimeModule())
             .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
-
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
@@ -98,7 +98,6 @@ public class CaseManagementLocationMigrationImplTest {
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
-
         CaseManagementLocationMigrationImpl caseManagementLocationService = new CaseManagementLocationMigrationImpl(
             searchQuery, repository, refDataService, venueService, regionalProcessingCenterService, airLookupService);
 

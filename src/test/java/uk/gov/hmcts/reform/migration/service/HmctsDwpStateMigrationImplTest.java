@@ -20,7 +20,6 @@ import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.E
 import static uk.gov.hmcts.reform.migration.service.HmctsDwpStateMigrationImpl.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 
-
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 public class HmctsDwpStateMigrationImplTest {
