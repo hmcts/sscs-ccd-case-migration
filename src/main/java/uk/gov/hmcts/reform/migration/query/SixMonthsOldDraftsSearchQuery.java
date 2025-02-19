@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SixMonthsOldDraftsSearchQuery extends ElasticSearchQuery {
 
-    private static final String SIX_MONTHS_OLD_DRAFTS_QUERY = """
+    static final String SIX_MONTHS_OLD_DRAFTS_QUERY = """
         {
           "query": {
             "bool": {
