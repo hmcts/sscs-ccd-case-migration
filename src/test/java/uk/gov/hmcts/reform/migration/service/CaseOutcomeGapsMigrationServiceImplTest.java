@@ -59,7 +59,8 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
     @Test
     void shouldReturnCorrectValuesForCaseOutcomeGapsMigration() {
         assertThat(REMOVE_GAPS_OUTCOME_TAB_ID).isEqualTo(caseOutcomeGapsMigrationService.getEventId());
-        assertThat(REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION).isEqualTo(caseOutcomeGapsMigrationService.getEventDescription());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION)
+            .isEqualTo(caseOutcomeGapsMigrationService.getEventDescription());
         assertThat(REMOVE_GAPS_OUTCOME_TAB_SUMMARY).isEqualTo(caseOutcomeGapsMigrationService.getEventSummary());
     }
 
