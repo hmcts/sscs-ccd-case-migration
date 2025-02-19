@@ -16,9 +16,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.REMOVE_GAPS_OUTCOME_TAB_ID;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.REMOVE_GAPS_OUTCOME_TAB_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetailsToSscsCaseDetails;
 
@@ -58,9 +58,9 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
     @Test
     void shouldReturnCorrectValuesForCaseOutcomeGapsMigration() {
-        assertThat(EVENT_ID).isEqualTo(caseOutcomeGapsMigrationService.getEventId());
-        assertThat(EVENT_DESCRIPTION).isEqualTo(caseOutcomeGapsMigrationService.getEventDescription());
-        assertThat(EVENT_SUMMARY).isEqualTo(caseOutcomeGapsMigrationService.getEventSummary());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_ID).isEqualTo(caseOutcomeGapsMigrationService.getEventId());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION).isEqualTo(caseOutcomeGapsMigrationService.getEventDescription());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_SUMMARY).isEqualTo(caseOutcomeGapsMigrationService.getEventSummary());
     }
 
     @Test

@@ -28,9 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.CASE_OUTCOME_MIGRATION_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.CASE_OUTCOME_MIGRATION_ID;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigrationServiceImpl.CASE_OUTCOME_MIGRATION_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
@@ -74,9 +74,9 @@ public class CaseOutcomeMigrationServiceImplTest {
 
     @Test
     void shouldReturnCorrectValuesForCaseOutcomeMigration() {
-        assertThat(EVENT_ID).isEqualTo(caseOutcomeMigrationService.getEventId());
-        assertThat(EVENT_DESCRIPTION).isEqualTo(caseOutcomeMigrationService.getEventDescription());
-        assertThat(EVENT_SUMMARY).isEqualTo(caseOutcomeMigrationService.getEventSummary());
+        assertThat(CASE_OUTCOME_MIGRATION_ID).isEqualTo(caseOutcomeMigrationService.getEventId());
+        assertThat(CASE_OUTCOME_MIGRATION_DESCRIPTION).isEqualTo(caseOutcomeMigrationService.getEventDescription());
+        assertThat(CASE_OUTCOME_MIGRATION_SUMMARY).isEqualTo(caseOutcomeMigrationService.getEventSummary());
     }
 
     @Test

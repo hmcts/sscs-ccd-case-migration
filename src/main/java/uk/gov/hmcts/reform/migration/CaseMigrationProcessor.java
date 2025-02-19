@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.migration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 
@@ -63,6 +66,11 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
         log.info("Migrated cases: {}", getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
         log.info("Failed/Skipped Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
         log.info("Data migration of cases completed");
+    }
+
+    public SscsCaseData getSscsCaseDataFrom(Map<String, Object> data) {
+        return new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(data, SscsCaseData.class);
     }
 
     private void validateCaseType(String caseType) {

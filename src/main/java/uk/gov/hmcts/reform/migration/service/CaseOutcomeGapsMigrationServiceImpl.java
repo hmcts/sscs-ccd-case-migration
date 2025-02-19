@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -22,9 +20,9 @@ import static java.util.Objects.nonNull;
 @ConditionalOnProperty(value = "migration.caseOutcomeGapsMigration.enabled", havingValue = "true")
 public class CaseOutcomeGapsMigrationServiceImpl extends CaseMigrationProcessor {
 
-    static final String EVENT_ID = "removeGapsOutcomeTab";
-    static final String EVENT_SUMMARY = "Outcome tab removed as it is Gaps case";
-    static final String EVENT_DESCRIPTION = "Outcome tab removed as it is Gaps case";
+    static final String REMOVE_GAPS_OUTCOME_TAB_ID = "removeGapsOutcomeTab";
+    static final String REMOVE_GAPS_OUTCOME_TAB_SUMMARY = "Outcome tab removed as it is Gaps case";
+    static final String REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION = "Outcome tab removed as it is Gaps case";
 
     private final String encodedDataString;
 
@@ -39,12 +37,8 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseMigrationProcessor 
     public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
         var data = caseDetails.getData();
         if (nonNull(data)) {
-
-            SscsCaseData caseData = new ObjectMapper().registerModule(new JavaTimeModule())
-                .convertValue(data, SscsCaseData.class);
-
+            SscsCaseData caseData = getSscsCaseDataFrom(data);
             String caseId = caseDetails.getId().toString();
-
             String hearingRoute = caseDetails.getData().get("hearingRoute").toString();
 
             if (!hearingRoute.equalsIgnoreCase("gaps")) {
@@ -55,20 +49,10 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseMigrationProcessor 
             }
 
             if (caseData.getCaseOutcome().getCaseOutcome() == null) {
-
                 log.info("Skipping case for case outcome migration. Case id: {} Reason: Case outcome is empty", caseId);
                 throw new Exception("Skipping case for case outcome migration. Case outcome is empty");
-
             } else {
-                log.info("case outcome found with value {} and set to null for case id {}",
-                         data.get("caseOutcome"), caseId);
-                data.put("caseOutcome", null);
-
-                log.info("did Po Attend found with value {} and set to null for case id {}",
-                         data.get("didPoAttend"), caseId);
-                data.put("didPoAttend", null);
-
-                log.info("Completed migration for case outcome gaps migration. Case id: {}", caseId);
+                resetCaseOutcome(data, caseId);
             }
         }
         return data;
@@ -79,18 +63,28 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseMigrationProcessor 
         return new CaseLoader(encodedDataString).findCases();
     }
 
+    public static void resetCaseOutcome(Map<String, Object> caseData, String caseId) {
+        log.info("case outcome found with value {} and set to null for case id {}",
+                 caseData.get("caseOutcome"), caseId);
+        caseData.put("caseOutcome", null);
+        log.info("did Po Attend found with value {} and set to null for case id {}",
+                 caseData.get("didPoAttend"), caseId);
+        caseData.put("didPoAttend", null);
+        log.info("Completed migration for case outcome gaps migration. Case id: {}", caseId);
+    }
+
     @Override
     public String getEventId() {
-        return EVENT_ID;
+        return REMOVE_GAPS_OUTCOME_TAB_ID;
     }
 
     @Override
     public String getEventDescription() {
-        return EVENT_DESCRIPTION;
+        return REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION;
     }
 
     @Override
     public String getEventSummary() {
-        return EVENT_SUMMARY;
+        return REMOVE_GAPS_OUTCOME_TAB_SUMMARY;
     }
 }

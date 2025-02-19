@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -87,8 +85,7 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
     }
 
     private Map<String, Object> getManagementLocation(Map<String, Object> data) {
-        SscsCaseData caseData = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(data, SscsCaseData.class);
+        SscsCaseData caseData = getSscsCaseDataFrom(data);
         String postCode = resolvePostCode(caseData);
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 
