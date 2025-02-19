@@ -171,6 +171,19 @@ public class CompletedHearingsOutcomesMigrationTest {
     }
 
     @Test
+    void shouldThrowErrorWhenGapsCaseIsProcessed() {
+        SscsCaseData caseData = buildCaseData();
+        caseData.getSchedulingAndListingFields().setHearingRoute(GAPS);
+
+        var data = new ObjectMapper().registerModule(new JavaTimeModule())
+            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
+        caseDetails.setData(data);
+
+        assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(data, caseDetails))
+            .hasMessageContaining("Skipping case for case outcome migration. Hearing Route is not list assist");
+    }
+
+    @Test
     void shouldThrowErrorWhenMigrateCalledWithNoCaseOutcomeInData() {
         caseDetails.setData(buildCaseDataMap(buildCaseData()));
 
