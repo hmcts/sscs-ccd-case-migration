@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.JointParty;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsDeprecatedFields;
@@ -159,6 +160,7 @@ public class CompletedHearingsOutcomesMigrationTest {
             HearingOutcome.builder().value(
                 HearingOutcomeDetails.builder().completedHearingId("1").build()).build()
         ));
+        caseData.getSchedulingAndListingFields().setHearingRoute(HearingRoute.LIST_ASSIST);
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
