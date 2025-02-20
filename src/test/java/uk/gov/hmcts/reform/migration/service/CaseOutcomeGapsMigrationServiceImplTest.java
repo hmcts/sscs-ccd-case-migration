@@ -91,7 +91,8 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
     @Test
     void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() {
         assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration. Case outcome is empty");
+            .hasMessageContaining("Skipping case for case outcome migration, "
+                                      + "Hearing outcome already exists or Case outcome is empty");
 
     }
 }

@@ -1,80 +1,105 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
+import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.migration.repository.CaseLoader;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
-@Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.hearingOutcomesMigration.enabled", havingValue = "true")
-public abstract class CaseOutcomeMigration implements DataMigrationService<Map<String, Object>> {
+public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
 
     static final String SKIPPING_CASE_MSG = "Skipping case for case outcome migration";
-    static final String EVENT_ID = "caseOutcomeMigration";
-    static final String EVENT_SUMMARY = "Hearing outcome linked to hearing date";
-    static final String EVENT_DESCRIPTION = "";
+    static final String CASE_OUTCOME_MIGRATION_ID = "caseOutcomeMigration";
+    static final String CASE_OUTCOME_MIGRATION_SUMMARY = "Hearing outcome linked to hearing date";
+    static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
+    private final String encodedDataString;
 
-    public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService) {
+    public CaseOutcomeMigration(CoreCaseDataService coreCaseDataService,
+                                HearingOutcomeService hearingOutcomeService,
+                                String encodedDataString) {
+        super(coreCaseDataService);
         this.hearingOutcomeService = hearingOutcomeService;
+        this.encodedDataString = encodedDataString;
     }
 
 
-
-    public Predicate<CaseDetails> accepts() {
-        return Objects::nonNull;
-    }
-
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
+    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
+        var data = caseDetails.getData();
         if (nonNull(data)) {
-            final SscsCaseData caseData = new ObjectMapper().registerModule(new JavaTimeModule())
-                .convertValue(data, SscsCaseData.class);
-
+            final SscsCaseData caseData = getSscsCaseDataFrom(data);
             String caseId = caseDetails.getId().toString();
             String hearingRoute = caseDetails.getData().get("hearingRoute").toString();
 
-            if (!hearingRoute.equalsIgnoreCase("listAssist")) {
+            if (!hearingRoute.equalsIgnoreCase(getMigrationRoute())) {
                 log.info(SKIPPING_CASE_MSG + " |Case id: {} "
-                                + "Reason: Hearing Route is not list assist it is {}",
-                        caseId, hearingRoute);
-                throw new Exception(SKIPPING_CASE_MSG + ". Hearing Route is not list assist");
+                                + "Reason: Hearing Route is not {} it is {}",
+                         caseId, getMigrationRoute(), hearingRoute);
+                throw new Exception(SKIPPING_CASE_MSG + ". Hearing Route is not " + getMigrationRoute());
             }
 
-            if (nonNull(caseData.getHearingOutcomes())
-                || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome())) {
+            if (isMigrationNeeded(caseData)) {
                 log.info(SKIPPING_CASE_MSG + "|Case id: {}|Case outcome: {}|Hearing outcome: {}|"
                              + "Reason: Hearing outcome already exists or Case outcome is empty",
                          caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes());
                 throw new Exception(SKIPPING_CASE_MSG + ", Hearing outcome already exists or Case outcome is empty");
             }
-
-            data.put(
-                "hearingOutcomes", hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData)
-            );
-
-            log.info("Case outcome reset from {} to null for case id {}", data.get("caseOutcome"), caseId);
+            setHearingOutcome(data, caseData, caseId);
+            log.info("case outcome found with value {} and set to null for case id {}",
+                     data.get("caseOutcome"), caseId);
             data.put("caseOutcome", null);
-
-            log.info("'Did Po Attend found' reset from {} to null for case id {}", data.get("didPoAttend"), caseId);
+            log.info("did Po Attend found with value {} and set to null for case id {}",
+                     data.get("didPoAttend"), caseId);
             data.put("didPoAttend", null);
-
-            log.info("Completed case outcome migration. Case id: {}", caseId);
+            log.info("Completed migration for case outcome migration. Case id: {}", caseId);
         }
         return data;
+    }
+
+    @Override
+    public List<CaseDetails> getMigrationCases() {
+        return new CaseLoader(encodedDataString).findCases();
+    }
+
+    boolean isMigrationNeeded(SscsCaseData caseData) {
+        return nonNull(caseData.getHearingOutcomes())
+            || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome());
+    }
+
+    String getMigrationRoute() {
+        return HearingRoute.LIST_ASSIST.toString();
+    }
+
+    void setHearingOutcome(Map<String, Object> data, SscsCaseData caseData, String caseId) throws Exception {
+        data.put(
+            "hearingOutcomes", hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData)
+        );
+    }
+
+    @Override
+    public String getEventId() {
+        return CASE_OUTCOME_MIGRATION_ID;
+    }
+
+    @Override
+    public String getEventDescription() {
+        return CASE_OUTCOME_MIGRATION_DESCRIPTION;
+    }
+
+    @Override
+    public String getEventSummary() {
+        return CASE_OUTCOME_MIGRATION_SUMMARY;
     }
 
     private CaseHearing getHmcHearing(String caseId) throws Exception {
@@ -89,17 +114,7 @@ public abstract class CaseOutcomeMigration implements DataMigrationService<Map<S
         return hmcHearings.get(0);
     }
 
-    abstract List<CaseHearing> getHearingsFromHmc(String caseId);
-
-    public String getEventId() {
-        return EVENT_ID;
-    }
-
-    public String getEventDescription() {
-        return EVENT_DESCRIPTION;
-    }
-
-    public String getEventSummary() {
-        return EVENT_SUMMARY;
+    List<CaseHearing> getHearingsFromHmc(String caseId) {
+        return List.of();
     }
 }
