@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
@@ -28,11 +27,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ElasticSearchRepositoryTest {
 
-    private static final String USER_TOKEN = "TEST_USER_TOKEN";
-
     private static final String CASE_TYPE = "CASE_TYPE";
-
-    private static final String AUTH_TOKEN = "Test_Auth_Token";
 
     private static final String INITIAL_QUERY = """
             {
@@ -95,7 +90,6 @@ public class ElasticSearchRepositoryTest {
             }""";
 
     private static final int QUERY_SIZE = 100;
-    private static final int CASE_PROCESS_LIMIT = 100;
 
     private ElasticSearchRepository elasticSearchRepository;
 
@@ -103,46 +97,32 @@ public class ElasticSearchRepositoryTest {
     private CoreCaseDataService coreCaseDataService;
 
     @Mock
-    private AuthTokenGenerator authTokenGenerator;
-    @Mock
-    private IdamRepository idamRepository;
-
-    @Mock
     private ElasticSearchQuery elasticSearchQuery;
 
     @BeforeEach
     public void setUp() {
         elasticSearchRepository = new ElasticSearchRepository(coreCaseDataService,
-                                                              authTokenGenerator,
-                                                              idamRepository,
-                                                              elasticSearchQuery,
                                                               CASE_TYPE,
-                                                              QUERY_SIZE,
-                                                              CASE_PROCESS_LIMIT);
+                                                              QUERY_SIZE);
     }
 
     @Test
     public void shouldReturnSearchResultsForCaseTypeElasticSearch() {
         SearchResult searchResult = mock(SearchResult.class);
-        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
-        when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(coreCaseDataService.getCases(
-            USER_TOKEN,
             CASE_TYPE,
-            AUTH_TOKEN,
             INITIAL_QUERY
         )).thenReturn(searchResult);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCases();
+        List<CaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
 
     @Test
     public void shouldNotReturnCaseDetailsForCaseTypeWhenSearchResultIsNull() {
-        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCases();
+        List<CaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
@@ -154,24 +134,18 @@ public class ElasticSearchRepositoryTest {
         caseDetails.add(details);
         SearchResult searchResult = mock(SearchResult.class);
         when(details.getId()).thenReturn(1677777777L);
-        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
-        when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         when(searchResult.getCases()).thenReturn(caseDetails);
         when(searchResult.getTotal()).thenReturn(1);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
         when(coreCaseDataService.getCases(
-            USER_TOKEN,
             CASE_TYPE,
-            AUTH_TOKEN,
             INITIAL_QUERY
         )).thenReturn(searchResult);
 
         SearchResult searchAfterResult = mock(SearchResult.class);
         when(coreCaseDataService.getCases(
-            USER_TOKEN,
             CASE_TYPE,
-            AUTH_TOKEN,
             SEARCH_AFTER_QUERY
         )).thenReturn(searchAfterResult);
 
@@ -180,17 +154,10 @@ public class ElasticSearchRepositoryTest {
         caseDetails1.add(details1);
         when(searchAfterResult.getCases()).thenReturn(caseDetails1, List.of());
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases();
+        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
         assertNotNull(returnCaseDetails);
-        verify(authTokenGenerator, times(1)).generate();
-        verify(coreCaseDataService, times(1)).getCases(USER_TOKEN,
-                                                      CASE_TYPE,
-                                                      AUTH_TOKEN,
-                                                      INITIAL_QUERY);
-        verify(coreCaseDataService, times(1)).getCases(USER_TOKEN,
-                                                      CASE_TYPE,
-                                                      AUTH_TOKEN,
-                                                      SEARCH_AFTER_QUERY);
+        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, INITIAL_QUERY);
+        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, SEARCH_AFTER_QUERY);
 
         assertEquals(2, returnCaseDetails.size());
     }
@@ -202,39 +169,19 @@ public class ElasticSearchRepositoryTest {
         when(details.getId()).thenReturn(1677777777L);
         caseDetails.add(details);
         SearchResult searchResult = mock(SearchResult.class);
-        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
-        when(idamRepository.generateUserToken()).thenReturn(USER_TOKEN);
         when(searchResult.getCases()).thenReturn(caseDetails);
         when(searchResult.getTotal()).thenReturn(1);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
-        when(coreCaseDataService.getCases(
-            USER_TOKEN,
-            CASE_TYPE,
-            AUTH_TOKEN,
-            INITIAL_QUERY
-        )).thenReturn(searchResult);
+        when(coreCaseDataService.getCases(CASE_TYPE, INITIAL_QUERY)).thenReturn(searchResult);
 
-        when(coreCaseDataService.getCases(
-            USER_TOKEN,
-            CASE_TYPE,
-            AUTH_TOKEN,
-            SEARCH_AFTER_QUERY
-        )).thenReturn(null);
+        when(coreCaseDataService.getCases(CASE_TYPE,SEARCH_AFTER_QUERY)).thenReturn(null);
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases();
+        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
         assertNotNull(returnCaseDetails);
 
-        verify(authTokenGenerator, times(1)).generate();
-
-        verify(coreCaseDataService, times(1)).getCases(USER_TOKEN,
-                                                      CASE_TYPE,
-                                                      AUTH_TOKEN,
-                                                      INITIAL_QUERY);
-        verify(coreCaseDataService, times(1)).getCases(USER_TOKEN,
-                                                      CASE_TYPE,
-                                                      AUTH_TOKEN,
-                                                      SEARCH_AFTER_QUERY);
+        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, INITIAL_QUERY);
+        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, SEARCH_AFTER_QUERY);
 
         assertEquals(1, returnCaseDetails.size());
     }

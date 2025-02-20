@@ -4,29 +4,39 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.migration.query.DwpElasticSearchQuery;
+import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
-public class DwpDataMigrationServiceImpl implements DataMigrationService<Map<String, Object>> {
+public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
 
     private static final String EVENT_ID = "dwpCaseMigration";
     private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
     private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
 
-    @Override
-    public Predicate<CaseDetails> accepts() {
-        return Objects::nonNull;
+    private final DwpElasticSearchQuery elasticSearchQuery;
+    private final ElasticSearchRepository repository;
+
+    public DwpDataMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
+                                       DwpElasticSearchQuery elasticSearchQuery,
+                                       ElasticSearchRepository repository) {
+        super(coreCaseDataService);
+        this.elasticSearchQuery = elasticSearchQuery;
+        this.repository = repository;
     }
 
     @Override
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) {
+    public Map<String, Object> migrate(CaseDetails caseDetails) {
+        var data = caseDetails.getData();
         if (nonNull(data)) {
             if (!data.containsKey("poAttendanceConfirmed")) {
                 data.put("poAttendanceConfirmed", "No");
@@ -41,6 +51,10 @@ public class DwpDataMigrationServiceImpl implements DataMigrationService<Map<Str
         return data;
     }
 
+    @Override
+    public List<CaseDetails> getMigrationCases() {
+        return repository.findCases(elasticSearchQuery);
+    }
 
     @Override
     public String getEventId() {

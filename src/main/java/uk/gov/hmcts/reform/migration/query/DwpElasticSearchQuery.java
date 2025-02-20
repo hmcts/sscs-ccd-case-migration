@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.migration.query;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
-public class DwpElasticSearchQuery extends AbstractElasticQuery implements ElasticSearchQuery {
+public class DwpElasticSearchQuery extends ElasticSearchQuery {
 
     private static final String DWP_START_QUERY = """
         {

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CaseManagementLocationQueryTest {
+
     private static final int QUERY_SIZE = 100;
 
     @Test

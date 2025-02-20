@@ -1,15 +1,17 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
+import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Hearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
@@ -18,36 +20,35 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.resetCaseOutcome;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.hearingOutcomesMigration.enabled", havingValue = "true")
-public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Map<String, Object>> {
-    static final String EVENT_ID = "caseOutcomeMigration";
-    static final String EVENT_SUMMARY = "Hearing outcome linked to hearing date";
-    static final String EVENT_DESCRIPTION = "";
+public class CaseOutcomeMigrationServiceImpl extends CaseMigrationProcessor {
+
+    static final String CASE_OUTCOME_MIGRATION_ID = "caseOutcomeMigration";
+    static final String CASE_OUTCOME_MIGRATION_SUMMARY = "Hearing outcome linked to hearing date";
+    static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
 
     private final HmcHearingsApiService hmcHearingsApiService;
+    private final String encodedDataString;
 
-    public CaseOutcomeMigrationServiceImpl(HmcHearingsApiService hmcHearingsApiService) {
+    public CaseOutcomeMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
+                                           HmcHearingsApiService hmcHearingsApiService,
+                                           @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
+                                           String encodedDataString) {
+        super(coreCaseDataService);
         this.hmcHearingsApiService = hmcHearingsApiService;
+        this.encodedDataString = encodedDataString;
     }
 
-    public Predicate<CaseDetails> accepts() {
-        return Objects::nonNull;
-    }
-
-    public Map<String, Object> migrate(Map<String, Object> data, CaseDetails caseDetails) throws Exception {
+    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
+        var data = caseDetails.getData();
         if (nonNull(data)) {
-
-            SscsCaseData caseData = JsonMapper.builder()
-                    .addModule(new JavaTimeModule())
-                    .build().convertValue(data, SscsCaseData.class);
-
+            SscsCaseData caseData = getSscsCaseDataFrom(data);
             String caseId = caseDetails.getId().toString();
 
             if (caseData.getHearingOutcomes() != null) {
@@ -78,24 +79,33 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
                 } else {
                     String hearingID = hmcHearings.get(0).getHearingId().toString();
                     log.info("Completed hearing found for case id {} with hearing id {}", caseId, hearingID);
-
                     Map<String, Object> hearingOutcomeMap = buildHearingOutcomeMap(caseData, hearingID);
-
                     data.put("hearingOutcomes", hearingOutcomeMap);
-
-                    log.info("case outcome found with value {} and set to null for case id {}",
-                            data.get("caseOutcome"), caseId);
-                    data.put("caseOutcome", null);
-
-                    log.info("did Po Attend found with value {} and set to null for case id {}",
-                            data.get("didPoAttend"), caseId);
-                    data.put("didPoAttend", null);
-
-                    log.info("Completed migration for case outcome migration. Case id: {}", caseId);
+                    resetCaseOutcome(data, caseId);
                 }
             }
         }
         return data;
+    }
+
+    @Override
+    public List<CaseDetails> getMigrationCases() {
+        return new CaseLoader(encodedDataString).findCases();
+    }
+
+    @Override
+    public String getEventId() {
+        return CASE_OUTCOME_MIGRATION_ID;
+    }
+
+    @Override
+    public String getEventDescription() {
+        return CASE_OUTCOME_MIGRATION_DESCRIPTION;
+    }
+
+    @Override
+    public String getEventSummary() {
+        return CASE_OUTCOME_MIGRATION_SUMMARY;
     }
 
     private static HearingDetails getHearingDetails(SscsCaseData caseData, String hearingID) {
@@ -121,17 +131,5 @@ public class CaseOutcomeMigrationServiceImpl  implements DataMigrationService<Ma
         HearingOutcome hearingOutcome = HearingOutcome.builder().value(hearingOutcomeDetails).build();
 
         return Map.of("hearingOutcomes", hearingOutcome);
-    }
-
-    public String getEventId() {
-        return EVENT_ID;
-    }
-
-    public String getEventDescription() {
-        return EVENT_DESCRIPTION;
-    }
-
-    public String getEventSummary() {
-        return EVENT_SUMMARY;
     }
 }

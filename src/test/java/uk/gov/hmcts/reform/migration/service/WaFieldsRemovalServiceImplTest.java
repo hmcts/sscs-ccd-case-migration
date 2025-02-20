@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,11 +25,14 @@ import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.E
 @Slf4j
 public class WaFieldsRemovalServiceImplTest {
 
-    WaFieldsRemovalServiceImpl waFieldsRemovalService = new WaFieldsRemovalServiceImpl();
+    WaFieldsRemovalServiceImpl waFieldsRemovalService;
+    private CaseDetails caseDetails;
 
-    private final CaseDetails caseDetails = CaseDetails.builder()
-        .id(1234L)
-        .build();
+    @BeforeEach
+    public void setUp() {
+        waFieldsRemovalService = new WaFieldsRemovalServiceImpl(null, null);
+        caseDetails = CaseDetails.builder().id(1234L).build();
+    }
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -42,7 +46,7 @@ public class WaFieldsRemovalServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() {
-        Map<String, Object> result = waFieldsRemovalService.migrate(null, null);
+        Map<String, Object> result = waFieldsRemovalService.migrate(caseDetails);
         assertNull(result);
     }
 
@@ -58,7 +62,10 @@ public class WaFieldsRemovalServiceImplTest {
     void shouldReturnPassedDataWhenMigrateCalled(String key, List<String> value) {
         Map<String, Object> data = new HashMap<>();
         data.put(key, value);
-        Map<String, Object> result = waFieldsRemovalService.migrate(data, caseDetails);
+        caseDetails.setData(data);
+
+        Map<String, Object> result = waFieldsRemovalService.migrate(caseDetails);
+
         assertNotNull(result);
         assertNull(result.get(key));
     }

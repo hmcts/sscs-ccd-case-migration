@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -14,11 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WaDataMigrationServiceImplTest {
 
-    private final WaDataMigrationServiceImpl waDataMigrationService = new WaDataMigrationServiceImpl();
+    private WaDataMigrationServiceImpl waDataMigrationService;
 
-    private final CaseDetails caseDetails = CaseDetails.builder()
-        .id(1234L)
-        .build();
+    private CaseDetails caseDetails;
+
+    @BeforeEach
+    void setUp() {
+        waDataMigrationService =
+            new WaDataMigrationServiceImpl(null,null, null);
+        caseDetails = CaseDetails.builder().id(1234L).build();
+    }
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -33,7 +39,10 @@ class WaDataMigrationServiceImplTest {
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() {
         Map<String, Object> data = new HashMap<>();
-        Map<String, Object> result = waDataMigrationService.migrate(data, caseDetails);
+        caseDetails.setData(data);
+
+        Map<String, Object> result = waDataMigrationService.migrate(caseDetails);
+
         assertNotNull(result);
         assertEquals(data, result);
         assertTrue(data.containsKey("preWorkAllocation"));
@@ -41,7 +50,8 @@ class WaDataMigrationServiceImplTest {
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = waDataMigrationService.migrate(null, null);
+        Map<String, Object> result = waDataMigrationService.migrate(caseDetails);
+
         assertNull(result);
     }
 

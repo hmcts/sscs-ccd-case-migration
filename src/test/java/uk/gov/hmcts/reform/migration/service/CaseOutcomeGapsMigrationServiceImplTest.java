@@ -1,14 +1,14 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 
@@ -16,23 +16,28 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.EVENT_SUMMARY;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.REMOVE_GAPS_OUTCOME_TAB_ID;
+import static uk.gov.hmcts.reform.migration.service.CaseOutcomeGapsMigrationServiceImpl.REMOVE_GAPS_OUTCOME_TAB_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetailsToSscsCaseDetails;
 
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 public class CaseOutcomeGapsMigrationServiceImplTest {
 
-    private final  CaseDetails caseDetails = CaseDetails.builder()
-        .id(1234L)
-        .data(Map.of("hearingRoute", "gaps"))
-        .build();
+    private CaseDetails caseDetails;
+    private CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService;
 
-    CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
-        new CaseOutcomeGapsMigrationServiceImpl();
+    @BeforeEach
+    public void setUp() {
+        SscsCaseData caseData = SscsCaseData.builder()
+            .schedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(HearingRoute.GAPS).build())
+            .build();
+        caseDetails = CaseDetails.builder().id(1234L).data(buildCaseDataMap(caseData)).build();
+        caseOutcomeGapsMigrationService = new CaseOutcomeGapsMigrationServiceImpl(null, null);
+    }
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
@@ -46,67 +51,46 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() throws Exception {
-        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(null, null);
+        caseDetails.setData(null);
+        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(caseDetails);
         assertThat(result).isNull();
     }
 
     @Test
     void shouldReturnCorrectValuesForCaseOutcomeGapsMigration() {
-        assertThat(EVENT_ID).isEqualTo(caseOutcomeGapsMigrationService.getEventId());
-        assertThat(EVENT_DESCRIPTION).isEqualTo(caseOutcomeGapsMigrationService.getEventDescription());
-        assertThat(EVENT_SUMMARY).isEqualTo(caseOutcomeGapsMigrationService.getEventSummary());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_ID).isEqualTo(caseOutcomeGapsMigrationService.getEventId());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION)
+            .isEqualTo(caseOutcomeGapsMigrationService.getEventDescription());
+        assertThat(REMOVE_GAPS_OUTCOME_TAB_SUMMARY).isEqualTo(caseOutcomeGapsMigrationService.getEventSummary());
     }
 
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() throws Exception {
+        var caseData = convertCaseDetailsToSscsCaseDetails(caseDetails).getData();
+        caseData.setCaseOutcome(CaseOutcome.builder().caseOutcome("1234").didPoAttend(YesNo.YES).build());
+        caseDetails.setData(buildCaseDataMap(caseData));
 
-        CaseOutcome caseOutcome = CaseOutcome.builder().caseOutcome("1234").didPoAttend(YesNo.YES).build();
+        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(caseDetails);
 
-        SscsCaseData caseData = SscsCaseData.builder()
-            .caseOutcome(caseOutcome)
-            .build();
-
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
-
-        CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
-            new CaseOutcomeGapsMigrationServiceImpl();
-        Map<String, Object> result = caseOutcomeGapsMigrationService.migrate(data, caseDetails);
         assertThat(result).isNotNull();
-
         assertThat(result.get("caseOutcome")).isNull();
         assertThat(result.get("didPoAttend")).isNull();
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledWithNonGapsCase() throws Exception {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(1234L)
-            .data(Map.of("hearingRoute", "listAssist"))
-            .build();
+    void shouldThrowErrorWhenMigrateCalledWithNonGapsCase() {
+        var caseData = convertCaseDetailsToSscsCaseDetails(caseDetails).getData();
+        caseData.getSchedulingAndListingFields().setHearingRoute(HearingRoute.LIST_ASSIST);
+        caseDetails.setData(buildCaseDataMap(caseData));
 
-        SscsCaseData caseData = buildCaseData();
-
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
-
-        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(data, caseDetails))
+        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
             .hasMessageContaining("Skipping case for case outcome migration. Hearing Route is not gaps");
 
     }
 
     @Test
-    void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() throws Exception {
-        SscsCaseData caseData = SscsCaseData.builder()
-            .build();
-
-        var data = new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(caseData, new TypeReference<Map<String, Object>>() {});
-
-        CaseOutcomeGapsMigrationServiceImpl caseOutcomeGapsMigrationService =
-            new CaseOutcomeGapsMigrationServiceImpl();
-
-        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(data, caseDetails))
+    void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() {
+        assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
             .hasMessageContaining("Skipping case for case outcome migration. Case outcome is empty");
 
     }

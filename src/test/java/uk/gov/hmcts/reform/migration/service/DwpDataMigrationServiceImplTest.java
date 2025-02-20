@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
@@ -14,11 +15,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DwpDataMigrationServiceImplTest {
 
-    private final DwpDataMigrationServiceImpl dwpDataMigrationService = new DwpDataMigrationServiceImpl();
+    private DwpDataMigrationServiceImpl dwpDataMigrationService;
 
-    private final CaseDetails caseDetails = CaseDetails.builder()
-        .id(1234L)
-        .build();
+    private CaseDetails caseDetails;
+
+    @BeforeEach
+    public void setup() {
+        dwpDataMigrationService =
+            new DwpDataMigrationServiceImpl(null,null, null);
+        caseDetails = CaseDetails.builder().id(1234L).build();
+    }
 
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
@@ -33,7 +39,10 @@ class DwpDataMigrationServiceImplTest {
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() {
         Map<String, Object> data = new HashMap<>();
-        Map<String, Object> result = dwpDataMigrationService.migrate(data, caseDetails);
+        caseDetails.setData(data);
+
+        Map<String, Object> result = dwpDataMigrationService.migrate(caseDetails);
+
         assertNotNull(result);
         assertEquals(data, result);
     }
@@ -44,7 +53,10 @@ class DwpDataMigrationServiceImplTest {
         data.put("poAttendanceConfirmed", "Yes");
         data.put("dwpIsOfficerAttending", "Yes");
         data.put("tribunalDirectPoToAttend", "Yes");
-        Map<String, Object> result = dwpDataMigrationService.migrate(data, caseDetails);
+        caseDetails.setData(data);
+
+        Map<String, Object> result = dwpDataMigrationService.migrate(caseDetails);
+
         assertNotNull(result);
         assertEquals("Yes", data.get("poAttendanceConfirmed"));
         assertEquals("Yes", data.get("dwpIsOfficerAttending"));
@@ -53,7 +65,8 @@ class DwpDataMigrationServiceImplTest {
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = dwpDataMigrationService.migrate(null, null);
+        Map<String, Object> result = dwpDataMigrationService.migrate(caseDetails);
+
         assertNull(result);
     }
 
