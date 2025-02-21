@@ -106,7 +106,8 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         var hmcHearings = getHearingsFromHmc(caseId);
 
         if (hmcHearings.size() != 1) {
-            log.info(SKIPPING_CASE_MSG + "|Case id: {}|No of hearings: {}|Reason: Zero or More than one hearing found",
+            log.info(SKIPPING_CASE_MSG
+                     + " |Case id: {}|No of hearings: {} |Reason: Zero or More than one hearing found",
                      caseId, hmcHearings.size()
             );
             throw new Exception(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
@@ -114,7 +115,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         return hmcHearings.get(0);
     }
 
-    List<CaseHearing> getHearingsFromHmc(String caseId) {
+    List<CaseHearing> getHearingsFromHmc(String caseId) throws Exception {
         return List.of();
     }
 }

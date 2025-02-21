@@ -23,13 +23,23 @@ public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
     public NonListedHearingsOutcomesMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
                                               CoreCaseDataService coreCaseDataService,
-                                              @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
+                                              @Value("${migration.nonListedHearingsOutcomes.encoded-data-string}")
                                               String encodedDataString) {
         super(coreCaseDataService, hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 
-    List<CaseHearing> getHearingsFromHmc(String caseId) {
+    List<CaseHearing> getHearingsFromHmc(String caseId) throws Exception {
+
+        List<CaseHearing> allhmcHearings = hmcHearingsApiService.getHearingsRequest(caseId, null)
+                .getCaseHearings();
+        if (allhmcHearings.size() != 1) {
+            log.info(SKIPPING_CASE_MSG
+                    + " |Case id: {}|No of hearings: {} |Reason: Zero or More than one hearing found",
+                    caseId, allhmcHearings.size());
+            throw new Exception(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
+        }
+
         return hmcHearingsApiService.getHearingsRequest(caseId, null)
             .getCaseHearings()
             .stream()

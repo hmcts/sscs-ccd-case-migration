@@ -21,7 +21,7 @@ public class CompletedHearingsOutcomesMigration extends CaseOutcomeMigration {
     public CompletedHearingsOutcomesMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
                                               CoreCaseDataService coreCaseDataService,
-                                              @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
+                                              @Value("${migration.completedHearingsOutcomes.encoded-data-string}")
                                               String encodedDataString) {
         super(coreCaseDataService, hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
