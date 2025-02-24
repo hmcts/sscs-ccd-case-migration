@@ -40,9 +40,7 @@ public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
             throw new Exception(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
         }
 
-        return hmcHearingsApiService.getHearingsRequest(caseId, null)
-            .getCaseHearings()
-            .stream()
+        return allhmcHearings.stream()
             .filter(hearing -> !List.of(COMPLETED, LISTED).contains(hearing.getHmcStatus()))
             .toList();
     }
