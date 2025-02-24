@@ -22,8 +22,6 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
     static final String REMOVE_GAPS_OUTCOME_TAB_SUMMARY = "Outcome tab removed as it is Gaps case";
     static final String REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION = "Outcome tab removed as it is Gaps case";
 
-    private final String encodedDataString;
-
     public CaseOutcomeGapsMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
                                                @Value("${migration.caseOutcomeGapsMigration.encoded-data-string}")
                                                String encodedDataString) {
