@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
