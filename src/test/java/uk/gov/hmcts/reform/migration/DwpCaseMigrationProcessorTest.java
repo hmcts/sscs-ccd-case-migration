@@ -7,12 +7,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.DwpDataMigrationServiceImpl;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
@@ -42,8 +40,6 @@ public class DwpCaseMigrationProcessorTest {
     @Mock
     private UpdateCcdCaseService ccdUpdateService;
     @Mock
-    private SscsCcdConvertService ccdConvertService;
-    @Mock
     private ForkJoinPool threadPool;
     @Mock
     private ElasticSearchRepository elasticSearchRepository;
@@ -53,16 +49,13 @@ public class DwpCaseMigrationProcessorTest {
     @InjectMocks
     DwpDataMigrationServiceImpl caseMigrationProcessor;
 
-    private final CaseDetails caseDetails = CaseDetails.builder().id(1677777777L).jurisdiction("SSCS").build();
-    private final SscsCaseDetails sscsCaseDetails =
-        SscsCaseDetails.builder().id(1677777777L).jurisdiction("SSCS").build();
-    private final List<CaseDetails> caseList = List.of(caseDetails, CaseDetails.builder().build());
+    private final SscsCaseDetails caseDetails = SscsCaseDetails.builder().id(1677777777L).jurisdiction("SSCS").build();
+    private final List<SscsCaseDetails> caseList = List.of(caseDetails, SscsCaseDetails.builder().build());
 
     @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(caseMigrationProcessor, "caseProcessLimit", 1);
         ReflectionTestUtils.setField(caseMigrationProcessor, "idamService", idamService);
-        ReflectionTestUtils.setField(caseMigrationProcessor, "ccdConvertService", ccdConvertService);
         ReflectionTestUtils.setField(caseMigrationProcessor, "ccdUpdateService", ccdUpdateService);
     }
 
@@ -106,7 +99,6 @@ public class DwpCaseMigrationProcessorTest {
 
     private void setupMocks() {
         when(elasticSearchRepository.findCases(any())).thenReturn(caseList);
-        when(ccdConvertService.getCaseDetails(caseDetails)).thenReturn(sscsCaseDetails);
         when(idamService.getIdamTokens()).thenReturn(tokens);
         when(ccdUpdateService
                  .updateCaseV2(eq(1677777777L), eq(EVENT_ID), eq(tokens), any()))

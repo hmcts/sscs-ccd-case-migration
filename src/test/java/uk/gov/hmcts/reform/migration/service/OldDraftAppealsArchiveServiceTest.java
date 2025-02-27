@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.OldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -39,14 +38,14 @@ class OldDraftAppealsArchiveServiceTest {
 
     @Test
     void shouldReturnMigrationCases() {
-        var caseA = CaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(5)).build();
-        var caseB = CaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(6)).build();
-        var caseC = CaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(7)).build();
-        var caseD = CaseDetails.builder().id(1L).state("appealCreated").createdDate(now().minusMonths(6)).build();
-        List<CaseDetails> caseList = List.of(caseA, caseB, caseC, caseD);
+        var caseA = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(5)).build();
+        var caseB = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(6)).build();
+        var caseC = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(7)).build();
+        var caseD = SscsCaseDetails.builder().id(1L).state("appealCreated").createdDate(now().minusMonths(6)).build();
+        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD);
         when(repository.findCases(searchQuery)).thenReturn(caseList);
 
-        List<CaseDetails> migrationCases = oldDraftAppealsArchiveService.getMigrationCases();
+        List<SscsCaseDetails> migrationCases = oldDraftAppealsArchiveService.getMigrationCases();
 
         assertThat(migrationCases).hasSize(2);
         assertThat(migrationCases).contains(caseB, caseC);

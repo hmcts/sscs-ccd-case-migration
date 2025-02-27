@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
@@ -13,7 +12,7 @@ public interface DataMigrationService<T> {
         return Objects::nonNull;
     }
 
-    List<CaseDetails> getMigrationCases();
+    List<SscsCaseDetails> getMigrationCases();
 
     void migrateCases(String caseType);
 

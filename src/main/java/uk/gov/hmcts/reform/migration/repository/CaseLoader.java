@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.migration.repository;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,14 +27,14 @@ public class CaseLoader {
         this.encodedDataString = encodedDataString;
     }
 
-    public List<CaseDetails> findCases() {
-        List<CaseDetails> cases = new ArrayList<>();
+    public List<SscsCaseDetails> findCases() {
+        List<SscsCaseDetails> cases = new ArrayList<>();
         try {
             JSONArray data = new JSONArray(decompressAndB64Decode(encodedDataString));
             AtomicInteger unprocessed = new AtomicInteger(data.length());
             log.info("Number of cases to be migrated: ({})", unprocessed.get());
 
-            data.iterator().forEachRemaining(row -> cases.add(CaseDetails.builder()
+            data.iterator().forEachRemaining(row -> cases.add(SscsCaseDetails.builder()
                               .jurisdiction(JURISDICTION)
                               .id(((JSONObject) row).getLong(ID_COLUMN))
                               .build()));

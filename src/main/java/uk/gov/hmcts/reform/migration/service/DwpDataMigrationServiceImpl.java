@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.migration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.query.DwpElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
@@ -50,7 +49,7 @@ public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
     }
 
     @Override
-    public List<CaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> getMigrationCases() {
         return repository.findCases(elasticSearchQuery);
     }
 
