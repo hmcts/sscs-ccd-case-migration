@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
@@ -21,13 +19,11 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-@Component
 public abstract class CaseMigrationProcessor implements DataMigrationService<Map<String, Object>> {
 
     public static final String LOG_STRING = "-----------------------------------------\n";
 
-    @Autowired
-    private CoreCaseDataService coreCaseDataService;
+    private final CoreCaseDataService coreCaseDataService;
 
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
