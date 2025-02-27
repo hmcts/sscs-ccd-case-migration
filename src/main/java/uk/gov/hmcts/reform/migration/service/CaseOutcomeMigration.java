@@ -4,13 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -26,45 +25,45 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     private final HearingOutcomeService hearingOutcomeService;
     private final String encodedDataString;
 
-    public CaseOutcomeMigration(CoreCaseDataService coreCaseDataService,
-                                HearingOutcomeService hearingOutcomeService,
+    public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService,
                                 String encodedDataString) {
-        super(coreCaseDataService);
         this.hearingOutcomeService = hearingOutcomeService;
         this.encodedDataString = encodedDataString;
     }
 
-
-    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
+    @Override
+    public void migrate(SscsCaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
-            final SscsCaseData caseData = getSscsCaseDataFrom(data);
+            final SscsCaseData caseData = caseDetails.getData();
             String caseId = caseDetails.getId().toString();
-            String hearingRoute = caseDetails.getData().get("hearingRoute").toString();
 
-            if (!hearingRoute.equalsIgnoreCase(getMigrationRoute())) {
+            var hearingRoute = data.getSchedulingAndListingFields().getHearingRoute();
+
+            if (!hearingRoute.equals(getMigrationRoute())) {
                 log.info(SKIPPING_CASE_MSG + " |Case id: {} "
                                 + "Reason: Hearing Route is not {} it is {}",
-                        caseId, getMigrationRoute(), hearingRoute);
-                throw new Exception(SKIPPING_CASE_MSG + ". Hearing Route is not " + getMigrationRoute());
+                         caseId, getMigrationRoute(), hearingRoute);
+                throw new RuntimeException(SKIPPING_CASE_MSG + ". Hearing Route is not " + getMigrationRoute());
             }
 
             if (isMigrationNeeded(caseData)) {
                 log.info(SKIPPING_CASE_MSG + "|Case id: {}|Case outcome: {}|Hearing outcome: {}|"
-                                + "Reason: Hearing outcome already exists or Case outcome is empty",
-                        caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes());
-                throw new Exception(SKIPPING_CASE_MSG + ", Hearing outcome already exists or Case outcome is empty");
+                             + "Reason: Hearing outcome already exists or Case outcome is empty",
+                         caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes());
+                throw new RuntimeException(SKIPPING_CASE_MSG
+                                               + ", Hearing outcome already exists or Case outcome is empty");
             }
             setHearingOutcome(data, caseData, caseId);
+            var caseOutcome = data.getCaseOutcome();
             log.info("case outcome found with value {} and set to null for case id {}",
-                    data.get("caseOutcome"), caseId);
-            data.put("caseOutcome", null);
+                     caseOutcome.getCaseOutcome(), caseId);
+            caseOutcome.setCaseOutcome(null);
             log.info("did Po Attend found with value {} and set to null for case id {}",
-                    data.get("didPoAttend"), caseId);
-            data.put("didPoAttend", null);
+                     caseOutcome.getDidPoAttend(), caseId);
+            caseOutcome.setDidPoAttend(null);
             log.info("Completed migration for case outcome migration. Case id: {}", caseId);
         }
-        return data;
     }
 
     @Override
@@ -74,17 +73,15 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
 
     boolean isMigrationNeeded(SscsCaseData caseData) {
         return nonNull(caseData.getHearingOutcomes())
-                || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome());
+            || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome());
     }
 
-    String getMigrationRoute() {
-        return HearingRoute.LIST_ASSIST.toString();
+    HearingRoute getMigrationRoute() {
+        return HearingRoute.LIST_ASSIST;
     }
 
-    void setHearingOutcome(Map<String, Object> data, SscsCaseData caseData, String caseId) throws Exception {
-        data.put(
-                "hearingOutcomes", hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData)
-        );
+    void setHearingOutcome(SscsCaseData data, SscsCaseData caseData, String caseId) {
+        data.setHearingOutcomes(hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData));
     }
 
     @Override
@@ -102,20 +99,19 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         return CASE_OUTCOME_MIGRATION_SUMMARY;
     }
 
-    private CaseHearing getHmcHearing(String caseId) throws Exception {
+    private CaseHearing getHmcHearing(String caseId) {
         var hmcHearings = getHearingsFromHmc(caseId);
 
         if (hmcHearings.size() != 1) {
-            log.info(SKIPPING_CASE_MSG
-                            + " |Case id: {}|No of hearings: {} |Reason: Zero or More than one hearing found",
-                    caseId, hmcHearings.size()
+            log.info(SKIPPING_CASE_MSG + "|Case id: {}|No of hearings: {}|Reason: Zero or More than one hearing found",
+                     caseId, hmcHearings.size()
             );
-            throw new Exception(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
+            throw new RuntimeException(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
         }
         return hmcHearings.get(0);
     }
 
-    List<CaseHearing> getHearingsFromHmc(String caseId) throws Exception {
+    List<CaseHearing> getHearingsFromHmc(String caseId) {
         return List.of();
     }
 }

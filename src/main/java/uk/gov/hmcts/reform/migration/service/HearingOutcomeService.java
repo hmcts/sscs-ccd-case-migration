@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.sscs.service.VenueService;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Map;
+import java.util.List;
 
 import static java.util.Objects.isNull;
 
@@ -29,7 +29,7 @@ public class HearingOutcomeService {
         this.venueService = venueService;
     }
 
-    public Map<String, HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, SscsCaseData caseData) {
+    public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, SscsCaseData caseData) {
         log.info("Creating hearing outcome with hearingID {}", hmcHearing.getHearingId().toString());
 
         var hearingDaySchedule = isNull(hmcHearing.getHearingDaySchedule())
@@ -51,9 +51,7 @@ public class HearingOutcomeService {
             .epimsId(hearingDaySchedule.getHearingVenueEpimsId())
             .build();
 
-        HearingOutcome hearingOutcome = HearingOutcome.builder().value(hearingOutcomeDetails).build();
-
-        return Map.of("hearingOutcomes", hearingOutcome);
+        return List.of(HearingOutcome.builder().value(hearingOutcomeDetails).build());
     }
 
     private Venue mapEpimsIdToVenue(String epimsId) {

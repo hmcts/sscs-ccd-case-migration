@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 
 import java.util.List;
@@ -25,14 +24,13 @@ public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
 
     public NonListedHearingsOutcomesMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
-                                              CoreCaseDataService coreCaseDataService,
-                                              @Value("${migration.nonListedHearingsOutcomes.encoded-data-string}")
+                                              @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
                                               String encodedDataString) {
-        super(coreCaseDataService, hearingOutcomeService, encodedDataString);
+        super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 
-    List<CaseHearing> getHearingsFromHmc(String caseId) throws Exception {
+    List<CaseHearing> getHearingsFromHmc(String caseId) {
 
         List<CaseHearing> allhmcHearings = hmcHearingsApiService.getHearingsRequest(caseId, null)
                 .getCaseHearings();
@@ -40,7 +38,7 @@ public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
             log.info(SKIPPING_CASE_MSG
                             + " |Case id: {}|No of hearings: {} |Reason: Zero or More than one hearing found",
                     caseId, allhmcHearings.size());
-            throw new Exception(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
+            throw new RuntimeException(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
         }
 
         return allhmcHearings.stream()

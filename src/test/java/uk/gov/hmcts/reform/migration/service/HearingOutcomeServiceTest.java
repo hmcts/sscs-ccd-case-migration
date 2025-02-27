@@ -59,9 +59,9 @@ public class HearingOutcomeServiceTest {
                 .build()
         ).build();
 
-        var hearingOutcome = hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, caseData);
+        var hearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, caseData);
 
-        assertEquals(expectedHearingOutcome, hearingOutcome.get("hearingOutcomes"));
+        assertEquals(expectedHearingOutcome, hearingOutcomes.get(0));
     }
 
     @Test
@@ -99,8 +99,8 @@ public class HearingOutcomeServiceTest {
                 .build()
         ).build();
 
-        var hearingOutcome = hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, caseData);
+        var hearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, caseData);
 
-        assertEquals(expectedHearingOutcome, hearingOutcome.get("hearingOutcomes"));
+        assertEquals(expectedHearingOutcome, hearingOutcomes.get(0));
     }
 }

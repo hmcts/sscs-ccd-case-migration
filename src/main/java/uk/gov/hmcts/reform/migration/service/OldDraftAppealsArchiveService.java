@@ -5,12 +5,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
-import uk.gov.hmcts.reform.migration.query.SixMonthsOldDraftsSearchQuery;
+import uk.gov.hmcts.reform.migration.query.OldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT;
@@ -24,13 +23,11 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
     static final String EVENT_SUMMARY = "Auto archive draft appeals over 6 months old";
     static final String EVENT_DESCRIPTION = "Auto archive draft appeals over 6 months old";
 
-    private final SixMonthsOldDraftsSearchQuery searchQuery;
+    private final OldDraftsSearchQuery searchQuery;
     private final ElasticSearchRepository repository;
 
-    public OldDraftAppealsArchiveService(CoreCaseDataService coreCaseDataService,
-                                         SixMonthsOldDraftsSearchQuery searchQuery,
+    public OldDraftAppealsArchiveService(OldDraftsSearchQuery searchQuery,
                                          ElasticSearchRepository repository) {
-        super(coreCaseDataService);
         this.searchQuery = searchQuery;
         this.repository = repository;
     }
@@ -44,9 +41,9 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
             .toList();
     }
 
-    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
+    @Override
+    public void migrate(SscsCaseDetails caseDetails) {
         log.info("Archiving draft appeal with case id: {}", caseDetails.getId());
-        return caseDetails.getData();
     }
 
     public String getEventId() {

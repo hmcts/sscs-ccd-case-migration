@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.migration.query;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SixMonthsOldDraftsSearchQuery extends ElasticSearchQuery {
+public class OldDraftsSearchQuery extends ElasticSearchQuery {
 
     static final String SIX_MONTHS_OLD_DRAFTS_QUERY = """
         {

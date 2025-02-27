@@ -5,12 +5,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.WaElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -26,20 +26,17 @@ public class WaDataMigrationServiceImpl extends CaseMigrationProcessor {
     private final WaElasticSearchQuery elasticSearchQuery;
     private final ElasticSearchRepository repository;
 
-    public WaDataMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
-                                      WaElasticSearchQuery elasticSearchQuery, ElasticSearchRepository repository) {
-        super(coreCaseDataService);
+    public WaDataMigrationServiceImpl(WaElasticSearchQuery elasticSearchQuery, ElasticSearchRepository repository) {
         this.elasticSearchQuery = elasticSearchQuery;
         this.repository = repository;
     }
 
     @Override
-    public Map<String, Object> migrate(CaseDetails caseDetails) {
+    public void migrate(SscsCaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
-            data.put("preWorkAllocation", "Yes");
+            data.setPreWorkAllocation(YesNo.YES);
         }
-        return data;
     }
 
     @Override
