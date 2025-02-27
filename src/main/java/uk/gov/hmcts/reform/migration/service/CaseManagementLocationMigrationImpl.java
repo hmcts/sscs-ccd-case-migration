@@ -7,14 +7,15 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.CaseManagementLocactionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Appointee;
 import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
+import uk.gov.hmcts.reform.sscs.ccd.domain.CaseManagementLocation;
 import uk.gov.hmcts.reform.sscs.ccd.domain.RegionalProcessingCenter;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.model.CourtVenue;
 import uk.gov.hmcts.reform.sscs.service.AirLookupService;
 import uk.gov.hmcts.reform.sscs.service.RefDataService;
@@ -23,7 +24,6 @@ import uk.gov.hmcts.reform.sscs.service.VenueService;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
@@ -48,14 +48,12 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
     private final AirLookupService airLookupService;
     private final HashMap<String, String> regiondIdsCache = new HashMap<>();
 
-    public CaseManagementLocationMigrationImpl(CoreCaseDataService coreCaseDataService,
-                                               CaseManagementLocactionQuery searchQuery,
+    public CaseManagementLocationMigrationImpl(CaseManagementLocactionQuery searchQuery,
                                                ElasticSearchRepository repository,
                                                RefDataService refDataService,
                                                VenueService venueService,
                                                RegionalProcessingCenterService regionalProcessingCenterService,
                                                AirLookupService airLookupService) {
-        super(coreCaseDataService);
         this.searchQuery = searchQuery;
         this.repository = repository;
         this.refDataService = refDataService;
@@ -70,22 +68,19 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
     }
 
     @Override
-    public Map<String, Object> migrate(CaseDetails caseDetails) {
-        Map<String, Object> data = caseDetails.getData();
-        if (nonNull(data)) {
-            if (!data.containsKey("caseManagementLocation")) {
-                Map<String, Object> managementLocation = getManagementLocation(data);
+    public void migrate(SscsCaseDetails caseDetails) {
+        var caseData = caseDetails.getData();
+        if (nonNull(caseData)) {
+            if (isNull(caseData.getCaseManagementLocation())) {
+                var managementLocation = getManagementLocation(caseData);
                 if (!isNull(managementLocation)) {
-                    data.put("caseManagementLocation", managementLocation);
+                    caseData.setCaseManagementLocation(managementLocation);
                 }
             }
         }
-
-        return data;
     }
 
-    private Map<String, Object> getManagementLocation(Map<String, Object> data) {
-        SscsCaseData caseData = getSscsCaseDataFrom(data);
+    private CaseManagementLocation getManagementLocation(SscsCaseData caseData) {
         String postCode = resolvePostCode(caseData);
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 
@@ -105,7 +100,7 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
         String regionId = getRegionId(venueEpimsId);
 
         if (!isNull(regionId) && !isNull(rpc.getEpimsId())) {
-            return Map.of("region", regionId, "baseLocation", rpc.getEpimsId());
+            return CaseManagementLocation.builder().region(regionId).baseLocation(rpc.getEpimsId()).build();
         }
         return null;
     }

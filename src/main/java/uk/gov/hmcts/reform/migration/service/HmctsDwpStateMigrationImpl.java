@@ -6,12 +6,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -26,17 +24,15 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     private final String encodedDataString;
 
-    public HmctsDwpStateMigrationImpl(CoreCaseDataService coreCaseDataService,
-                                      @Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
+    public HmctsDwpStateMigrationImpl(@Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
                                       String encodedDataString) {
-        super(coreCaseDataService);
         this.encodedDataString = encodedDataString;
     }
 
-    public Map<String, Object> migrate(CaseDetails caseDetails) throws Exception {
-        var data = caseDetails.getData();
-        if (nonNull(data)) {
-            SscsCaseData caseData = getSscsCaseDataFrom(data);
+    @Override
+    public void migrate(SscsCaseDetails caseDetails) {
+        var caseData = caseDetails.getData();
+        if (nonNull(caseData)) {
             String caseId = caseDetails.getId().toString();
 
             if (caseData.getHmctsDwpState() == null
@@ -44,15 +40,14 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
                 log.info("Skipping case for hmctsDwpState migration. Case id: {} Reason: hmctsDwpState is not"
                              + " 'failedSendingFurtherEvidence' it is {}",
                          caseId, caseData.getHmctsDwpState());
-                throw new Exception("Skipping case for hmctsDwpState migration. Reason: hmctsDwpState is not"
+                throw new RuntimeException("Skipping case for hmctsDwpState migration. Reason: hmctsDwpState is not"
                                         + " 'failedSendingFurtherEvidence'");
             } else {
                 log.info("case {} has hmctsDwpState as failedSendingFurtherEvidence. "
                              + "Removing it and setting it to null", caseId);
-                data.put("hmctsDwpState", null);
+                caseData.setHmctsDwpState(null);
             }
         }
-        return data;
     }
 
     @Override

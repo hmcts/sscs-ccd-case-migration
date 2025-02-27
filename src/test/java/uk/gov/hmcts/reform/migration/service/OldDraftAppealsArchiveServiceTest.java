@@ -6,28 +6,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
-import uk.gov.hmcts.reform.migration.query.SixMonthsOldDraftsSearchQuery;
+import uk.gov.hmcts.reform.migration.query.OldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 class OldDraftAppealsArchiveServiceTest {
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-    @Mock
-    private SixMonthsOldDraftsSearchQuery searchQuery;
+    private OldDraftsSearchQuery searchQuery;
     @Mock
     private ElasticSearchRepository repository;
 
@@ -36,7 +34,7 @@ class OldDraftAppealsArchiveServiceTest {
     @BeforeEach
     void setUp() {
         oldDraftAppealsArchiveService =
-            new OldDraftAppealsArchiveService(coreCaseDataService, searchQuery, repository);
+            new OldDraftAppealsArchiveService(searchQuery, repository);
     }
 
     @Test
@@ -55,11 +53,13 @@ class OldDraftAppealsArchiveServiceTest {
     }
 
     @Test
-    void shouldReturnMigratedCaseData() throws Exception {
-        var data = buildCaseDataMap(buildCaseData());
-        var caseDetails = CaseDetails.builder().data(data).build();
+    void shouldReturnMigratedCaseData() {
+        var data = buildCaseData();
+        var caseDetails = SscsCaseDetails.builder().data(data).build();
 
-        assertThat(oldDraftAppealsArchiveService.migrate(caseDetails)).isEqualTo(data);
+        oldDraftAppealsArchiveService.migrate(caseDetails);
+
+        assertEquals(caseDetails.getData(), data);
     }
 
     @Test

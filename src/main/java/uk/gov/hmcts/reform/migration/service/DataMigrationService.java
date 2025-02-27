@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,7 +9,7 @@ import java.util.function.Predicate;
 
 public interface DataMigrationService<T> {
 
-    default Predicate<CaseDetails> accepts() {
+    default Predicate<SscsCaseDetails> accepts() {
         return Objects::nonNull;
     }
 
@@ -16,7 +17,7 @@ public interface DataMigrationService<T> {
 
     void migrateCases(String caseType);
 
-    T migrate(CaseDetails caseDetails) throws Exception;
+    void migrate(SscsCaseDetails caseDetails);
 
     String getEventId();
 

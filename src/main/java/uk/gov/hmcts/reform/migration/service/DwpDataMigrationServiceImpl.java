@@ -5,13 +5,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.DwpElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 
 import java.util.List;
-import java.util.Map;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -19,36 +20,33 @@ import static java.util.Objects.nonNull;
 @ConditionalOnProperty(value = "migration.dwp-enhancements.enabled", havingValue = "true")
 public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
 
-    private static final String EVENT_ID = "dwpCaseMigration";
-    private static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
-    private static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
+    public static final String EVENT_ID = "dwpCaseMigration";
+    public static final String EVENT_SUMMARY = "Migrate case for DWP Enhancements";
+    public static final String EVENT_DESCRIPTION = "Migrate case for DWP Enhancements";
 
     private final DwpElasticSearchQuery elasticSearchQuery;
     private final ElasticSearchRepository repository;
 
-    public DwpDataMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
-                                       DwpElasticSearchQuery elasticSearchQuery,
+    public DwpDataMigrationServiceImpl(DwpElasticSearchQuery elasticSearchQuery,
                                        ElasticSearchRepository repository) {
-        super(coreCaseDataService);
         this.elasticSearchQuery = elasticSearchQuery;
         this.repository = repository;
     }
 
     @Override
-    public Map<String, Object> migrate(CaseDetails caseDetails) {
+    public void migrate(SscsCaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
-            if (!data.containsKey("poAttendanceConfirmed")) {
-                data.put("poAttendanceConfirmed", "No");
+            if (isNull(data.getPoAttendanceConfirmed())) {
+                data.setPoAttendanceConfirmed(YesNo.NO);
             }
-            if (!data.containsKey("dwpIsOfficerAttending")) {
-                data.put("dwpIsOfficerAttending", "No");
+            if (isNull(data.getDwpIsOfficerAttending())) {
+                data.setDwpIsOfficerAttending(YesNo.NO.getValue());
             }
-            if (!data.containsKey("tribunalDirectPoToAttend")) {
-                data.put("tribunalDirectPoToAttend", "No");
+            if (isNull(data.getTribunalDirectPoToAttend())) {
+                data.setTribunalDirectPoToAttend(YesNo.NO);
             }
         }
-        return data;
     }
 
     @Override

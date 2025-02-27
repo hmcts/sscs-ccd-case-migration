@@ -3,15 +3,11 @@ package uk.gov.hmcts.reform.migration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.WorkAllocationFields;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,12 +22,12 @@ import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.E
 public class WaFieldsRemovalServiceImplTest {
 
     WaFieldsRemovalServiceImpl waFieldsRemovalService;
-    private CaseDetails caseDetails;
+    private SscsCaseDetails caseDetails;
 
     @BeforeEach
     public void setUp() {
-        waFieldsRemovalService = new WaFieldsRemovalServiceImpl(null, null);
-        caseDetails = CaseDetails.builder().id(1234L).build();
+        waFieldsRemovalService = new WaFieldsRemovalServiceImpl(null);
+        caseDetails = SscsCaseDetails.builder().id(1234L).build();
     }
 
     @Test
@@ -46,8 +42,8 @@ public class WaFieldsRemovalServiceImplTest {
 
     @Test
     void shouldSkipWhenDataIsNull() {
-        Map<String, Object> result = waFieldsRemovalService.migrate(caseDetails);
-        assertNull(result);
+        waFieldsRemovalService.migrate(caseDetails);
+        assertNull(caseDetails.getData());
     }
 
     @Test
@@ -57,25 +53,25 @@ public class WaFieldsRemovalServiceImplTest {
         assertEquals(EVENT_SUMMARY, waFieldsRemovalService.getEventSummary());
     }
 
-    @ParameterizedTest
-    @MethodSource("getDataValues")
-    void shouldReturnPassedDataWhenMigrateCalled(String key, List<String> value) {
-        Map<String, Object> data = new HashMap<>();
-        data.put(key, value);
-        caseDetails.setData(data);
+    @Test
+    void shouldReturnPassedDataWhenMigrateCalled() {
+        caseDetails.setData(
+            SscsCaseData.builder()
+                .workAllocationFields(
+                    WorkAllocationFields.builder()
+                        .scannedDocumentTypes(
+                            List.of("appellantEvidence", "representativeEvidence", "Other document", "dl16")
+                        )
+                        .assignedCaseRoles(List.of("hearing-judge"))
+                        .previouslyAssignedCaseRoles(List.of("[CREATOR]", "hearing-judge"))
+                        .build())
+                .build());
 
-        Map<String, Object> result = waFieldsRemovalService.migrate(caseDetails);
+        waFieldsRemovalService.migrate(caseDetails);
 
-        assertNotNull(result);
-        assertNull(result.get(key));
-    }
-
-    private static Stream<Arguments> getDataValues() {
-        return Stream.of(
-            Arguments.of("scannedDocumentTypes",
-                         List.of("appellantEvidence", "representativeEvidence", "Other document", "dl16")),
-            Arguments.of("assignedCaseRoles", List.of("hearing-judge")),
-            Arguments.of("previouslyAssignedCaseRoles", List.of("[CREATOR]", "hearing-judge"))
-        );
+        assertNotNull(caseDetails.getData());
+        assertNull(caseDetails.getData().getWorkAllocationFields().getScannedDocumentTypes());
+        assertNull(caseDetails.getData().getWorkAllocationFields().getAssignedCaseRoles());
+        assertNull(caseDetails.getData().getWorkAllocationFields().getPreviouslyAssignedCaseRoles());
     }
 }

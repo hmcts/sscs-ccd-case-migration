@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 
 import java.util.List;
@@ -20,10 +19,9 @@ public class CompletedHearingsOutcomesMigration extends CaseOutcomeMigration {
 
     public CompletedHearingsOutcomesMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
-                                              CoreCaseDataService coreCaseDataService,
-                                              @Value("${migration.completedHearingsOutcomes.encoded-data-string}")
+                                              @Value("${migration.hearingOutcomesMigration.encoded-data-string}")
                                               String encodedDataString) {
-        super(coreCaseDataService, hearingOutcomeService, encodedDataString);
+        super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 

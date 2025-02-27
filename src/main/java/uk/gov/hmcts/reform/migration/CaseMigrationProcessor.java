@@ -1,16 +1,16 @@
 package uk.gov.hmcts.reform.migration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
+import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,12 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
 
     public static final String LOG_STRING = "-----------------------------------------\n";
 
-    private final CoreCaseDataService coreCaseDataService;
+    @Autowired
+    private IdamService idamService;
+    @Autowired
+    private UpdateCcdCaseService ccdUpdateService;
+    @Autowired
+    private SscsCcdConvertService ccdConvertService;
 
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
@@ -34,10 +39,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
     @Value("${case-migration.processing.limit}")
     private int caseProcessLimit;
 
-    public CaseMigrationProcessor(CoreCaseDataService coreCaseDataService) {
-        this.coreCaseDataService = coreCaseDataService;
-    }
-
     public void migrateCases(String caseType) {
         validateCaseType(caseType);
         log.info("Data migration of cases started for case type: {}", caseType);
@@ -45,7 +46,8 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
         threadPool.submit(() -> getMigrationCases()
             .parallelStream()
             .limit(caseProcessLimit)
-            .forEach(caseDetails -> updateCase(caseType, caseDetails)));
+            .map(caseDetails -> ccdConvertService.getCaseDetails(caseDetails))
+            .forEach(this::updateCase));
         shutdownThreadPool(threadPool);
         log.info("""
                 {}Data migration completed
@@ -64,11 +66,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
         log.info("Data migration of cases completed");
     }
 
-    public SscsCaseData getSscsCaseDataFrom(Map<String, Object> data) {
-        return new ObjectMapper().registerModule(new JavaTimeModule())
-            .convertValue(data, SscsCaseData.class);
-    }
-
     private void validateCaseType(String caseType) {
         if (!StringUtils.hasText(caseType)) {
             throw new CaseMigrationException("Provide case type for the migration");
@@ -79,23 +76,21 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
         }
     }
 
-    private void updateCase(String caseType, CaseDetails caseDetails) {
+    private void updateCase(SscsCaseDetails caseDetails) {
         if (accepts().test(caseDetails)) {
-            Long id = caseDetails.getId();
-            log.info("Updating case {}", id);
+            Long caseId = caseDetails.getId();
+            log.info("Updating case {}", caseId);
             try {
                 log.debug("Case data: {}", caseDetails.getData());
-                coreCaseDataService.update(
-                    caseType,
-                    caseDetails.getId(),
-                    caseDetails.getJurisdiction(),
-                    this
-                );
-                log.info("Case {} successfully updated", id);
-                migratedCases.add(id);
+                ccdUpdateService.updateCaseV2(caseId, getEventId(), idamService.getIdamTokens(), sscsCaseDetails -> {
+                    migrate(sscsCaseDetails);
+                    return new UpdateCcdCaseService.UpdateResult(getEventSummary(), getEventDescription());
+                });
+                log.info("Case {} successfully updated", caseId);
+                migratedCases.add(caseId);
             } catch (Exception e) {
-                log.error("Case {} update failed due to: {}", id, e.getMessage());
-                failedCases.add(id);
+                log.error("Case {} update failed due to: {}", caseId, e.getMessage());
+                failedCases.add(caseId);
             }
         } else {
             log.info("Case {} does not meet criteria for migration", caseDetails.getId());

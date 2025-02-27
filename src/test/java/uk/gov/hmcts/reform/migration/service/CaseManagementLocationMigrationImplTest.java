@@ -5,18 +5,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.query.CaseManagementLocactionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.model.CourtVenue;
 import uk.gov.hmcts.reform.sscs.service.AirLookupService;
 import uk.gov.hmcts.reform.sscs.service.RefDataService;
 import uk.gov.hmcts.reform.sscs.service.RegionalProcessingCenterService;
 import uk.gov.hmcts.reform.sscs.service.VenueService;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.YES;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 public class CaseManagementLocationMigrationImplTest {
@@ -50,12 +47,12 @@ public class CaseManagementLocationMigrationImplTest {
 
     private CaseManagementLocationMigrationImpl caseManagementLocationService;
 
-    private final  CaseDetails caseDetails = CaseDetails.builder().id(1234L).build();
+    private final SscsCaseDetails caseDetails = SscsCaseDetails.builder().id(1234L).build();
 
     @BeforeEach
     void setUp() {
         caseManagementLocationService =
-            new CaseManagementLocationMigrationImpl(null, searchQuery, repository, refDataService,
+            new CaseManagementLocationMigrationImpl(searchQuery, repository, refDataService,
                                                     venueService, regionalProcessingCenterService, airLookupService);
     }
 
@@ -71,21 +68,21 @@ public class CaseManagementLocationMigrationImplTest {
     }
 
     @Test
-    void shouldReturnPassedDataWhenMigrateCalled() {
+    void shouldMigrateDataWhenCaseManagementLocationIsNull() {
         SscsCaseData caseData = buildCaseData();
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(rpc);
-        var data = buildCaseDataMap(caseData);
-        caseDetails.setData(data);
+        caseDetails.setData(caseData);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
 
-        Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
+        caseManagementLocationService.migrate(caseDetails);
 
-        assertNotNull(result);
-        assertEquals(data, result);
+        assertNotNull(caseData.getCaseManagementLocation());
+        assertEquals(caseData.getCaseManagementLocation().getBaseLocation(), "rpgEpims");
+        assertEquals(caseData.getCaseManagementLocation().getRegion(), "id");
     }
 
     @Test
@@ -94,17 +91,15 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.getAppeal().getAppellant().setAddress(null);
         var rpc = caseData.getRegionalProcessingCenter().toBuilder().epimsId("rpgEpims").build();
         caseData.setRegionalProcessingCenter(rpc);
-        var data = buildCaseDataMap(caseData);
-        caseDetails.setData(data);
+        caseDetails.setData(caseData);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
 
-        Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
+        caseManagementLocationService.migrate(caseDetails);
 
-        assertNotNull(result);
-        assertNotNull(result.get("caseManagementLocation"));
+        assertNotNull(caseData.getCaseManagementLocation());
     }
 
     @Test
@@ -112,8 +107,7 @@ public class CaseManagementLocationMigrationImplTest {
         SscsCaseData caseData = buildCaseData();
         caseData.getAppeal().getAppellant().setAddress(null);
         caseData.setRegionalProcessingCenter(null);
-        var data = buildCaseDataMap(caseData);
-        caseDetails.setData(data);
+        caseDetails.setData(caseData);
 
         assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(caseDetails));
     }
@@ -125,23 +119,22 @@ public class CaseManagementLocationMigrationImplTest {
         when(regionalProcessingCenterService.getByPostcode(anyString(), anyBoolean())).thenReturn(rpc);
         caseData.setRegionalProcessingCenter(null);
         caseData.getAppeal().getAppellant().setIsAppointee(YES);
-        var data = buildCaseDataMap(caseData);
-        caseDetails.setData(data);
+        caseDetails.setData(caseData);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
             .thenReturn(CourtVenue.builder().regionId("id").build());
 
-        Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
+        caseManagementLocationService.migrate(caseDetails);
 
-        assertNotNull(result);
-        assertEquals(data, result);
+        assertNotNull(caseData.getCaseManagementLocation());
     }
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = caseManagementLocationService.migrate(caseDetails);
-        assertNull(result);
+        caseManagementLocationService.migrate(caseDetails);
+
+        assertNull(caseDetails.getData());
     }
 
     @Test

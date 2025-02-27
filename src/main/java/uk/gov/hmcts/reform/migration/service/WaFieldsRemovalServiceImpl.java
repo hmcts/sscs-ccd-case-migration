@@ -6,11 +6,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -26,30 +25,29 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
 
     private final String encodedDataString;
 
-    public WaFieldsRemovalServiceImpl(CoreCaseDataService coreCaseDataService,
-                                      @Value("${migration.waFieldsRemoval.encoded-data-string}")
+    public WaFieldsRemovalServiceImpl(@Value("${migration.waFieldsRemoval.encoded-data-string}")
                                       String encodedDataString) {
-        super(coreCaseDataService);
         this.encodedDataString = encodedDataString;
     }
 
-    public Map<String, Object> migrate(CaseDetails caseDetails) {
+    @Override
+    public void migrate(SscsCaseDetails caseDetails) {
         var data = caseDetails.getData();
-        if (nonNull(data)) {
-            if (data.containsKey("scannedDocumentTypes")) {
-                log.info("Scanned document types found {}", data.get("scannedDocumentTypes"));
-                data.put("scannedDocumentTypes", null);
+        if (nonNull(data) && nonNull(data.getWorkAllocationFields())) {
+            var waFields = data.getWorkAllocationFields();
+            if (nonNull(waFields.getScannedDocumentTypes())) {
+                log.info("Scanned document types found {}", waFields.getScannedDocumentTypes());
+                waFields.setScannedDocumentTypes(null);
             }
-            if (data.containsKey("assignedCaseRoles")) {
-                log.info("Assigned case roles found {}", data.get("assignedCaseRoles"));
-                data.put("assignedCaseRoles", null);
+            if (nonNull(waFields.getAssignedCaseRoles())) {
+                log.info("Assigned case roles found {}", waFields.getAssignedCaseRoles());
+                waFields.setAssignedCaseRoles(null);
             }
-            if (data.containsKey("previouslyAssignedCaseRoles")) {
-                log.info("Previously assigned case roles found {}", data.get("previouslyAssignedCaseRoles"));
-                data.put("previouslyAssignedCaseRoles", null);
+            if (nonNull(waFields.getPreviouslyAssignedCaseRoles())) {
+                log.info("Previously assigned case roles found {}", waFields.getPreviouslyAssignedCaseRoles());
+                waFields.setPreviouslyAssignedCaseRoles(null);
             }
         }
-        return data;
     }
 
     @Override
