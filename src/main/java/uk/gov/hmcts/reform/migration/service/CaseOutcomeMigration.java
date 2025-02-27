@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
@@ -67,7 +66,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     }
 
     @Override
-    public List<CaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> getMigrationCases() {
         return new CaseLoader(encodedDataString).findCases();
     }
 

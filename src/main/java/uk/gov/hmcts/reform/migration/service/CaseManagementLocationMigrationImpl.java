@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.query.CaseManagementLocactionQuery;
@@ -63,7 +62,7 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
     }
 
     @Override
-    public List<CaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> getMigrationCases() {
         return repository.findCases(searchQuery);
     }
 

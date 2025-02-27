@@ -4,55 +4,60 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.SearchCcdCaseService;
+import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Objects.nonNull;
 
 @Repository
 @Slf4j
 public class ElasticSearchRepository {
 
-    private final CoreCaseDataService coreCaseDataService;
+    private final SearchCcdCaseService ccdSearchService;
+    private final IdamService idamService;
     private final String caseType;
 
     private final int querySize;
 
     @Autowired
-    public ElasticSearchRepository(CoreCaseDataService coreCaseDataService,
+    public ElasticSearchRepository(SearchCcdCaseService ccdSearchService,
+                                   IdamService idamService,
                                    @Value("${migration.caseType}") String caseType,
                                    @Value("${case-migration.elasticsearch.querySize}") int querySize) {
-        this.coreCaseDataService = coreCaseDataService;
+        this.ccdSearchService = ccdSearchService;
+        this.idamService = idamService;
         this.caseType = caseType;
         this.querySize = querySize;
     }
 
-    public List<CaseDetails> findCases(ElasticSearchQuery elasticSearchQuery) {
+    public List<SscsCaseDetails> findCases(ElasticSearchQuery elasticSearchQuery) {
         log.info("Processing the Case Migration search for case type {}.", caseType);
 
         String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
-        SearchResult searchResult =
-            coreCaseDataService.getCases(caseType, initialQuery);
-        List<CaseDetails> caseDetails = new ArrayList<>();
+        var searchResultCases =
+            ccdSearchService.findCaseBySearchCriteria(initialQuery, idamService.getIdamTokens());
+        List<SscsCaseDetails> caseDetails = new ArrayList<>();
 
-        if (searchResult != null && searchResult.getTotal() > 0) {
-            List<CaseDetails> searchResultCases = searchResult.getCases();
+        if (nonNull(searchResultCases) && !searchResultCases.isEmpty()) {
             caseDetails.addAll(searchResultCases);
             String searchAfterValue = searchResultCases.get(searchResultCases.size() - 1).getId().toString();
 
             boolean keepSearching;
             do {
-                String subsequentElasticSearchQuery = elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
-                SearchResult subsequentSearchResult =
-                    coreCaseDataService.getCases(caseType, subsequentElasticSearchQuery);
+                String subsequentSearchQuery =
+                    elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
+                var subsequentSearchCases =
+                    ccdSearchService.findCaseBySearchCriteria(subsequentSearchQuery, idamService.getIdamTokens());
 
                 keepSearching = false;
-                if (subsequentSearchResult != null) {
-                    caseDetails.addAll(subsequentSearchResult.getCases());
-                    keepSearching = !subsequentSearchResult.getCases().isEmpty();
+                if (nonNull(subsequentSearchCases)) {
+                    caseDetails.addAll(subsequentSearchCases);
+                    keepSearching = !subsequentSearchCases.isEmpty();
                     if (keepSearching) {
                         searchAfterValue = caseDetails.get(caseDetails.size() - 1).getId().toString();
                     }

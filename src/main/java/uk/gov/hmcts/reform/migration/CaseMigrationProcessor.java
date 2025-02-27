@@ -8,7 +8,6 @@ import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
@@ -27,8 +26,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
     private IdamService idamService;
     @Autowired
     private UpdateCcdCaseService ccdUpdateService;
-    @Autowired
-    private SscsCcdConvertService ccdConvertService;
 
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
@@ -46,7 +43,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
         threadPool.submit(() -> getMigrationCases()
             .parallelStream()
             .limit(caseProcessLimit)
-            .map(caseDetails -> ccdConvertService.getCaseDetails(caseDetails))
             .forEach(this::updateCase));
         shutdownThreadPool(threadPool);
         log.info("""
