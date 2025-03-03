@@ -21,6 +21,7 @@ import java.util.concurrent.ForkJoinPool;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -98,7 +99,7 @@ public class DwpCaseMigrationProcessorTest {
     }
 
     private void setupMocks() {
-        when(elasticSearchRepository.findCases(any())).thenReturn(caseList);
+        when(elasticSearchRepository.findCases(any(), anyBoolean())).thenReturn(caseList);
         when(idamService.getIdamTokens()).thenReturn(tokens);
         when(ccdUpdateService
                  .updateCaseV2(eq(1677777777L), eq(EVENT_ID), eq(tokens), any()))

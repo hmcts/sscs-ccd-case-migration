@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public abstract class CaseMigrationProcessor implements DataMigrationService<Map
                 log.debug("Case data: {}", caseDetails.getData());
                 ccdUpdateService.updateCaseV2(caseId, getEventId(), idamService.getIdamTokens(), sscsCaseDetails -> {
                     migrate(sscsCaseDetails);
-                    return new UpdateCcdCaseService.UpdateResult(getEventSummary(), getEventDescription());
+                    return new UpdateResult(getEventSummary(), getEventDescription());
                 });
                 log.info("Case {} successfully updated", caseId);
                 migratedCases.add(caseId);

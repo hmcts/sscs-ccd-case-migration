@@ -50,7 +50,7 @@ public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> getMigrationCases() {
-        return repository.findCases(elasticSearchQuery);
+        return repository.findCases(elasticSearchQuery, true);
     }
 
     @Override

@@ -20,27 +20,23 @@ public class ElasticSearchRepository {
 
     private final SearchCcdCaseService ccdSearchService;
     private final IdamService idamService;
-    private final String caseType;
 
     private final int querySize;
 
     @Autowired
     public ElasticSearchRepository(SearchCcdCaseService ccdSearchService,
                                    IdamService idamService,
-                                   @Value("${migration.caseType}") String caseType,
                                    @Value("${case-migration.elasticsearch.querySize}") int querySize) {
         this.ccdSearchService = ccdSearchService;
         this.idamService = idamService;
-        this.caseType = caseType;
         this.querySize = querySize;
     }
 
-    public List<SscsCaseDetails> findCases(ElasticSearchQuery elasticSearchQuery) {
-        log.info("Processing the Case Migration search for case type {}.", caseType);
+    public List<SscsCaseDetails> findCases(ElasticSearchQuery elasticSearchQuery, boolean onlySubmittedCases) {
+        log.info("Processing the Case Migration search.");
 
         String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
-        var searchResultCases =
-            ccdSearchService.findCaseBySearchCriteria(initialQuery, idamService.getIdamTokens());
+        var searchResultCases = searchForCasesInCcd(initialQuery, onlySubmittedCases);
         List<SscsCaseDetails> caseDetails = new ArrayList<>();
 
         if (nonNull(searchResultCases) && !searchResultCases.isEmpty()) {
@@ -51,8 +47,7 @@ public class ElasticSearchRepository {
             do {
                 String subsequentSearchQuery =
                     elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
-                var subsequentSearchCases =
-                    ccdSearchService.findCaseBySearchCriteria(subsequentSearchQuery, idamService.getIdamTokens());
+                var subsequentSearchCases = searchForCasesInCcd(subsequentSearchQuery, onlySubmittedCases);
 
                 keepSearching = false;
                 if (nonNull(subsequentSearchCases)) {
@@ -66,5 +61,12 @@ public class ElasticSearchRepository {
         }
         log.info("The Case Migration has processed caseDetails {}.", caseDetails.size());
         return caseDetails;
+    }
+
+    private List<SscsCaseDetails> searchForCasesInCcd(String elasticSearchQuery, boolean onlySubmittedCases) {
+        if (onlySubmittedCases) {
+            return ccdSearchService.findSubmittedCasesBySearchCriteria(elasticSearchQuery, idamService.getIdamTokens());
+        }
+        return ccdSearchService.findAllCasesBySearchCriteria(elasticSearchQuery, idamService.getIdamTokens());
     }
 }

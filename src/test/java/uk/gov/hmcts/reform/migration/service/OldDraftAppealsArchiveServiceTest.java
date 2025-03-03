@@ -43,7 +43,7 @@ class OldDraftAppealsArchiveServiceTest {
         var caseC = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(7)).build();
         var caseD = SscsCaseDetails.builder().id(1L).state("appealCreated").createdDate(now().minusMonths(6)).build();
         List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD);
-        when(repository.findCases(searchQuery)).thenReturn(caseList);
+        when(repository.findCases(searchQuery, false)).thenReturn(caseList);
 
         List<SscsCaseDetails> migrationCases = oldDraftAppealsArchiveService.getMigrationCases();
 
