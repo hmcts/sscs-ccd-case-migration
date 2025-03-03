@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
-import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
@@ -36,9 +34,8 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     @Value("${case-migration.processing.limit}")
     private int caseProcessLimit;
 
-    public void migrateCases(String caseType) {
-        validateCaseType(caseType);
-        log.info("Data migration of cases started for case type: {}", caseType);
+    public void migrateCases() {
+        log.info("Data migration of cases started");
         ForkJoinPool threadPool = new ForkJoinPool(25);
         threadPool.submit(() -> getMigrationCases()
             .parallelStream()
@@ -60,16 +57,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
         log.info("Migrated cases: {}", getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
         log.info("Failed/Skipped Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
         log.info("Data migration of cases completed");
-    }
-
-    private void validateCaseType(String caseType) {
-        if (!StringUtils.hasText(caseType)) {
-            throw new CaseMigrationException("Provide case type for the migration");
-        }
-
-        if (caseType.split(",").length > 1) {
-            throw new CaseMigrationException("Only One case type at a time is allowed for the migration");
-        }
     }
 
     private void updateCase(SscsCaseDetails caseDetails) {

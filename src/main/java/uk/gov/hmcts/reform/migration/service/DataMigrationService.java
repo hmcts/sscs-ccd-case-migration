@@ -14,7 +14,7 @@ public interface DataMigrationService {
 
     List<SscsCaseDetails> getMigrationCases();
 
-    void migrateCases(String caseType);
+    void migrateCases();
 
     void migrate(SscsCaseDetails caseDetails);
 
