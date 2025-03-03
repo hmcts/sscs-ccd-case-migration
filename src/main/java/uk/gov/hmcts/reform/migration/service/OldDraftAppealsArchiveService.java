@@ -33,7 +33,7 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> getMigrationCases() {
-        return repository.findCases(searchQuery)
+        return repository.findCases(searchQuery, false)
             .stream()
             .filter(caseDetails -> DRAFT.toString().equals(caseDetails.getState())
                 && !caseDetails.getCreatedDate().isAfter(now().minusMonths(6)))

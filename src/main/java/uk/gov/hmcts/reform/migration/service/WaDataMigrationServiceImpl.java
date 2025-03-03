@@ -40,7 +40,7 @@ public class WaDataMigrationServiceImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> getMigrationCases() {
-        return repository.findCases(elasticSearchQuery);
+        return repository.findCases(elasticSearchQuery, true);
     }
 
     public String getEventId() {

@@ -63,7 +63,7 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
 
     @Override
     public List<SscsCaseDetails> getMigrationCases() {
-        return repository.findCases(searchQuery);
+        return repository.findCases(searchQuery, true);
     }
 
     @Override
