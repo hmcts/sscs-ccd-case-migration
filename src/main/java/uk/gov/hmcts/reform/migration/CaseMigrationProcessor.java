@@ -14,12 +14,11 @@ import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public abstract class CaseMigrationProcessor implements DataMigrationService<Map<String, Object>> {
+public abstract class CaseMigrationProcessor implements DataMigrationService {
 
     public static final String LOG_STRING = "-----------------------------------------\n";
 
