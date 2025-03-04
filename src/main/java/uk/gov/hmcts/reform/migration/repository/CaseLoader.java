@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
 
 @Slf4j
@@ -51,5 +52,13 @@ public class CaseLoader {
             inflaterOutputStream.write(Base64.getDecoder().decode(b64Compressed));
         }
         return outputStream.toString(StandardCharsets.UTF_8);
+    }
+
+    public static String compressAndB64Encode(String text) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
+            deflaterOutputStream.write(text.getBytes());
+        }
+        return new String(Base64.getEncoder().encode(outputStream.toByteArray()));
     }
 }
