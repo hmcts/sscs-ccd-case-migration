@@ -78,7 +78,9 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     }
 
     void setHearingOutcome(SscsCaseData caseData, String caseId) {
-        caseData.setHearingOutcomes(hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData));
+        caseData.setHearingOutcomes(
+            hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData)
+        );
     }
 
     @Override
