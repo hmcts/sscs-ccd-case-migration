@@ -28,12 +28,12 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
         return HearingRoute.GAPS;
     }
 
-    boolean isMigrationNeeded(SscsCaseData caseData) {
+    boolean skipMigration(SscsCaseData caseData) {
         return isNull(caseData.getCaseOutcome().getCaseOutcome());
     }
 
     @Override
-    void setHearingOutcome(SscsCaseData data, SscsCaseData caseData, String caseId) {
+    void setHearingOutcome(SscsCaseData caseData, String caseId) {
         // do nothing
     }
 

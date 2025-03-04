@@ -32,12 +32,10 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
 
     @Override
     public void migrate(SscsCaseDetails caseDetails) {
-        var data = caseDetails.getData();
-        if (nonNull(data)) {
-            final SscsCaseData caseData = caseDetails.getData();
+        var caseData = caseDetails.getData();
+        if (nonNull(caseData)) {
             String caseId = caseDetails.getId().toString();
-
-            var hearingRoute = data.getSchedulingAndListingFields().getHearingRoute();
+            var hearingRoute = caseData.getSchedulingAndListingFields().getHearingRoute();
 
             if (!hearingRoute.equals(getMigrationRoute())) {
                 log.info(SKIPPING_CASE_MSG + " |Case id: {} "
@@ -46,15 +44,15 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
                 throw new RuntimeException(SKIPPING_CASE_MSG + ". Hearing Route is not " + getMigrationRoute());
             }
 
-            if (isMigrationNeeded(caseData)) {
+            if (skipMigration(caseData)) {
                 log.info(SKIPPING_CASE_MSG + "|Case id: {}|Case outcome: {}|Hearing outcome: {}|"
                              + "Reason: Hearing outcome already exists or Case outcome is empty",
                          caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes());
                 throw new RuntimeException(SKIPPING_CASE_MSG
                                                + ", Hearing outcome already exists or Case outcome is empty");
             }
-            setHearingOutcome(data, caseData, caseId);
-            var caseOutcome = data.getCaseOutcome();
+            setHearingOutcome(caseData, caseId);
+            var caseOutcome = caseData.getCaseOutcome();
             log.info("case outcome found with value {} and set to null for case id {}",
                      caseOutcome.getCaseOutcome(), caseId);
             caseOutcome.setCaseOutcome(null);
@@ -70,7 +68,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         return new CaseLoader(encodedDataString).findCases();
     }
 
-    boolean isMigrationNeeded(SscsCaseData caseData) {
+    boolean skipMigration(SscsCaseData caseData) {
         return nonNull(caseData.getHearingOutcomes())
             || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome());
     }
@@ -79,8 +77,8 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         return HearingRoute.LIST_ASSIST;
     }
 
-    void setHearingOutcome(SscsCaseData data, SscsCaseData caseData, String caseId) {
-        data.setHearingOutcomes(hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData));
+    void setHearingOutcome(SscsCaseData caseData, String caseId) {
+        caseData.setHearingOutcomes(hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData));
     }
 
     @Override
