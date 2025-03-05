@@ -3,11 +3,12 @@ package uk.gov.hmcts.reform.migration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.query.WaElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
@@ -31,15 +32,16 @@ public class WaDataMigrationServiceImpl extends CaseMigrationProcessor {
     }
 
     @Override
-    public void migrate(SscsCaseDetails caseDetails) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
-            data.setPreWorkAllocation(YesNo.YES);
+            data.put("preWorkAllocation", "Yes");
         }
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<SscsCaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return repository.findCases(elasticSearchQuery, true);
     }
 

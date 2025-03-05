@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.migration.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
@@ -11,23 +12,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.YesNo.YES;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 class DwpDataMigrationServiceImplTest {
 
     private DwpDataMigrationServiceImpl dwpDataMigrationService;
 
-    private SscsCaseDetails caseDetails;
+    private CaseDetails caseDetails;
 
     @BeforeEach
     public void setup() {
         dwpDataMigrationService =
             new DwpDataMigrationServiceImpl(null,null);
-        caseDetails = SscsCaseDetails.builder().id(1234L).build();
+        caseDetails = CaseDetails.builder().id(1234L).build();
     }
 
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
-        assertTrue(dwpDataMigrationService.accepts().test(caseDetails));
+        var sscsCaseDetails = SscsCaseDetails.builder().id(1234L).build();
+        assertTrue(dwpDataMigrationService.accepts().test(sscsCaseDetails));
     }
 
     @Test
@@ -37,7 +40,7 @@ class DwpDataMigrationServiceImplTest {
 
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() {
-        var data = SscsCaseData.builder().build();
+        var data = buildCaseDataMap(SscsCaseData.builder().build());
         caseDetails.setData(data);
 
         dwpDataMigrationService.migrate(caseDetails);
@@ -53,7 +56,7 @@ class DwpDataMigrationServiceImplTest {
             .dwpIsOfficerAttending(YES.getValue())
             .tribunalDirectPoToAttend(YES)
             .build();
-        caseDetails.setData(data);
+        caseDetails.setData(buildCaseDataMap(data));
 
         dwpDataMigrationService.migrate(caseDetails);
 
@@ -66,7 +69,6 @@ class DwpDataMigrationServiceImplTest {
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
         dwpDataMigrationService.migrate(caseDetails);
-
         assertNull(caseDetails.getData());
     }
 

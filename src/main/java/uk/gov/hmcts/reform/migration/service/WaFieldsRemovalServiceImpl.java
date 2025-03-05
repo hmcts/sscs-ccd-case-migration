@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
@@ -30,27 +32,27 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
     }
 
     @Override
-    public void migrate(SscsCaseDetails caseDetails) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
         var data = caseDetails.getData();
-        if (nonNull(data) && nonNull(data.getWorkAllocationFields())) {
-            var waFields = data.getWorkAllocationFields();
-            if (nonNull(waFields.getScannedDocumentTypes())) {
-                log.info("Scanned document types found {}", waFields.getScannedDocumentTypes());
-                waFields.setScannedDocumentTypes(null);
+        if (nonNull(data)) {
+            if (data.containsKey("scannedDocumentTypes")) {
+                log.info("Scanned document types found {}", data.get("scannedDocumentTypes"));
+                data.put("scannedDocumentTypes", null);
             }
-            if (nonNull(waFields.getAssignedCaseRoles())) {
-                log.info("Assigned case roles found {}", waFields.getAssignedCaseRoles());
-                waFields.setAssignedCaseRoles(null);
+            if (data.containsKey("assignedCaseRoles")) {
+                log.info("Assigned case roles found {}", data.get("assignedCaseRoles"));
+                data.put("assignedCaseRoles", null);
             }
-            if (nonNull(waFields.getPreviouslyAssignedCaseRoles())) {
-                log.info("Previously assigned case roles found {}", waFields.getPreviouslyAssignedCaseRoles());
-                waFields.setPreviouslyAssignedCaseRoles(null);
+            if (data.containsKey("previouslyAssignedCaseRoles")) {
+                log.info("Previously assigned case roles found {}", data.get("previouslyAssignedCaseRoles"));
+                data.put("previouslyAssignedCaseRoles", null);
             }
         }
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<SscsCaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return new CaseLoader(encodedDataString).findCases();
     }
 

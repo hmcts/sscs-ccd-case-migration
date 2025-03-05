@@ -3,15 +3,15 @@ package uk.gov.hmcts.reform.migration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.query.DwpElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @Service
@@ -33,23 +33,24 @@ public class DwpDataMigrationServiceImpl extends CaseMigrationProcessor {
     }
 
     @Override
-    public void migrate(SscsCaseDetails caseDetails) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
-            if (isNull(data.getPoAttendanceConfirmed())) {
-                data.setPoAttendanceConfirmed(YesNo.NO);
+            if (!data.containsKey("poAttendanceConfirmed")) {
+                data.put("poAttendanceConfirmed", "No");
             }
-            if (isNull(data.getDwpIsOfficerAttending())) {
-                data.setDwpIsOfficerAttending(YesNo.NO.getValue());
+            if (!data.containsKey("dwpIsOfficerAttending")) {
+                data.put("dwpIsOfficerAttending", "No");
             }
-            if (isNull(data.getTribunalDirectPoToAttend())) {
-                data.setTribunalDirectPoToAttend(YesNo.NO);
+            if (!data.containsKey("tribunalDirectPoToAttend")) {
+                data.put("tribunalDirectPoToAttend", "No");
             }
         }
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<SscsCaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return repository.findCases(elasticSearchQuery, true);
     }
 
