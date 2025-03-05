@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
@@ -21,6 +23,8 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
     static final String EVENT_SUMMARY = "Cleared expired filters";
     static final String EVENT_DESCRIPTION = "Cleared expired filters";
 
+    private static final String HMCTS_DWP_STATE = "hmctsDwpState";
+
     private final String encodedDataString;
 
     public HmctsDwpStateMigrationImpl(@Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
@@ -29,28 +33,28 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
     }
 
     @Override
-    public void migrate(SscsCaseDetails caseDetails) {
-        var caseData = caseDetails.getData();
-        if (nonNull(caseData)) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
+        var data = caseDetails.getData();
+        if (nonNull(data)) {
             String caseId = caseDetails.getId().toString();
-
-            if (caseData.getHmctsDwpState() == null
-                || !caseData.getHmctsDwpState().equalsIgnoreCase("failedSendingFurtherEvidence")) {
+            if (data.get(HMCTS_DWP_STATE) == null
+                || !data.get(HMCTS_DWP_STATE).toString().equalsIgnoreCase("failedSendingFurtherEvidence")) {
                 log.info("Skipping case for hmctsDwpState migration. Case id: {} Reason: hmctsDwpState is not"
                              + " 'failedSendingFurtherEvidence' it is {}",
-                         caseId, caseData.getHmctsDwpState());
+                         caseId, data.get(HMCTS_DWP_STATE));
                 throw new RuntimeException("Skipping case for hmctsDwpState migration. Reason: hmctsDwpState is not"
                                         + " 'failedSendingFurtherEvidence'");
             } else {
                 log.info("case {} has hmctsDwpState as failedSendingFurtherEvidence. "
                              + "Removing it and setting it to null", caseId);
-                caseData.setHmctsDwpState(null);
+                data.put(HMCTS_DWP_STATE, null);
             }
         }
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<SscsCaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return new CaseLoader(encodedDataString).findCases();
     }
 

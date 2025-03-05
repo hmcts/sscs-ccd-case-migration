@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.OldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -19,6 +20,7 @@ import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveServic
 import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 class OldDraftAppealsArchiveServiceTest {
@@ -45,7 +47,7 @@ class OldDraftAppealsArchiveServiceTest {
         List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD);
         when(repository.findCases(searchQuery, false)).thenReturn(caseList);
 
-        List<SscsCaseDetails> migrationCases = oldDraftAppealsArchiveService.getMigrationCases();
+        List<SscsCaseDetails> migrationCases = oldDraftAppealsArchiveService.fetchCasesToMigrate();
 
         assertThat(migrationCases).hasSize(2);
         assertThat(migrationCases).contains(caseB, caseC);
@@ -53,8 +55,8 @@ class OldDraftAppealsArchiveServiceTest {
 
     @Test
     void shouldReturnMigratedCaseData() {
-        var data = buildCaseData();
-        var caseDetails = SscsCaseDetails.builder().data(data).build();
+        var data = buildCaseDataMap(buildCaseData());
+        var caseDetails = CaseDetails.builder().data(data).build();
 
         oldDraftAppealsArchiveService.migrate(caseDetails);
 

@@ -1,14 +1,16 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -31,55 +33,55 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     }
 
     @Override
-    public void migrate(SscsCaseDetails caseDetails) {
-        var caseData = caseDetails.getData();
-        if (nonNull(caseData)) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
+        if (nonNull(data)) {
             String caseId = caseDetails.getId().toString();
-            var hearingRoute = caseData.getSchedulingAndListingFields().getHearingRoute();
+            String hearingRoute = caseDetails.getData().get("hearingRoute").toString();
 
-            if (!hearingRoute.equals(getMigrationRoute())) {
+            if (!hearingRoute.equalsIgnoreCase(getMigrationRoute())) {
                 log.info(SKIPPING_CASE_MSG + " |Case id: {} "
-                                + "Reason: Hearing Route is not {} it is {}",
+                             + "Reason: Hearing Route is not {} it is {}",
                          caseId, getMigrationRoute(), hearingRoute);
                 throw new RuntimeException(SKIPPING_CASE_MSG + ". Hearing Route is not " + getMigrationRoute());
             }
 
-            if (skipMigration(caseData)) {
+            if (skipMigration(data)) {
                 log.info(SKIPPING_CASE_MSG + "|Case id: {}|Case outcome: {}|Hearing outcome: {}|"
                              + "Reason: Hearing outcome already exists or Case outcome is empty",
-                         caseId, caseData.getCaseOutcome(), caseData.getHearingOutcomes());
+                         caseId, data.get("caseOutcome"), data.get("hearingOutcomes"));
                 throw new RuntimeException(SKIPPING_CASE_MSG
                                                + ", Hearing outcome already exists or Case outcome is empty");
             }
-            setHearingOutcome(caseData, caseId);
-            var caseOutcome = caseData.getCaseOutcome();
+
+            setHearingOutcome(data, caseId);
             log.info("case outcome found with value {} and set to null for case id {}",
-                     caseOutcome.getCaseOutcome(), caseId);
-            caseOutcome.setCaseOutcome(null);
+                     data.get("caseOutcome"), caseId);
+            data.put("caseOutcome", null);
             log.info("did Po Attend found with value {} and set to null for case id {}",
-                     caseOutcome.getDidPoAttend(), caseId);
-            caseOutcome.setDidPoAttend(null);
+                     data.get("didPoAttend"), caseId);
+            data.put("didPoAttend", null);
             log.info("Completed migration for case outcome migration. Case id: {}", caseId);
         }
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<SscsCaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return new CaseLoader(encodedDataString).findCases();
     }
 
-    boolean skipMigration(SscsCaseData caseData) {
-        return nonNull(caseData.getHearingOutcomes())
-            || isNull(caseData.getCaseOutcome()) || isNull(caseData.getCaseOutcome().getCaseOutcome());
+    boolean skipMigration(Map<String, Object> data) {
+        return nonNull(data.get("hearingOutcomes")) || isNull(data.get("caseOutcome"));
     }
 
-    HearingRoute getMigrationRoute() {
-        return HearingRoute.LIST_ASSIST;
+    String getMigrationRoute() {
+        return HearingRoute.LIST_ASSIST.toString();
     }
 
-    void setHearingOutcome(SscsCaseData caseData, String caseId) {
-        caseData.setHearingOutcomes(
-            hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), caseData)
+    void setHearingOutcome(Map<String, Object> data, String caseId) {
+        data.put(
+            "hearingOutcomes", hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data)
         );
     }
 

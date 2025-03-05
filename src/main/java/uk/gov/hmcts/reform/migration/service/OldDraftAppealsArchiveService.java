@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.migration.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.query.OldDraftsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
     }
 
     @Override
-    public List<SscsCaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return repository.findCases(searchQuery, false)
             .stream()
             .filter(caseDetails -> DRAFT.toString().equals(caseDetails.getState())
@@ -41,8 +43,9 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
     }
 
     @Override
-    public void migrate(SscsCaseDetails caseDetails) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
         log.info("Archiving draft appeal with case id: {}", caseDetails.getId());
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     public String getEventId() {

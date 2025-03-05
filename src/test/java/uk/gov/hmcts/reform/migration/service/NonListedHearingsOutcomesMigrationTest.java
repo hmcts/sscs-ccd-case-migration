@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -42,6 +44,7 @@ import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.CASE_OU
 import static uk.gov.hmcts.reform.migration.service.NonListedHearingsOutcomesMigration.NON_LISTED_OUTCOME_TAB_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 public class NonListedHearingsOutcomesMigrationTest {
@@ -56,7 +59,7 @@ public class NonListedHearingsOutcomesMigrationTest {
     private final LocalDateTime start = LocalDateTime.of(2024, 6, 30, 10, 0);
     private final LocalDateTime end = LocalDateTime.of(2024, 6, 30, 13, 0);
 
-    private final SscsCaseDetails caseDetails = SscsCaseDetails.builder().id(1234L).build();
+    private final CaseDetails caseDetails = CaseDetails.builder().id(1234L).build();
 
     NonListedHearingsOutcomesMigration caseOutcomeMigrationService;
 
@@ -68,7 +71,8 @@ public class NonListedHearingsOutcomesMigrationTest {
 
     @Test
     public void shouldReturnTrueForCaseDetailsPassed() {
-        assertThat(caseOutcomeMigrationService.accepts().test(caseDetails)).isTrue();
+        var sscsCaseDetails = SscsCaseDetails.builder().build();
+        assertThat(caseOutcomeMigrationService.accepts().test(sscsCaseDetails)).isTrue();
     }
 
     @Test
@@ -99,6 +103,7 @@ public class NonListedHearingsOutcomesMigrationTest {
             .pipSscsCaseData(SscsPipCaseData.builder().build())
             .finalDecisionCaseData(SscsFinalDecisionCaseData.builder().build())
             .build();
+        var data = buildCaseDataMap(caseData);
 
         String epims = "123456";
         var caseHearing = CaseHearing.builder().hearingId(1L)
@@ -127,14 +132,14 @@ public class NonListedHearingsOutcomesMigrationTest {
                 .build();
         when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(caseData)))
             .thenReturn(List.of(hearingOutcome));
-        caseDetails.setData(caseData);
+        caseDetails.setData(data);
 
         caseOutcomeMigrationService.migrate(caseDetails);
 
-        assertThat(caseDetails.getData()).isNotNull();
-        assertThat(caseData.getHearingOutcomes()).isEqualTo(List.of(hearingOutcome));
-        assertNull(caseData.getCaseOutcome().getCaseOutcome());
-        assertNull(caseData.getCaseOutcome().getDidPoAttend());
+        assertNotNull(caseDetails.getData());
+        assertThat(data.get("hearingOutcomes")).isEqualTo(List.of(hearingOutcome));
+        assertNull(data.get("caseOutcome"));
+        assertNull(data.get("didPoAttend"));
     }
 
     @Test
@@ -144,7 +149,7 @@ public class NonListedHearingsOutcomesMigrationTest {
         caseData.getHearingOutcomes().add(HearingOutcome.builder().value(
             HearingOutcomeDetails.builder().completedHearingId("1").build()).build());
         caseData.setSchedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(LIST_ASSIST).build());
-        caseDetails.setData(caseData);
+        caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Hearing outcome already exists");
@@ -154,11 +159,10 @@ public class NonListedHearingsOutcomesMigrationTest {
     void shouldThrowErrorWhenMigrateCalledWithNoCaseOutcomeInData() {
         SscsCaseData caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(LIST_ASSIST).build());
-        caseDetails.setData(caseData);
+        caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Case outcome is empty");
-
     }
 
     @Test
@@ -174,11 +178,10 @@ public class NonListedHearingsOutcomesMigrationTest {
                 CaseHearing.builder().hearingId(1L).hmcStatus(HEARING_REQUESTED).build(),
                 CaseHearing.builder().hearingId(2L).hmcStatus(AWAITING_LISTING).build()
             )).build());
-        caseDetails.setData(caseData);
+        caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Zero or More than one hearing found");
-
     }
 
     @Test
@@ -191,7 +194,7 @@ public class NonListedHearingsOutcomesMigrationTest {
 
         when(hmcHearingsApiService.getHearingsRequest(any(), any())).thenReturn(
             HearingsGetResponse.builder().caseHearings(List.of()).build());
-        caseDetails.setData(caseData);
+        caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
             .hasMessageContaining("Skipping case for case outcome migration, Zero or More than one hearing found");

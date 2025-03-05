@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+
+import java.util.Map;
 
 import static java.util.Objects.isNull;
 
@@ -24,16 +25,17 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
     }
 
     @Override
-    public HearingRoute getMigrationRoute() {
-        return HearingRoute.GAPS;
-    }
-
-    boolean skipMigration(SscsCaseData caseData) {
-        return isNull(caseData.getCaseOutcome().getCaseOutcome());
+    public String getMigrationRoute() {
+        return HearingRoute.GAPS.toString();
     }
 
     @Override
-    void setHearingOutcome(SscsCaseData caseData, String caseId) {
+    boolean skipMigration(Map<String, Object> data) {
+        return isNull(data.get("caseOutcome"));
+    }
+
+    @Override
+    void setHearingOutcome(Map<String, Object> data, String caseId) {
         // do nothing
     }
 

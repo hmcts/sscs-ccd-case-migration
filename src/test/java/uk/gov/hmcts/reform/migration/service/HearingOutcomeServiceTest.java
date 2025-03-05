@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 public class HearingOutcomeServiceTest {
@@ -59,7 +60,8 @@ public class HearingOutcomeServiceTest {
                 .build()
         ).build();
 
-        var hearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, caseData);
+        var hearingOutcomes =
+            hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, buildCaseDataMap(caseData));
 
         assertEquals(expectedHearingOutcome, hearingOutcomes.get(0));
     }
@@ -99,7 +101,8 @@ public class HearingOutcomeServiceTest {
                 .build()
         ).build();
 
-        var hearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, caseData);
+        var hearingOutcomes =
+            hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, buildCaseDataMap(caseData));
 
         assertEquals(expectedHearingOutcome, hearingOutcomes.get(0));
     }

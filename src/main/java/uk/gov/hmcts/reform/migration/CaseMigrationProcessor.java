@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
-import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
@@ -24,6 +24,8 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     private IdamService idamService;
     @Autowired
     private UpdateCcdCaseService ccdUpdateService;
+    @Autowired
+    private SscsCcdConvertService ccdConvertService;
 
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
@@ -37,7 +39,7 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     public void migrateCases() {
         log.info("Data migration of cases started");
         ForkJoinPool threadPool = new ForkJoinPool(25);
-        threadPool.submit(() -> getMigrationCases()
+        threadPool.submit(() -> fetchCasesToMigrate()
             .parallelStream()
             .limit(caseProcessLimit)
             .forEach(this::updateCase));
@@ -54,7 +56,8 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
                 LOG_STRING
         );
 
-        log.info("Migrated cases: {}", getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
+        log.info("Migrated cases ({}): {}",
+                 getMigratedCases().size(), getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
         log.info("Failed/Skipped Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
         log.info("Data migration of cases completed");
     }
@@ -65,10 +68,10 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
             log.info("Updating case {}", caseId);
             try {
                 log.debug("Case data: {}", caseDetails.getData());
-                ccdUpdateService.updateCaseV2(caseId, getEventId(), idamService.getIdamTokens(), sscsCaseDetails -> {
-                    migrate(sscsCaseDetails);
-                    return new UpdateResult(getEventSummary(), getEventDescription());
-                });
+                ccdUpdateService.updateCaseV2(caseId, getEventId(),
+                                              idamService.getIdamTokens(),
+                                              sscsCaseDetails ->
+                                                  migrate(ccdConvertService.getCaseDetails(sscsCaseDetails)));
                 log.info("Case {} successfully updated", caseId);
                 migratedCases.add(caseId);
             } catch (Exception e) {
