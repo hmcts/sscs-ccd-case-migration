@@ -4,11 +4,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.migration.service.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
-import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
-import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,14 +15,20 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class CaseMigrationProcessor implements DataMigrationService {
 
-    public static final String LOG_STRING = "-----------------------------------------\n";
+    private static final String LOG_STRING = """
+        -----------------------------------------
+        Data migration completed
+        -----------------------------------------
+        Total number of processed cases: {}
+        Total number of migrations performed: {}
+        -----------------------------------------
+        Migrated cases: {}
+        Failed/Skipped Migrated cases: {}
+        -----------------------------------------
+        """;
 
     @Autowired
-    private IdamService idamService;
-    @Autowired
-    private UpdateCcdCaseService ccdUpdateService;
-    @Autowired
-    private SscsCcdConvertService ccdConvertService;
+    private CoreCaseDataService coreCaseDataService;
 
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
@@ -38,49 +41,37 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
 
     public void migrateCases() {
         log.info("Data migration of cases started");
+
         ForkJoinPool threadPool = new ForkJoinPool(25);
-        threadPool.submit(() -> fetchCasesToMigrate()
-            .parallelStream()
-            .limit(caseProcessLimit)
-            .forEach(this::updateCase));
-        shutdownThreadPool(threadPool);
-        log.info("""
-                {}Data migration completed
-                {}
-                Total number of processed cases: {}
-                Total number of migrations performed: {}
-                 {}
-                """,
-                LOG_STRING, LOG_STRING,
-                getMigratedCases().size() + getFailedCases().size(), getMigratedCases().size(),
-                LOG_STRING
+        threadPool.submit(
+            () -> fetchCasesToMigrate()
+                .parallelStream()
+                .limit(caseProcessLimit)
+                .forEach(caseDetails -> {
+                    if (accepts().test(caseDetails)) {
+                        Long caseId = caseDetails.getId();
+                        log.info("Updating case {}", caseId);
+                        try {
+                            log.debug("Case data: {}", caseDetails.getData());
+                            coreCaseDataService.applyUpdatesInCcd(caseId, getEventId(), this::migrate);
+                            log.info("Case {} successfully updated", caseId);
+                            migratedCases.add(caseId);
+                        } catch (Exception e) {
+                            log.error("Case {} update failed due to: {}", caseId, e.getMessage());
+                            failedCases.add(caseId);
+                        }
+                    } else {
+                        log.info("Case {} does not meet criteria for migration", caseDetails.getId());
+                    }
+                })
         );
+        shutdownThreadPool(threadPool);
 
-        log.info("Migrated cases ({}): {}",
-                 getMigratedCases().size(), getMigratedCases().isEmpty() ? "NONE" : getMigratedCases());
-        log.info("Failed/Skipped Migrated cases: {}", getFailedCases().isEmpty() ? "NONE" : getFailedCases());
-        log.info("Data migration of cases completed");
-    }
-
-    private void updateCase(SscsCaseDetails caseDetails) {
-        if (accepts().test(caseDetails)) {
-            Long caseId = caseDetails.getId();
-            log.info("Updating case {}", caseId);
-            try {
-                log.debug("Case data: {}", caseDetails.getData());
-                ccdUpdateService.updateCaseV2(caseId, getEventId(),
-                                              idamService.getIdamTokens(),
-                                              sscsCaseDetails ->
-                                                  migrate(ccdConvertService.getCaseDetails(sscsCaseDetails)));
-                log.info("Case {} successfully updated", caseId);
-                migratedCases.add(caseId);
-            } catch (Exception e) {
-                log.error("Case {} update failed due to: {}", caseId, e.getMessage());
-                failedCases.add(caseId);
-            }
-        } else {
-            log.info("Case {} does not meet criteria for migration", caseDetails.getId());
-        }
+        log.info(
+            LOG_STRING, getMigratedCases().size() + getFailedCases().size(),
+            getMigratedCases().size(), getMigratedCases().isEmpty() ? "NONE" : getMigratedCases(),
+            getFailedCases().isEmpty() ? "NONE" : getFailedCases()
+        );
     }
 
     public void shutdownThreadPool(ForkJoinPool threadPool) {

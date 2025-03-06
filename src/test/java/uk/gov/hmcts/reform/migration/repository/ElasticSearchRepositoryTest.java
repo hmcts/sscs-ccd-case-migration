@@ -6,10 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
+import uk.gov.hmcts.reform.migration.service.CoreCaseDataService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SearchCcdCaseService;
-import uk.gov.hmcts.reform.sscs.idam.IdamService;
-import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 
 import java.util.List;
 
@@ -87,27 +85,22 @@ public class ElasticSearchRepositoryTest {
             }""";
 
     private static final int QUERY_SIZE = 100;
-    private final IdamTokens idamTokens = IdamTokens.builder().build();
     private ElasticSearchRepository elasticSearchRepository;
 
     @Mock
-    private SearchCcdCaseService ccdSearchService;
-    @Mock
-    private IdamService idamService;
-
+    private CoreCaseDataService ccdSearchService;
     @Mock
     private ElasticSearchQuery elasticSearchQuery;
 
     @BeforeEach
     public void setUp() {
-        elasticSearchRepository = new ElasticSearchRepository(ccdSearchService, idamService, QUERY_SIZE);
-        when(idamService.getIdamTokens()).thenReturn(idamTokens);
+        elasticSearchRepository = new ElasticSearchRepository(ccdSearchService, QUERY_SIZE);
     }
 
     @Test
     public void shouldReturnSearchResultsForCaseTypeElasticSearch() {
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
-        when(ccdSearchService.findSubmittedCasesBySearchCriteria(INITIAL_QUERY, idamTokens)).thenReturn(List.of());
+        when(ccdSearchService.searchForCases(INITIAL_QUERY, true)).thenReturn(List.of());
 
         List<SscsCaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery, true);
 
@@ -130,18 +123,18 @@ public class ElasticSearchRepositoryTest {
         List<SscsCaseDetails> searchResults = List.of(SscsCaseDetails.builder().id(1677777777L).build());
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
-        when(ccdSearchService.findAllCasesBySearchCriteria(INITIAL_QUERY, idamTokens)).thenReturn(searchResults);
+        when(ccdSearchService.searchForCases(INITIAL_QUERY, false)).thenReturn(searchResults);
         List<SscsCaseDetails> subsequentSearchResults = List.of(SscsCaseDetails.builder().id(1777777777L).build());
-        when(ccdSearchService.findAllCasesBySearchCriteria(SEARCH_AFTER_QUERY, idamTokens))
+        when(ccdSearchService.searchForCases(SEARCH_AFTER_QUERY, false))
             .thenReturn(subsequentSearchResults)
             .thenReturn(null);
 
         List<SscsCaseDetails> actualSearchResults = elasticSearchRepository.findCases(elasticSearchQuery, false);
 
         assertNotNull(actualSearchResults);
-        verify(ccdSearchService).findAllCasesBySearchCriteria(INITIAL_QUERY, idamTokens);
+        verify(ccdSearchService).searchForCases(INITIAL_QUERY, false);
         verify(ccdSearchService, times(2))
-            .findAllCasesBySearchCriteria(SEARCH_AFTER_QUERY, idamTokens);
+            .searchForCases(SEARCH_AFTER_QUERY, false);
         assertEquals(2, actualSearchResults.size());
     }
 
@@ -150,14 +143,14 @@ public class ElasticSearchRepositoryTest {
         List<SscsCaseDetails> searchResults = List.of(SscsCaseDetails.builder().id(1677777777L).build());
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
-        when(ccdSearchService.findSubmittedCasesBySearchCriteria(INITIAL_QUERY, idamTokens)).thenReturn(searchResults);
-        when(ccdSearchService.findSubmittedCasesBySearchCriteria(SEARCH_AFTER_QUERY, idamTokens)).thenReturn(null);
+        when(ccdSearchService.searchForCases(INITIAL_QUERY, true)).thenReturn(searchResults);
+        when(ccdSearchService.searchForCases(SEARCH_AFTER_QUERY, true)).thenReturn(null);
 
         List<SscsCaseDetails> actualSearchResults = elasticSearchRepository.findCases(elasticSearchQuery, true);
 
         assertNotNull(actualSearchResults);
-        verify(ccdSearchService).findSubmittedCasesBySearchCriteria(INITIAL_QUERY, idamTokens);
-        verify(ccdSearchService).findSubmittedCasesBySearchCriteria(SEARCH_AFTER_QUERY, idamTokens);
+        verify(ccdSearchService).searchForCases(INITIAL_QUERY, true);
+        verify(ccdSearchService).searchForCases(SEARCH_AFTER_QUERY, true);
         assertEquals(1, actualSearchResults.size());
     }
 }
