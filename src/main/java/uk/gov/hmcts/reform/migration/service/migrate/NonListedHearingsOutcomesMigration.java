@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +11,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.COMPLETED;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.LISTED;
+import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 
 @Service
 @Slf4j

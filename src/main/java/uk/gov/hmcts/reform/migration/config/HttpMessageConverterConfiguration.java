@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.ccd;
+package uk.gov.hmcts.reform.migration.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
