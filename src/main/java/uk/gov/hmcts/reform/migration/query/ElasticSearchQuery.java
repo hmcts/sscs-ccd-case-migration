@@ -1,47 +1,25 @@
 package uk.gov.hmcts.reform.migration.query;
 
-import lombok.Builder;
-
-@Builder
-public class ElasticSearchQuery {
-
-    private static final String START_QUERY = """
-        {
-          "query": {
-            "match_all": {}
-          },
-          "_source": [
-            "reference"
-          ],
-          "size": %s,
-          "sort": [
-            {
-              "reference.keyword": "asc"
-            }
-          ]
-          """;
+public abstract class ElasticSearchQuery {
 
     private static final String END_QUERY = "\n}";
-
     private static final String SEARCH_AFTER = "\"search_after\": [%s]";
 
-    private String searchAfterValue;
-    private int size;
-    private boolean initialSearch;
-
-    public String getQuery() {
+    public String getQuery(String searchAfterValue, int size, boolean initialSearch) {
         if (initialSearch) {
-            return getInitialQuery();
+            return getInitialQuery(size);
         } else {
-            return getSubsequentQuery();
+            return getSubsequentQuery(searchAfterValue, size);
         }
     }
 
-    private String getInitialQuery() {
-        return String.format(START_QUERY, size) + END_QUERY;
+    private String getInitialQuery(int size) {
+        return String.format(getStartQuery(), size) + END_QUERY;
     }
 
-    private String getSubsequentQuery() {
-        return String.format(START_QUERY, size) + "," + String.format(SEARCH_AFTER, searchAfterValue) + END_QUERY;
+    private String getSubsequentQuery(String searchAfterValue, int size) {
+        return String.format(getStartQuery(), size) + "," + String.format(SEARCH_AFTER, searchAfterValue) + END_QUERY;
     }
+
+    protected abstract String getStartQuery();
 }

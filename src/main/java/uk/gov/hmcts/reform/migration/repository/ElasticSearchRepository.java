@@ -4,10 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
 
 import java.util.ArrayList;
@@ -17,39 +16,26 @@ import java.util.List;
 @Slf4j
 public class ElasticSearchRepository {
 
-    private final CoreCaseDataApi coreCaseDataApi;
-
-    private final AuthTokenGenerator authTokenGenerator;
+    private final CoreCaseDataService coreCaseDataService;
+    private final String caseType;
 
     private final int querySize;
 
-    private final int caseProcessLimit;
-
     @Autowired
-    public ElasticSearchRepository(CoreCaseDataApi coreCaseDataApi,
-                                   AuthTokenGenerator authTokenGenerator,
-                                   @Value("${case-migration.elasticsearch.querySize}") int querySize,
-                                   @Value("${case-migration.processing.limit}") int caseProcessLimit) {
-        this.coreCaseDataApi = coreCaseDataApi;
-        this.authTokenGenerator = authTokenGenerator;
+    public ElasticSearchRepository(CoreCaseDataService coreCaseDataService,
+                                   @Value("${migration.caseType}") String caseType,
+                                   @Value("${case-migration.elasticsearch.querySize}") int querySize) {
+        this.coreCaseDataService = coreCaseDataService;
+        this.caseType = caseType;
         this.querySize = querySize;
-        this.caseProcessLimit = caseProcessLimit;
     }
 
-    public List<CaseDetails> findCaseByCaseType(String userToken, String caseType) {
-        ElasticSearchQuery elasticSearchQuery = ElasticSearchQuery.builder()
-            .initialSearch(true)
-            .size(querySize)
-            .build();
-
+    public List<CaseDetails> findCases(ElasticSearchQuery elasticSearchQuery) {
         log.info("Processing the Case Migration search for case type {}.", caseType);
-        String authToken = authTokenGenerator.generate();
 
-        SearchResult searchResult = coreCaseDataApi.searchCases(userToken,
-                                                                authToken,
-                                                                caseType, elasticSearchQuery.getQuery()
-        );
-
+        String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
+        SearchResult searchResult =
+            coreCaseDataService.getCases(caseType, initialQuery);
         List<CaseDetails> caseDetails = new ArrayList<>();
 
         if (searchResult != null && searchResult.getTotal() > 0) {
@@ -59,22 +45,14 @@ public class ElasticSearchRepository {
 
             boolean keepSearching;
             do {
-                ElasticSearchQuery subsequentElasticSearchQuery = ElasticSearchQuery.builder()
-                    .initialSearch(false)
-                    .size(querySize)
-                    .searchAfterValue(searchAfterValue)
-                    .build();
-
+                String subsequentElasticSearchQuery = elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
                 SearchResult subsequentSearchResult =
-                    coreCaseDataApi.searchCases(userToken,
-                                                authToken,
-                                                caseType, subsequentElasticSearchQuery.getQuery()
-                    );
+                    coreCaseDataService.getCases(caseType, subsequentElasticSearchQuery);
 
                 keepSearching = false;
                 if (subsequentSearchResult != null) {
                     caseDetails.addAll(subsequentSearchResult.getCases());
-                    keepSearching = subsequentSearchResult.getCases().size() > 0;
+                    keepSearching = !subsequentSearchResult.getCases().isEmpty();
                     if (keepSearching) {
                         searchAfterValue = caseDetails.get(caseDetails.size() - 1).getId().toString();
                     }

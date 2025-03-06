@@ -1,31 +1,28 @@
 package uk.gov.hmcts.reform.migration.ccd;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
+import uk.gov.hmcts.reform.sscs.idam.IdamService;
+import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CoreCaseDataServiceTest {
-
+@ExtendWith(MockitoExtension.class)
+class CoreCaseDataServiceTest {
     private static final String EVENT_ID = "migrateCase";
     private static final String CASE_TYPE = "CARE_SUPERVISION_EPO";
     private static final String CASE_ID = "123456789";
@@ -35,42 +32,27 @@ public class CoreCaseDataServiceTest {
     private static final String EVENT_SUMMARY = "Migrate Case";
     private static final String EVENT_DESC = "Migrate Case";
 
+    @Mock
+    CoreCaseDataApi coreCaseDataApi;
+    @Mock
+    private DataMigrationService<Map<String, Object>> dataMigrationService;
+    @Mock
+    private IdamService idamService;
+
     @InjectMocks
     private CoreCaseDataService underTest;
 
-    @Mock
-    CoreCaseDataApi coreCaseDataApi;
-
-    @Mock
-    private IdamClient idamClient;
-
-    @Mock
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private DataMigrationService<Map<String, Object>> dataMigrationService;
-
-
-    @Before
-    public void setUp() {
-    }
-
     @Test
-    public void shouldUpdateTheCase() {
-        // given
-        UserDetails userDetails = UserDetails.builder()
-            .id("30")
-            .email("test@test.com")
-            .forename("Test")
-            .surname("Surname")
-            .build();
-
-        CaseDetails caseDetails3 = createCaseDetails(CASE_ID, "case-3");
-        setupMocks(userDetails, caseDetails3.getData());
+    void shouldUpdateTheCase() throws Exception {
+        CaseDetails caseDetails3 = createCaseDetails();
+        setupMocks(caseDetails3.getData());
+        when(dataMigrationService.getEventDescription()).thenReturn(EVENT_DESC);
+        when(dataMigrationService.getEventId()).thenReturn(EVENT_ID);
+        when(dataMigrationService.getEventSummary()).thenReturn(EVENT_SUMMARY);
 
         //when
-        CaseDetails update = underTest.update(AUTH_TOKEN, EVENT_ID, EVENT_SUMMARY, EVENT_DESC, CASE_TYPE,
-                                              caseDetails3.getId(), caseDetails3.getJurisdiction());
+        CaseDetails update = underTest.update(CASE_TYPE, caseDetails3.getId(),
+                                              caseDetails3.getJurisdiction(), dataMigrationService);
         //then
         assertThat(update.getId(), is(Long.parseLong(CASE_ID)));
         assertThat(update.getData().get("solicitorEmail"), is("Padmaja.Ramisetti@hmcts.net"));
@@ -81,7 +63,7 @@ public class CoreCaseDataServiceTest {
         assertThat(update.getData().get("appRespondentFMName"), is("TestRespondant"));
     }
 
-    private CaseDetails createCaseDetails(String id, String value) {
+    private CaseDetails createCaseDetails() {
         LinkedHashMap<String, Object> data = new LinkedHashMap<>();
         data.put("solicitorEmail", "Padmaja.Ramisetti@hmcts.net");
         data.put("solicitorName", "PADMAJA");
@@ -90,15 +72,16 @@ public class CoreCaseDataServiceTest {
         data.put("applicantFMName", "Prashanth");
         data.put("appRespondentFMName", "TestRespondant");
         return CaseDetails.builder()
-            .id(Long.valueOf(id))
+            .id(Long.valueOf(CASE_ID))
             .data(data)
             .build();
     }
 
-    private void setupMocks(UserDetails userDetails, Map<String, Object> data) {
-        when(idamClient.getUserDetails(AUTH_TOKEN)).thenReturn(userDetails);
-
-        when(authTokenGenerator.generate()).thenReturn(AUTH_TOKEN);
+    private void setupMocks(Map<String, Object> data) throws Exception {
+        when(idamService.getIdamTokens()).thenReturn(IdamTokens.builder()
+                                                         .idamOauth2Token(AUTH_TOKEN)
+                                                         .serviceAuthorization(AUTH_TOKEN)
+                                                         .userId(USER_ID).build());
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123456789L)
@@ -111,7 +94,7 @@ public class CoreCaseDataServiceTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(dataMigrationService.migrate(data))
+        when(dataMigrationService.migrate(caseDetails))
             .thenReturn(data);
 
         when(coreCaseDataApi.startEventForCaseWorker(AUTH_TOKEN, AUTH_TOKEN, "30",
