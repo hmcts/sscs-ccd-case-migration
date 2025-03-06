@@ -35,10 +35,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.AWAITING_LISTING;
+import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.CANCELLED;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.HEARING_REQUESTED;
 import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_ID;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.NonListedHearingsOutcomesMigration.NON_LISTED_OUTCOME_TAB_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
@@ -87,7 +88,7 @@ public class NonListedHearingsOutcomesMigrationTest {
     void shouldReturnCorrectValuesForCaseOutcomeMigration() {
         assertThat(CASE_OUTCOME_MIGRATION_ID).isEqualTo(caseOutcomeMigrationService.getEventId());
         assertThat(CASE_OUTCOME_MIGRATION_DESCRIPTION).isEqualTo(caseOutcomeMigrationService.getEventDescription());
-        assertThat(CASE_OUTCOME_MIGRATION_SUMMARY).isEqualTo(caseOutcomeMigrationService.getEventSummary());
+        assertThat(NON_LISTED_OUTCOME_TAB_SUMMARY).isEqualTo(caseOutcomeMigrationService.getEventSummary());
     }
 
     @Test
@@ -109,7 +110,7 @@ public class NonListedHearingsOutcomesMigrationTest {
                                 .build())
                 )
                 .hearingChannels(List.of(HearingChannel.FACE_TO_FACE))
-                .hmcStatus(AWAITING_LISTING)
+                .hmcStatus(CANCELLED)
                 .build();
         when(hmcHearingsApiService.getHearingsRequest(eq(caseDetails.getId().toString()), isNull()))
                 .thenReturn(HearingsGetResponse.builder().caseHearings(List.of(caseHearing)).build());
