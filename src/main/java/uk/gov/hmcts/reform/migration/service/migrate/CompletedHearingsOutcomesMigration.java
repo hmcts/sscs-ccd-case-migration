@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 
 import java.util.List;
-import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 
 @Service
 @Slf4j
