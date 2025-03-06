@@ -10,13 +10,16 @@ import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 
 import java.util.List;
 
+import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.AWAITING_LISTING;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.COMPLETED;
-import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.LISTED;
+import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.UPDATE_SUBMITTED;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.nonListedHearingsOutcomes.enabled", havingValue = "true")
 public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
+
+    static final String NON_LISTED_OUTCOME_TAB_SUMMARY = "migrate case - link outcome to hearing";
 
     private final HmcHearingsApiService hmcHearingsApiService;
 
@@ -41,7 +44,13 @@ public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
         }
 
         return allhmcHearings.stream()
-                .filter(hearing -> !List.of(COMPLETED, LISTED).contains(hearing.getHmcStatus()))
+                .filter(hearing -> !List.of(COMPLETED, AWAITING_LISTING, UPDATE_SUBMITTED)
+                        .contains(hearing.getHmcStatus()))
                 .toList();
+    }
+
+    @Override
+    public String getEventSummary() {
+        return NON_LISTED_OUTCOME_TAB_SUMMARY;
     }
 }
