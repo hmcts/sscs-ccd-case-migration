@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 
 import java.util.List;
 

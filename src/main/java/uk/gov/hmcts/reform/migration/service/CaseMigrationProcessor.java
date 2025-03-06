@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class CaseMigrationProcessor implements DataMigrationService {
 
     private static final String LOG_STRING = """
-        -----------------------------------------
+        \n-----------------------------------------
         Data migration completed
         -----------------------------------------
         Total number of processed cases: {}
@@ -48,16 +48,15 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
                 .limit(caseProcessLimit)
                 .forEach(caseDetails -> {
                     if (accepts().test(caseDetails)) {
-                        Long caseId = caseDetails.getId();
-                        log.info("Updating case {}", caseId);
+                        log.info("Updating case {}", caseDetails.getId());
                         try {
                             log.debug("Case data: {}", caseDetails.getData());
-                            coreCaseDataService.applyUpdatesInCcd(caseId, getEventId(), this::migrate);
-                            log.info("Case {} successfully updated", caseId);
-                            migratedCases.add(caseId);
+                            coreCaseDataService.applyUpdatesInCcd(caseDetails.getId(), getEventId(), this::migrate);
+                            migratedCases.add(caseDetails.getId());
+                            log.info("Case {} successfully updated", caseDetails.getId());
                         } catch (Exception e) {
-                            log.error("Case {} update failed due to: {}", caseId, e.getMessage());
-                            failedCases.add(caseId);
+                            failedCases.add(caseDetails.getId());
+                            log.error("Case {} update failed due to: {}", caseDetails.getId(), e.getMessage());
                         }
                     } else {
                         log.info("Case {} does not meet criteria for migration", caseDetails.getId());
