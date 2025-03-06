@@ -139,7 +139,7 @@ sonarqube {
     property "sonar.organization", "hmcts"
     property "sonar.projectName", "sscs-ccd-case-migration"
     property "sonar.projectKey", "sscs-ccd-case-migration"
-    property "sonar.exclusions", "**/exception/*.java,**/hmc/*.java,**/domain/*.java,**/common/*.java,**/migration/auth/AuthTokenGeneratorConfiguration.java,**/migration/CaseMigrationRunner.java,**/ccd/HttpMessageConverterConfiguration.java"
+    property "sonar.exclusions", "**/exception/*.java,**/hmc/*.java,**/domain/*.java,**/common/*.java,**/migration/auth/AuthTokenGeneratorConfiguration.java,**/migration/CaseMigrationRunner.java,**/migration/MigrationDataEncoderApp.java,**/ccd/HttpMessageConverterConfiguration.java"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.outputLocation}"
   }
 }
@@ -191,8 +191,9 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.0'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.0.3'
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.3'
+  implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.17.2'
 
-  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '6.0.0'
+  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '5afa6f7'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBoot.class.package.implementationVersion
   testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.6.0'

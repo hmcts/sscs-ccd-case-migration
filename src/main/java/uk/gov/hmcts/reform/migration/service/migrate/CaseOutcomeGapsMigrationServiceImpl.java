@@ -1,12 +1,10 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
 import java.util.Map;
 
@@ -21,10 +19,9 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
     static final String REMOVE_GAPS_OUTCOME_TAB_SUMMARY = "Outcome tab removed as it is Gaps case";
     static final String REMOVE_GAPS_OUTCOME_TAB_DESCRIPTION = "Outcome tab removed as it is Gaps case";
 
-    public CaseOutcomeGapsMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
-                                               @Value("${migration.caseOutcomeGapsMigration.encoded-data-string}")
+    public CaseOutcomeGapsMigrationServiceImpl(@Value("${migration.caseOutcomeGapsMigration.encoded-data-string}")
                                                String encodedDataString) {
-        super(coreCaseDataService, null, encodedDataString);
+        super(null, encodedDataString);
     }
 
     @Override
@@ -32,12 +29,13 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
         return HearingRoute.GAPS.toString();
     }
 
-    boolean isMigrationNeeded(SscsCaseData caseData) {
-        return isNull(caseData.getCaseOutcome().getCaseOutcome());
+    @Override
+    boolean skipMigration(Map<String, Object> data) {
+        return isNull(data.get("caseOutcome"));
     }
 
     @Override
-    void setHearingOutcome(Map<String, Object> data, SscsCaseData caseData, String caseId) {
+    void setHearingOutcome(Map<String, Object> data, String caseId) {
         // do nothing
     }
 
