@@ -5,9 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
+import uk.gov.hmcts.reform.migration.service.CoreCaseDataService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SearchCcdCaseService;
-import uk.gov.hmcts.reform.sscs.idam.IdamService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,17 +17,14 @@ import static java.util.Objects.nonNull;
 @Slf4j
 public class ElasticSearchRepository {
 
-    private final SearchCcdCaseService ccdSearchService;
-    private final IdamService idamService;
+    CoreCaseDataService ccdSearchService;
 
     private final int querySize;
 
     @Autowired
-    public ElasticSearchRepository(SearchCcdCaseService ccdSearchService,
-                                   IdamService idamService,
+    public ElasticSearchRepository(CoreCaseDataService ccdSearchService,
                                    @Value("${case-migration.elasticsearch.querySize}") int querySize) {
         this.ccdSearchService = ccdSearchService;
-        this.idamService = idamService;
         this.querySize = querySize;
     }
 
@@ -36,7 +32,7 @@ public class ElasticSearchRepository {
         log.info("Processing the Case Migration search.");
 
         String initialQuery = elasticSearchQuery.getQuery(null, querySize, true);
-        var searchResultCases = searchForCasesInCcd(initialQuery, onlySubmittedCases);
+        var searchResultCases = ccdSearchService.searchForCases(initialQuery, onlySubmittedCases);
         List<SscsCaseDetails> caseDetails = new ArrayList<>();
 
         if (nonNull(searchResultCases) && !searchResultCases.isEmpty()) {
@@ -47,7 +43,7 @@ public class ElasticSearchRepository {
             do {
                 String subsequentSearchQuery =
                     elasticSearchQuery.getQuery(searchAfterValue, querySize, false);
-                var subsequentSearchCases = searchForCasesInCcd(subsequentSearchQuery, onlySubmittedCases);
+                var subsequentSearchCases = ccdSearchService.searchForCases(subsequentSearchQuery, onlySubmittedCases);
 
                 keepSearching = false;
                 if (nonNull(subsequentSearchCases)) {
@@ -61,12 +57,5 @@ public class ElasticSearchRepository {
         }
         log.info("The Case Migration has processed caseDetails {}.", caseDetails.size());
         return caseDetails;
-    }
-
-    private List<SscsCaseDetails> searchForCasesInCcd(String elasticSearchQuery, boolean onlySubmittedCases) {
-        if (onlySubmittedCases) {
-            return ccdSearchService.findSubmittedCasesBySearchCriteria(elasticSearchQuery, idamService.getIdamTokens());
-        }
-        return ccdSearchService.findAllCasesBySearchCriteria(elasticSearchQuery, idamService.getIdamTokens());
     }
 }
