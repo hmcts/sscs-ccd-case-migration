@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
@@ -39,9 +40,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.AWAITING_LISTING;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.CANCELLED;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.HEARING_REQUESTED;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_ID;
-import static uk.gov.hmcts.reform.migration.service.NonListedHearingsOutcomesMigration.NON_LISTED_OUTCOME_TAB_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.NonListedHearingsOutcomesMigration.NON_LISTED_OUTCOME_TAB_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;

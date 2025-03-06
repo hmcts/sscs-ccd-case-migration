@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.ccd;
 
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 @Service
 @Slf4j
-public abstract class CoreCaseDataService {
+public class CoreCaseDataService {
 
     private final IdamService idamService;
     private final CcdClient ccdClient;
@@ -32,7 +32,6 @@ public abstract class CoreCaseDataService {
 
     public void applyUpdatesInCcd(Long caseId, String eventType, Function<CaseDetails, UpdateResult> mutator) {
         IdamTokens idamTokens = idamService.getIdamTokens();
-        log.info("UpdateCaseV2 for caseId {} and eventType {}", caseId, eventType);
         StartEventResponse startEventResponse = ccdClient.startEvent(idamTokens, caseId, eventType);
         var caseDetails = startEventResponse.getCaseDetails();
         var result = mutator.apply(caseDetails);

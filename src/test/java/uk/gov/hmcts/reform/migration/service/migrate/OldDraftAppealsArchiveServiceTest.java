@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +16,9 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.OldDraftAppealsArchiveService.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.OldDraftAppealsArchiveService.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.OldDraftAppealsArchiveService.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.OldDraftAppealsArchiveService.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 

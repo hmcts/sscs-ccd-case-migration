@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
+import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Hearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingDetails;
@@ -40,9 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_ID;
-import static uk.gov.hmcts.reform.migration.service.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.CompletedHearingsOutcomesMigration.CASE_OUTCOME_MIGRATION_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.GAPS;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;

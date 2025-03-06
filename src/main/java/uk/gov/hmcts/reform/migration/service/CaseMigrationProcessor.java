@@ -1,11 +1,10 @@
-package uk.gov.hmcts.reform.migration;
+package uk.gov.hmcts.reform.migration.service;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.migration.service.CoreCaseDataService;
-import uk.gov.hmcts.reform.migration.service.DataMigrationService;
+import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 
 import java.util.ArrayList;
 import java.util.List;

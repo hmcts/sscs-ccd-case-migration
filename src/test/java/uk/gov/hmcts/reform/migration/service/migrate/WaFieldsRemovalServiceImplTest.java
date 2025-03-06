@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.WaFieldsRemovalServiceImpl.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.WaFieldsRemovalServiceImpl.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.WaFieldsRemovalServiceImpl.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.WaFieldsRemovalServiceImpl.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @Slf4j
