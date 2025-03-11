@@ -96,16 +96,6 @@ public class NonListedHearingsOutcomesMigrationTest {
 
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() {
-        SscsCaseData caseData = SscsCaseData.builder()
-            .caseOutcome(CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build())
-            .schedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(LIST_ASSIST).build())
-            .jointParty(JointParty.builder().build())
-            .sscsDeprecatedFields(SscsDeprecatedFields.builder().build())
-            .pipSscsCaseData(SscsPipCaseData.builder().build())
-            .finalDecisionCaseData(SscsFinalDecisionCaseData.builder().build())
-            .build();
-        var data = buildCaseDataMap(caseData);
-
         String epims = "123456";
         var caseHearing = CaseHearing.builder().hearingId(1L)
                 .hearingDaySchedule(List.of(
@@ -131,7 +121,15 @@ public class NonListedHearingsOutcomesMigrationTest {
                         .hearingEndDateTime(end)
                         .build())
                 .build();
-        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(caseData)))
+        var data = buildCaseDataMap(SscsCaseData.builder()
+            .caseOutcome(CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build())
+            .schedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(LIST_ASSIST).build())
+            .jointParty(JointParty.builder().build())
+            .sscsDeprecatedFields(SscsDeprecatedFields.builder().build())
+            .pipSscsCaseData(SscsPipCaseData.builder().build())
+            .finalDecisionCaseData(SscsFinalDecisionCaseData.builder().build())
+            .build());
+        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(data)))
             .thenReturn(List.of(hearingOutcome));
         caseDetails.setData(data);
 

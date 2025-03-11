@@ -51,7 +51,11 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
                         log.info("Updating case {}", caseDetails.getId());
                         try {
                             log.debug("Case data: {}", caseDetails.getData());
-                            coreCaseDataService.applyUpdatesInCcd(caseDetails.getId(), getEventId(), this::migrate);
+                            coreCaseDataService.applyUpdatesInCcd(
+                                caseDetails.getId(),
+                                getEventId(),
+                                this::migrate
+                            );
                             migratedCases.add(caseDetails.getId());
                             log.info("Case {} successfully updated", caseDetails.getId());
                         } catch (Exception e) {
