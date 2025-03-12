@@ -32,9 +32,6 @@ public class CaseMigrationRunner implements CommandLineRunner {
         this.applicationContext = applicationContext;
     }
 
-    @Value("${migration.caseType}")
-    private String caseType;
-
     public static void main(String[] args) {
         SpringApplication.run(CaseMigrationRunner.class, args);
     }
@@ -44,7 +41,7 @@ public class CaseMigrationRunner implements CommandLineRunner {
         try {
             getMigrationJobs().forEach((name, job) -> {
                 log.info("Running Migration job: {}", name);
-                job.migrateCases(caseType);
+                job.migrateCases();
             });
         } catch (Exception e) {
             log.error("Migration failed with the following reason: {}", e.getMessage(), e);

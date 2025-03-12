@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.ElasticSearchQuery;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,15 +17,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ElasticSearchRepositoryTest {
-
-    private static final String CASE_TYPE = "CASE_TYPE";
 
     private static final String INITIAL_QUERY = """
             {
@@ -90,31 +85,25 @@ public class ElasticSearchRepositoryTest {
             }""";
 
     private static final int QUERY_SIZE = 100;
-
     private ElasticSearchRepository elasticSearchRepository;
 
     @Mock
-    private CoreCaseDataService coreCaseDataService;
-
+    private CoreCaseDataService ccdSearchService;
     @Mock
     private ElasticSearchQuery elasticSearchQuery;
 
     @BeforeEach
     public void setUp() {
-        elasticSearchRepository = new ElasticSearchRepository(coreCaseDataService,
-                                                              CASE_TYPE,
-                                                              QUERY_SIZE);
+        elasticSearchRepository = new ElasticSearchRepository(ccdSearchService, QUERY_SIZE);
     }
 
     @Test
     public void shouldReturnSearchResultsForCaseTypeElasticSearch() {
-        SearchResult searchResult = mock(SearchResult.class);
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
-        when(coreCaseDataService.getCases(
-            CASE_TYPE,
-            INITIAL_QUERY
-        )).thenReturn(searchResult);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
+        when(ccdSearchService.searchForCases(INITIAL_QUERY, true)).thenReturn(List.of());
+
+        List<SscsCaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery, true);
+
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
@@ -122,67 +111,46 @@ public class ElasticSearchRepositoryTest {
     @Test
     public void shouldNotReturnCaseDetailsForCaseTypeWhenSearchResultIsNull() {
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
-        List<CaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
+
+        List<SscsCaseDetails> caseDetails = elasticSearchRepository.findCases(elasticSearchQuery, true);
+
         assertNotNull(caseDetails);
         assertEquals(0, caseDetails.size());
     }
 
     @Test
     public void shouldReturnSearchResultsAndCaseDetailsForCaseTypeElasticSearch() {
-        List<CaseDetails> caseDetails = new ArrayList<>();
-        CaseDetails details = mock(CaseDetails.class);
-        caseDetails.add(details);
-        SearchResult searchResult = mock(SearchResult.class);
-        when(details.getId()).thenReturn(1677777777L);
-        when(searchResult.getCases()).thenReturn(caseDetails);
-        when(searchResult.getTotal()).thenReturn(1);
+        List<SscsCaseDetails> searchResults = List.of(SscsCaseDetails.builder().id(1677777777L).build());
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
-        when(coreCaseDataService.getCases(
-            CASE_TYPE,
-            INITIAL_QUERY
-        )).thenReturn(searchResult);
+        when(ccdSearchService.searchForCases(INITIAL_QUERY, false)).thenReturn(searchResults);
+        List<SscsCaseDetails> subsequentSearchResults = List.of(SscsCaseDetails.builder().id(1777777777L).build());
+        when(ccdSearchService.searchForCases(SEARCH_AFTER_QUERY, false))
+            .thenReturn(subsequentSearchResults)
+            .thenReturn(null);
 
-        SearchResult searchAfterResult = mock(SearchResult.class);
-        when(coreCaseDataService.getCases(
-            CASE_TYPE,
-            SEARCH_AFTER_QUERY
-        )).thenReturn(searchAfterResult);
+        List<SscsCaseDetails> actualSearchResults = elasticSearchRepository.findCases(elasticSearchQuery, false);
 
-        List<CaseDetails> caseDetails1 = new ArrayList<>();
-        CaseDetails details1 = mock(CaseDetails.class);
-        caseDetails1.add(details1);
-        when(searchAfterResult.getCases()).thenReturn(caseDetails1, List.of());
-
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
-        assertNotNull(returnCaseDetails);
-        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, INITIAL_QUERY);
-        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, SEARCH_AFTER_QUERY);
-
-        assertEquals(2, returnCaseDetails.size());
+        assertNotNull(actualSearchResults);
+        verify(ccdSearchService).searchForCases(INITIAL_QUERY, false);
+        verify(ccdSearchService, times(2))
+            .searchForCases(SEARCH_AFTER_QUERY, false);
+        assertEquals(2, actualSearchResults.size());
     }
 
     @Test
     public void shouldReturnOnlyInitialCaseDetailsWhenSearchAfterReturnsNullSearchResults() {
-        List<CaseDetails> caseDetails = new ArrayList<>();
-        CaseDetails details = mock(CaseDetails.class);
-        when(details.getId()).thenReturn(1677777777L);
-        caseDetails.add(details);
-        SearchResult searchResult = mock(SearchResult.class);
-        when(searchResult.getCases()).thenReturn(caseDetails);
-        when(searchResult.getTotal()).thenReturn(1);
+        List<SscsCaseDetails> searchResults = List.of(SscsCaseDetails.builder().id(1677777777L).build());
         when(elasticSearchQuery.getQuery(isNull(), anyInt(), eq(true))).thenReturn(INITIAL_QUERY);
         when(elasticSearchQuery.getQuery(anyString(), anyInt(), eq(false))).thenReturn(SEARCH_AFTER_QUERY);
-        when(coreCaseDataService.getCases(CASE_TYPE, INITIAL_QUERY)).thenReturn(searchResult);
+        when(ccdSearchService.searchForCases(INITIAL_QUERY, true)).thenReturn(searchResults);
+        when(ccdSearchService.searchForCases(SEARCH_AFTER_QUERY, true)).thenReturn(null);
 
-        when(coreCaseDataService.getCases(CASE_TYPE,SEARCH_AFTER_QUERY)).thenReturn(null);
+        List<SscsCaseDetails> actualSearchResults = elasticSearchRepository.findCases(elasticSearchQuery, true);
 
-        List<CaseDetails> returnCaseDetails = elasticSearchRepository.findCases(elasticSearchQuery);
-        assertNotNull(returnCaseDetails);
-
-        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, INITIAL_QUERY);
-        verify(coreCaseDataService, times(1)).getCases(CASE_TYPE, SEARCH_AFTER_QUERY);
-
-        assertEquals(1, returnCaseDetails.size());
+        assertNotNull(actualSearchResults);
+        verify(ccdSearchService).searchForCases(INITIAL_QUERY, true);
+        verify(ccdSearchService).searchForCases(SEARCH_AFTER_QUERY, true);
+        assertEquals(1, actualSearchResults.size());
     }
 }

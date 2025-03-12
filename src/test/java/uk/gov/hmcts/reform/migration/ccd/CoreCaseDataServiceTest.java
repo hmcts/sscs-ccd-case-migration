@@ -1,120 +1,95 @@
 package uk.gov.hmcts.reform.migration.ccd;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.migration.service.DataMigrationService;
+import uk.gov.hmcts.reform.sscs.ccd.client.CcdClient;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.SearchCcdCaseService;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
 import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Function;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CoreCaseDataServiceTest {
-    private static final String EVENT_ID = "migrateCase";
-    private static final String CASE_TYPE = "CARE_SUPERVISION_EPO";
-    private static final String CASE_ID = "123456789";
-    private static final String USER_ID = "30";
-    private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJubGJoN";
-    private static final String EVENT_TOKEN = "Bearer aaaadsadsasawewewewew";
-    private static final String EVENT_SUMMARY = "Migrate Case";
-    private static final String EVENT_DESC = "Migrate Case";
 
-    @Mock
-    CoreCaseDataApi coreCaseDataApi;
-    @Mock
-    private DataMigrationService<Map<String, Object>> dataMigrationService;
     @Mock
     private IdamService idamService;
+    @Mock
+    private CcdClient ccdClient;
+    @Mock
+    private SearchCcdCaseService ccdSearchService;
 
     @InjectMocks
-    private CoreCaseDataService underTest;
+    private CoreCaseDataService coreCaseDataService;
+
+    private final IdamTokens idamTokens = IdamTokens.builder().build();
+
+    @BeforeEach
+    void setUp() {
+        when(idamService.getIdamTokens()).thenReturn(idamTokens);
+    }
 
     @Test
-    void shouldUpdateTheCase() throws Exception {
-        CaseDetails caseDetails3 = createCaseDetails();
-        setupMocks(caseDetails3.getData());
-        when(dataMigrationService.getEventDescription()).thenReturn(EVENT_DESC);
-        when(dataMigrationService.getEventId()).thenReturn(EVENT_ID);
-        when(dataMigrationService.getEventSummary()).thenReturn(EVENT_SUMMARY);
-
-        //when
-        CaseDetails update = underTest.update(CASE_TYPE, caseDetails3.getId(),
-                                              caseDetails3.getJurisdiction(), dataMigrationService);
-        //then
-        assertThat(update.getId(), is(Long.parseLong(CASE_ID)));
-        assertThat(update.getData().get("solicitorEmail"), is("Padmaja.Ramisetti@hmcts.net"));
-        assertThat(update.getData().get("solicitorName"), is("PADMAJA"));
-        assertThat(update.getData().get("solicitorReference"), is("LL02"));
-        assertThat(update.getData().get("applicantLName"), is("Mamidi"));
-        assertThat(update.getData().get("applicantFMName"), is("Prashanth"));
-        assertThat(update.getData().get("appRespondentFMName"), is("TestRespondant"));
-    }
-
-    private CaseDetails createCaseDetails() {
-        LinkedHashMap<String, Object> data = new LinkedHashMap<>();
-        data.put("solicitorEmail", "Padmaja.Ramisetti@hmcts.net");
-        data.put("solicitorName", "PADMAJA");
-        data.put("solicitorReference", "LL02");
-        data.put("applicantLName", "Mamidi");
-        data.put("applicantFMName", "Prashanth");
-        data.put("appRespondentFMName", "TestRespondant");
-        return CaseDetails.builder()
-            .id(Long.valueOf(CASE_ID))
-            .data(data)
-            .build();
-    }
-
-    private void setupMocks(Map<String, Object> data) throws Exception {
-        when(idamService.getIdamTokens()).thenReturn(IdamTokens.builder()
-                                                         .idamOauth2Token(AUTH_TOKEN)
-                                                         .serviceAuthorization(AUTH_TOKEN)
-                                                         .userId(USER_ID).build());
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123456789L)
-            .data(data)
-            .build();
-
+    void applyUpdatesInCcd() {
+        Long caseId = 12345L;
+        String eventType = "updateEvent";
+        var data = new HashMap<String, Object>();
+        data.put("hearingRoute", "gaps");
+        var updateResult = new UpdateResult("summary", "description");
+        Function<CaseDetails, UpdateResult> mutator = caseDetails -> {
+            caseDetails.getData().put("hearingRoute", "listAssist");
+            return updateResult;
+        };
+        CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         StartEventResponse startEventResponse = StartEventResponse.builder()
-            .eventId(EVENT_ID)
-            .token(EVENT_TOKEN)
-            .caseDetails(caseDetails)
-            .build();
+            .caseDetails(caseDetails).token("token").eventId("eventId").build();
+        when(ccdClient.startEvent(any(), eq(caseId), eq(eventType))).thenReturn(startEventResponse);
 
-        when(dataMigrationService.migrate(caseDetails))
-            .thenReturn(data);
+        coreCaseDataService.applyUpdatesInCcd(caseId, eventType, mutator);
 
-        when(coreCaseDataApi.startEventForCaseWorker(AUTH_TOKEN, AUTH_TOKEN, "30",
-                                                     null, CASE_TYPE, CASE_ID, EVENT_ID
-        ))
-            .thenReturn(startEventResponse);
+        assertEquals("listAssist", data.get("hearingRoute"));
+        verify(ccdClient).startEvent(eq(idamTokens), eq(caseId), eq(eventType));
+        verify(ccdClient).submitEventForCaseworker(eq(idamTokens), eq(caseId), any());
+    }
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-            .event(Event.builder()
-                       .id(EVENT_ID)
-                       .description(EVENT_DESC)
-                       .summary(EVENT_SUMMARY)
-                       .build())
-            .eventToken(EVENT_TOKEN)
-            .data(data)
-            .ignoreWarning(false)
-            .build();
+    @Test
+    void shouldSearchForSubmittedCases() {
+        String elasticSearchQuery = "query";
+        List<SscsCaseDetails> expectedCases = List.of(SscsCaseDetails.builder().build());
 
-        when(coreCaseDataApi.submitEventForCaseWorker(AUTH_TOKEN, AUTH_TOKEN, USER_ID, null,
-                                                      CASE_TYPE, CASE_ID, true, caseDataContent
-        )).thenReturn(caseDetails);
+        when(ccdSearchService.findSubmittedCasesBySearchCriteria(eq(elasticSearchQuery), eq(idamTokens)))
+            .thenReturn(expectedCases);
+
+        var actualCases = coreCaseDataService.searchForCases(elasticSearchQuery, true);
+
+        assertEquals(expectedCases, actualCases);
+    }
+
+    @Test
+    void shouldSearchForAllCases() {
+        String elasticSearchQuery = "query";
+        List<SscsCaseDetails> expectedCases = List.of(SscsCaseDetails.builder().build());
+        when(ccdSearchService.findAllCasesBySearchCriteria(eq(elasticSearchQuery), eq(idamTokens)))
+            .thenReturn(expectedCases);
+
+        List<SscsCaseDetails> actualCases = coreCaseDataService.searchForCases(elasticSearchQuery, false);
+
+        assertEquals(expectedCases, actualCases);
     }
 }

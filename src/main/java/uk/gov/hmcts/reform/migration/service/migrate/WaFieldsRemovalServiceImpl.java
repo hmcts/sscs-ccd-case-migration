@@ -1,16 +1,16 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
+import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -26,14 +26,13 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
 
     private final String encodedDataString;
 
-    public WaFieldsRemovalServiceImpl(CoreCaseDataService coreCaseDataService,
-                                      @Value("${migration.waFieldsRemoval.encoded-data-string}")
+    public WaFieldsRemovalServiceImpl(@Value("${migration.waFieldsRemoval.encoded-data-string}")
                                       String encodedDataString) {
-        super(coreCaseDataService);
         this.encodedDataString = encodedDataString;
     }
 
-    public Map<String, Object> migrate(CaseDetails caseDetails) {
+    @Override
+    public UpdateResult migrate(CaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
             if (data.containsKey("scannedDocumentTypes")) {
@@ -49,11 +48,11 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
                 data.put("previouslyAssignedCaseRoles", null);
             }
         }
-        return data;
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<CaseDetails> getMigrationCases() {
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
         return new CaseLoader(encodedDataString).findCases();
     }
 

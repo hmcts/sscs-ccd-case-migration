@@ -1,16 +1,16 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.migration.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.query.WaElasticSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.nonNull;
 
@@ -26,25 +26,23 @@ public class WaDataMigrationServiceImpl extends CaseMigrationProcessor {
     private final WaElasticSearchQuery elasticSearchQuery;
     private final ElasticSearchRepository repository;
 
-    public WaDataMigrationServiceImpl(CoreCaseDataService coreCaseDataService,
-                                      WaElasticSearchQuery elasticSearchQuery, ElasticSearchRepository repository) {
-        super(coreCaseDataService);
+    public WaDataMigrationServiceImpl(WaElasticSearchQuery elasticSearchQuery, ElasticSearchRepository repository) {
         this.elasticSearchQuery = elasticSearchQuery;
         this.repository = repository;
     }
 
     @Override
-    public Map<String, Object> migrate(CaseDetails caseDetails) {
+    public UpdateResult migrate(CaseDetails caseDetails) {
         var data = caseDetails.getData();
         if (nonNull(data)) {
             data.put("preWorkAllocation", "Yes");
         }
-        return data;
+        return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
     @Override
-    public List<CaseDetails> getMigrationCases() {
-        return repository.findCases(elasticSearchQuery);
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
+        return repository.findCases(elasticSearchQuery, true);
     }
 
     public String getEventId() {

@@ -1,17 +1,18 @@
-package uk.gov.hmcts.reform.migration.service;
+package uk.gov.hmcts.reform.migration.service.migrate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-
-import java.util.HashMap;
-import java.util.Map;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.YesNo.YES;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 class DwpDataMigrationServiceImplTest {
 
@@ -22,13 +23,14 @@ class DwpDataMigrationServiceImplTest {
     @BeforeEach
     public void setup() {
         dwpDataMigrationService =
-            new DwpDataMigrationServiceImpl(null,null, null);
+            new DwpDataMigrationServiceImpl(null,null);
         caseDetails = CaseDetails.builder().id(1234L).build();
     }
 
     @Test
     void shouldReturnTrueForCaseDetailsPassed() {
-        assertTrue(dwpDataMigrationService.accepts().test(caseDetails));
+        var sscsCaseDetails = SscsCaseDetails.builder().id(1234L).build();
+        assertTrue(dwpDataMigrationService.accepts().test(sscsCaseDetails));
     }
 
     @Test
@@ -38,36 +40,36 @@ class DwpDataMigrationServiceImplTest {
 
     @Test
     void shouldReturnPassedDataWhenMigrateCalled() {
-        Map<String, Object> data = new HashMap<>();
+        var data = buildCaseDataMap(SscsCaseData.builder().build());
         caseDetails.setData(data);
 
-        Map<String, Object> result = dwpDataMigrationService.migrate(caseDetails);
+        dwpDataMigrationService.migrate(caseDetails);
 
-        assertNotNull(result);
-        assertEquals(data, result);
+        assertNotNull(caseDetails.getData());
+        assertEquals(data, caseDetails.getData());
     }
 
     @Test
     void shouldNotChangeExistingFields() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("poAttendanceConfirmed", "Yes");
-        data.put("dwpIsOfficerAttending", "Yes");
-        data.put("tribunalDirectPoToAttend", "Yes");
-        caseDetails.setData(data);
+        var data = SscsCaseData.builder()
+            .poAttendanceConfirmed(YES)
+            .dwpIsOfficerAttending(YES.getValue())
+            .tribunalDirectPoToAttend(YES)
+            .build();
+        caseDetails.setData(buildCaseDataMap(data));
 
-        Map<String, Object> result = dwpDataMigrationService.migrate(caseDetails);
+        dwpDataMigrationService.migrate(caseDetails);
 
-        assertNotNull(result);
-        assertEquals("Yes", data.get("poAttendanceConfirmed"));
-        assertEquals("Yes", data.get("dwpIsOfficerAttending"));
-        assertEquals("Yes", data.get("tribunalDirectPoToAttend"));
+        assertNotNull(data);
+        assertEquals(YES, data.getPoAttendanceConfirmed());
+        assertEquals(YES.toString(), data.getDwpIsOfficerAttending());
+        assertEquals(YES, data.getTribunalDirectPoToAttend());
     }
 
     @Test
     void shouldReturnNullWhenDataIsNotPassed() {
-        Map<String, Object> result = dwpDataMigrationService.migrate(caseDetails);
-
-        assertNull(result);
+        dwpDataMigrationService.migrate(caseDetails);
+        assertNull(caseDetails.getData());
     }
 
     @Test
