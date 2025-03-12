@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
-import static java.time.LocalDateTime.now;
+import static java.time.LocalDate.now;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT;
 
 @Service
@@ -38,7 +38,7 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
         return repository.findCases(searchQuery, false)
             .stream()
             .filter(caseDetails -> DRAFT.toString().equals(caseDetails.getState())
-                && !caseDetails.getCreatedDate().isAfter(now().minusMonths(6)))
+                && !caseDetails.getCreatedDate().toLocalDate().isAfter(now().minusMonths(6)))
             .toList();
     }
 

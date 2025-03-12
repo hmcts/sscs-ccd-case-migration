@@ -16,7 +16,7 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
 
     private static final String LOG_STRING = """
         \n-----------------------------------------
-        Data migration completed
+        Data migration completed ({})
         -----------------------------------------
         Total number of processed cases: {}
         Total number of migrations performed: {}
@@ -70,7 +70,7 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
         shutdownThreadPool(threadPool);
 
         log.info(
-            LOG_STRING, getMigratedCases().size() + getFailedCases().size(),
+            LOG_STRING, getClass().getSimpleName(), getMigratedCases().size() + getFailedCases().size(),
             getMigratedCases().size(), getMigratedCases().isEmpty() ? "NONE" : getMigratedCases(),
             getFailedCases().isEmpty() ? "NONE" : getFailedCases()
         );
