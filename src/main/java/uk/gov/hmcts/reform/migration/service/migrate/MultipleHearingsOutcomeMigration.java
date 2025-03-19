@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -9,7 +8,6 @@ import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
 import java.util.Map;
@@ -36,22 +34,18 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
         List<CaseHearing> allhmcHearings = hmcHearingsApiService.getHearingsRequest(caseId, null)
             .getCaseHearings();
 
-        Long jostSelectedHearingID = Long.valueOf(caseMap.get(caseId));
+        Long selectedHearingID = Long.valueOf(caseMap.get(caseId));
+        log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingID);
 
-        List<CaseHearing>  jostSelectedHearing = allhmcHearings.stream()
-            .filter(hearing -> hearing.getHearingId().equals(jostSelectedHearingID)).toList();
+        List<CaseHearing>  selectedHearing = allhmcHearings.stream()
+            .filter(hearing -> hearing.getHearingId().equals(selectedHearingID)).toList();
 
-        if (jostSelectedHearing.size() != 1) {
+        if (selectedHearing.size() != 1) {
             log.info(SKIPPING_CASE_MSG
-                + "Cannot map to hearingID {} selected for case id {}",
-               jostSelectedHearingID, caseId);
-            throw new RuntimeException(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
+                + " | Case id: {} | Hearing id: {} |Reason: Hearing with selected hearing id not found on case",
+                     caseId, selectedHearingID);
+            throw new RuntimeException(SKIPPING_CASE_MSG + ", Hearing with selected hearing id not found on case");
         }
-        return jostSelectedHearing;
-    };
-
-    @Override
-    public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return new CaseLoader(encodedDataString).findCases(); //use findCasesWithHearingID new method
+        return selectedHearing;
     }
 }

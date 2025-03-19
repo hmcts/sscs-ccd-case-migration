@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.migration.repository;
 
-import com.nimbusds.jose.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -11,12 +10,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
@@ -51,21 +47,18 @@ public class CaseLoader {
         return cases;
     }
 
-    public Map<String, String> findCasesWithHearingID() {
-        LinkedHashMap<String, String> mapdata = new LinkedHashMap<>();
+    public LinkedHashMap<String, String> findCasesWithHearingID() {
+        LinkedHashMap<String, String> caseToHearingIdMap = new LinkedHashMap<>();
         try {
             JSONArray data = new JSONArray(decompressAndB64Decode(encodedDataString));
-            log.info("DATA ************ {} *************", data);
-            AtomicInteger unprocessed = new AtomicInteger(data.length());
             data.iterator().forEachRemaining(row -> {
                 JSONObject jsonObject = (JSONObject) row;
-                log.info ("{}", jsonObject);
-                mapdata.put(jsonObject.getString("reference"), jsonObject.getString("hearingID"));
+                caseToHearingIdMap.put(jsonObject.getString("reference"), jsonObject.getString("hearingID"));
             });
         } catch (IOException e) {
-            log.info("Failed create mapping for {}", this.getClass().getName());
+            log.info("Failed to create mapping for {}", this.getClass().getName());
         }
-        return mapdata;
+        return caseToHearingIdMap;
     }
 
     private static String decompressAndB64Decode(String b64Compressed) throws IOException {
