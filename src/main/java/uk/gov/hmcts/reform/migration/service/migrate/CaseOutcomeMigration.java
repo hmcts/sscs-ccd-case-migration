@@ -25,7 +25,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
-    private final String encodedDataString;
+    public String encodedDataString;
 
     public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService,
                                 String encodedDataString) {
