@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.completedHearingsOutcomes.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "migration.multipleHearingsOutcomes.enabled", havingValue = "true")
 public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     private final HmcHearingsApiService hmcHearingsApiService;
@@ -25,7 +25,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     public MultipleHearingsOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
-                                              @Value("${migration.completedHearingsOutcomes.encoded-data-string}")
+                                              @Value("${migration.multipleHearingsOutcomes.encoded-data-string}")
                                               String encodedDataString) {
         super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
@@ -52,6 +52,6 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return new CaseLoader(encodedDataString).findCases(true); //use findCasesWithHearingID new method
+        return new CaseLoader(encodedDataString).findCases(); //use findCasesWithHearingID new method
     }
 }
