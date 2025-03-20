@@ -34,9 +34,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -87,7 +84,7 @@ public class MultipleHearingsOutcomeMigrationTest {
     @Test
     void shouldSkipWhenDataIsNull() {
         caseOutcomeMigrationService.migrate(caseDetails);
-        assertNull(caseDetails.getData());
+        assertThat(caseDetails.getData()).isNull();
     }
 
     @Test
@@ -146,10 +143,10 @@ public class MultipleHearingsOutcomeMigrationTest {
 
         caseOutcomeMigrationService.migrate(caseDetails);
 
-        assertNotNull(data);
-        assertEquals(List.of(hearingOutcome), data.get("hearingOutcomes"));
-        assertNull(data.get("caseOutcome"));
-        assertNull(data.get("didPoAttend"));
+        assertThat(data).isNotNull();
+        assertThat(List.of(hearingOutcome)).isEqualTo(data.get("hearingOutcomes"));
+        assertThat(data.get("caseOutcome")).isNull();
+        assertThat(data.get("didPoAttend")).isNull();
     }
 
     @Test
