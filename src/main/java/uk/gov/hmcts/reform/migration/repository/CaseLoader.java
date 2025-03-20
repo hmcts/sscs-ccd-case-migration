@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DeflaterOutputStream;
@@ -47,8 +47,8 @@ public class CaseLoader {
         return cases;
     }
 
-    public LinkedHashMap<String, String> findCasesWithHearingID() {
-        LinkedHashMap<String, String> caseToHearingIdMap = new LinkedHashMap<>();
+    public HashMap<String, String> findCasesWithHearingID() {
+        HashMap<String, String> caseToHearingIdMap = new HashMap<>();
         try {
             JSONArray data = new JSONArray(decompressAndB64Decode(encodedDataString));
             data.iterator().forEachRemaining(row -> {
