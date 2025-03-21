@@ -20,6 +20,7 @@ public class CaseLoaderTest {
         CaseLoader caseLoader = new CaseLoader(ENCODED_STRING);
 
         var result = caseLoader.findCases();
+
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(1729631427870175L, result.getFirst().getId());
@@ -31,11 +32,12 @@ public class CaseLoaderTest {
         CaseLoader caseLoader = new CaseLoader(ENCODED_HEARING_STRING);
 
         var result = caseLoader.findCasesWithHearingID();
+
         assertNotNull(result);
         assertFalse(result.getValue().isEmpty());
         assertEquals("1234", result.getLeft().get("1729631427870175"));
         assertEquals(1729631427870175L, result.getRight().getFirst().getId());
-        assertEquals("SSCS", result.getValue().getFirst().getJurisdiction());
+        assertEquals("SSCS", result.getRight().getFirst().getJurisdiction());
     }
 
     @Test
@@ -43,6 +45,7 @@ public class CaseLoaderTest {
         CaseLoader caseLoader = new CaseLoader(INVALID_ENCODED_DATA_STRING);
 
         var result = caseLoader.findCases();
+
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -52,6 +55,7 @@ public class CaseLoaderTest {
         CaseLoader caseLoader = new CaseLoader(INVALID_ENCODED_DATA_STRING);
 
         var result = caseLoader.findCasesWithHearingID();
+
         assertNotNull(result);
         assertTrue(result.getKey().isEmpty());
         assertTrue(result.getValue().isEmpty());
