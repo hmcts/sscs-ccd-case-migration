@@ -33,8 +33,8 @@ public class CaseLoaderTest {
         var result = caseLoader.findCasesWithHearingID();
         assertNotNull(result);
         assertFalse(result.getValue().isEmpty());
-        assertEquals("1234", result.getKey().get("1729631427870175"));
-        assertEquals(1729631427870175L, result.getValue().getFirst().getId());
+        assertEquals("1234", result.getLeft().get("1729631427870175"));
+        assertEquals(1729631427870175L, result.getRight().getFirst().getId());
         assertEquals("SSCS", result.getValue().getFirst().getJurisdiction());
     }
 
