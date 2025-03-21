@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CaseLoaderTest {
 
     private static final String ENCODED_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VaqNBQC1oglo";
-    private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VdJRykhNLMrMS" +
-        "/d0AUkbGZso1cYCAJvGDos=";
+    private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VdJRykhNLMrMS"
+        + "/d0AUkbGZso1cYCAJvGDos=";
     private static final String INVALID_ENCODED_DATA_STRING = "xxxxxxxxxxxxxxx";
 
 

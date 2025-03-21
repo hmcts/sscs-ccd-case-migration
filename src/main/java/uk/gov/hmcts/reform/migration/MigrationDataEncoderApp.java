@@ -3,20 +3,20 @@ package uk.gov.hmcts.reform.migration;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-import java.util.zip.DeflaterOutputStream;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DeflaterOutputStream;
 
 @Slf4j
 public class MigrationDataEncoderApp {
