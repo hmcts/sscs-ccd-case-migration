@@ -36,8 +36,8 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
         var caseAndHearingDetails = new CaseLoader(encodedDataString).findCasesWithHearingID();
-        caseRefToHearingIdMap = caseAndHearingDetails.getKey();
-        return caseAndHearingDetails.getValue();
+        caseRefToHearingIdMap = caseAndHearingDetails.getLeft();
+        return caseAndHearingDetails.getRight();
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {

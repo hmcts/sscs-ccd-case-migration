@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.repository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
@@ -13,13 +14,11 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.zip.InflaterOutputStream;
 
 import static java.lang.Long.parseLong;
-import static java.util.Map.entry;
 
 @Slf4j
 public class CaseLoader {
@@ -43,7 +42,7 @@ public class CaseLoader {
             .toList();
     }
 
-    public Entry<Map<String, String>, List<SscsCaseDetails>> findCasesWithHearingID() {
+    public Pair<Map<String, String>, List<SscsCaseDetails>> findCasesWithHearingID() {
         Map<String, String> caseRefToHearingIdMap = new HashMap<>();
         List<SscsCaseDetails> caseList = new ArrayList<>();
         decompressAndB64Decode(encodedDataString).forEach(jsonObj -> {
@@ -51,7 +50,7 @@ public class CaseLoader {
             caseList.add(SscsCaseDetails.builder()
                              .jurisdiction(JURISDICTION).id(parseLong(jsonObj.get(ID_COLUMN))).build());
         });
-        return entry(caseRefToHearingIdMap, caseList);
+        return Pair.of(caseRefToHearingIdMap, caseList);
     }
 
     private Stream<Map<String, String>> decompressAndB64Decode(String b64Compressed) {
