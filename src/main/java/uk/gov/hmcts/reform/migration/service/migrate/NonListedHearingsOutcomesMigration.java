@@ -32,20 +32,12 @@ public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
-
-        List<CaseHearing> allhmcHearings = hmcHearingsApiService.getHearingsRequest(caseId, null)
-                .getCaseHearings();
-        if (allhmcHearings.size() != 1) {
-            log.info(SKIPPING_CASE_MSG
-                            + " |Case id: {}|No of hearings: {} |Reason: Zero or More than one hearing found",
-                    caseId, allhmcHearings.size());
-            throw new RuntimeException(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
-        }
-
-        return allhmcHearings.stream()
-                .filter(hearing -> !List.of(COMPLETED, AWAITING_LISTING, UPDATE_SUBMITTED)
-                        .contains(hearing.getHmcStatus()))
-                .toList();
+        return hmcHearingsApiService.getHearingsRequest(caseId, null)
+            .getCaseHearings()
+            .stream()
+            .filter(hearing ->
+                        !List.of(COMPLETED, AWAITING_LISTING, UPDATE_SUBMITTED).contains(hearing.getHmcStatus()))
+            .toList();
     }
 
     @Override

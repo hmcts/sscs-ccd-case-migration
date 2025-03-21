@@ -110,7 +110,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
             );
             throw new RuntimeException(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
         }
-        return hmcHearings.get(0);
+        return hmcHearings.getFirst();
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {

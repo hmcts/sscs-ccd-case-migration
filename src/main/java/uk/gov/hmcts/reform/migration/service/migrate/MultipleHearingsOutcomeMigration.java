@@ -8,9 +8,13 @@ import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static java.lang.Long.parseLong;
 
 @Service
 @Slf4j
@@ -18,8 +22,8 @@ import java.util.Map;
 public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     private final HmcHearingsApiService hmcHearingsApiService;
+    private Map<Long, Long> caseRefToHearingIdMap;
 
-    private final Map<String, String> caseMap = new CaseLoader(encodedDataString).findCasesWithHearingID();
 
     public MultipleHearingsOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
@@ -27,25 +31,23 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
                                               String encodedDataString) {
         super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
-        this.encodedDataString = encodedDataString;
+    }
+
+    @Override
+    public List<SscsCaseDetails> fetchCasesToMigrate() {
+        var caseAndHearingDetails = new CaseLoader(encodedDataString).findCasesWithHearingID();
+        caseRefToHearingIdMap = caseAndHearingDetails.getKey();
+        return caseAndHearingDetails.getValue();
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
-        List<CaseHearing> allhmcHearings = hmcHearingsApiService.getHearingsRequest(caseId, null)
-            .getCaseHearings();
-
-        Long selectedHearingID = Long.valueOf(caseMap.get(caseId));
+        Long selectedHearingID = caseRefToHearingIdMap.get(parseLong(caseId));
         log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingID);
 
-        List<CaseHearing>  selectedHearing = allhmcHearings.stream()
-            .filter(hearing -> hearing.getHearingId().equals(selectedHearingID)).toList();
-
-        if (selectedHearing.size() != 1) {
-            log.info(SKIPPING_CASE_MSG
-                + " | Case id: {} | Hearing id: {} |Reason: Hearing with selected hearing id not found on case",
-                     caseId, selectedHearingID);
-            throw new RuntimeException(SKIPPING_CASE_MSG + ", Hearing with selected hearing id not found on case");
-        }
-        return selectedHearing;
+        return hmcHearingsApiService.getHearingsRequest(caseId, null)
+            .getCaseHearings()
+            .stream()
+            .filter(hearing -> Objects.equals(hearing.getHearingId(), selectedHearingID))
+            .toList();
     }
 }

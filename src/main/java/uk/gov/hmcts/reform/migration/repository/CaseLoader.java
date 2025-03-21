@@ -13,15 +13,21 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
+
+import static java.util.Map.entry;
 
 @Slf4j
 public class CaseLoader {
 
     private static final String JURISDICTION = "SSCS";
     private static final String ID_COLUMN = "reference";
+    private static final String HEARING_ID_COLUMN = "reference";
 
     private final String encodedDataString;
 
@@ -30,43 +36,37 @@ public class CaseLoader {
     }
 
     public List<SscsCaseDetails> findCases() {
-        List<SscsCaseDetails> cases = new ArrayList<>();
-        try {
-            JSONArray data = new JSONArray(decompressAndB64Decode(encodedDataString));
-            AtomicInteger unprocessed = new AtomicInteger(data.length());
-            log.info("Number of cases to be migrated: ({})", unprocessed.get());
-
-            data.iterator().forEachRemaining(row -> cases.add(SscsCaseDetails.builder()
-                              .jurisdiction(JURISDICTION)
-                              .id(((JSONObject) row).getLong(ID_COLUMN))
-                              .build()));
-
-        } catch (IOException e) {
-            log.info("Failed to load cases from {}", this.getClass().getName());
-        }
-        return cases;
+        return decompressAndB64Decode(encodedDataString)
+            .map(jsonObj -> SscsCaseDetails.builder()
+                .jurisdiction(JURISDICTION)
+                .id(jsonObj.getLong(ID_COLUMN))
+                .build())
+            .toList();
     }
 
-    public HashMap<String, String> findCasesWithHearingID() {
-        HashMap<String, String> caseToHearingIdMap = new HashMap<>();
-        try {
-            JSONArray data = new JSONArray(decompressAndB64Decode(encodedDataString));
-            data.iterator().forEachRemaining(row -> {
-                JSONObject jsonObject = (JSONObject) row;
-                caseToHearingIdMap.put(jsonObject.getString("reference"), jsonObject.getString("hearingID"));
-            });
-        } catch (IOException e) {
-            log.info("Failed to create mapping for {}", this.getClass().getName());
-        }
-        return caseToHearingIdMap;
+    public Entry<Map<Long, Long>, List<SscsCaseDetails>> findCasesWithHearingID() {
+        Map<Long, Long> caseRefToHearingIdMap = new HashMap<>();
+        List<SscsCaseDetails> caseList = new ArrayList<>();
+        decompressAndB64Decode(encodedDataString).forEach(jsonObj -> {
+            caseRefToHearingIdMap.put(jsonObj.getLong(ID_COLUMN), jsonObj.getLong(HEARING_ID_COLUMN));
+            caseList.add(SscsCaseDetails.builder().jurisdiction(JURISDICTION).id(jsonObj.getLong(ID_COLUMN)).build());
+        });
+        return entry(caseRefToHearingIdMap, caseList);
     }
 
-    private static String decompressAndB64Decode(String b64Compressed) throws IOException {
+    private Stream<JSONObject> decompressAndB64Decode(String b64Compressed) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try (OutputStream inflaterOutputStream = new InflaterOutputStream(outputStream)) {
             inflaterOutputStream.write(Base64.getDecoder().decode(b64Compressed));
+            JSONArray data = new JSONArray(outputStream.toString(StandardCharsets.UTF_8));
+            AtomicInteger unprocessed = new AtomicInteger(data.length());
+            log.info("Number of cases to be migrated: ({})", unprocessed.get());
+            return data.toList().stream()
+                .map(row -> (JSONObject)row);
+        } catch (IOException e) {
+            log.info("Failed to load cases from {}", this.getClass().getName());
         }
-        return outputStream.toString(StandardCharsets.UTF_8);
+        return Stream.empty();
     }
 
     public static String compressAndB64Encode(String text) throws IOException {
