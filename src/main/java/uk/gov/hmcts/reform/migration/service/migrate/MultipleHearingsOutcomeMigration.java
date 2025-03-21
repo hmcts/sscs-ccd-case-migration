@@ -22,7 +22,7 @@ import static java.lang.Long.parseLong;
 public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     private final HmcHearingsApiService hmcHearingsApiService;
-    private Map<Long, Long> caseRefToHearingIdMap;
+    private Map<String, String> caseRefToHearingIdMap;
 
 
     public MultipleHearingsOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
@@ -41,13 +41,13 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
-        Long selectedHearingID = caseRefToHearingIdMap.get(parseLong(caseId));
-        log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingID);
+        String selectedHearingId = caseRefToHearingIdMap.get(caseId);
+        log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingId);
 
         return hmcHearingsApiService.getHearingsRequest(caseId, null)
             .getCaseHearings()
             .stream()
-            .filter(hearing -> Objects.equals(hearing.getHearingId(), selectedHearingID))
+            .filter(hearing -> Objects.equals(hearing.getHearingId(), parseLong(selectedHearingId)))
             .toList();
     }
 }

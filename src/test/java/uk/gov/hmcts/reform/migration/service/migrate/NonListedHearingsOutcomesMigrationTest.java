@@ -37,7 +37,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.AWAITING_LISTING;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.CANCELLED;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.HEARING_REQUESTED;
 import static uk.gov.hmcts.reform.migration.service.migrate.CaseOutcomeMigration.CASE_OUTCOME_MIGRATION_DESCRIPTION;
@@ -175,7 +174,7 @@ public class NonListedHearingsOutcomesMigrationTest {
         when(hmcHearingsApiService.getHearingsRequest(any(), any())).thenReturn(
             HearingsGetResponse.builder().caseHearings(List.of(
                 CaseHearing.builder().hearingId(1L).hmcStatus(HEARING_REQUESTED).build(),
-                CaseHearing.builder().hearingId(2L).hmcStatus(AWAITING_LISTING).build()
+                CaseHearing.builder().hearingId(2L).hmcStatus(HEARING_REQUESTED).build()
             )).build());
         caseDetails.setData(buildCaseDataMap(caseData));
 
