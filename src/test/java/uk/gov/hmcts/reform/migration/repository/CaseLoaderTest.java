@@ -31,13 +31,11 @@ public class CaseLoaderTest {
     void givenValidEncodedStringWithHearingId_thenReturnListOfCasesAndHearingIdMap() {
         CaseLoader caseLoader = new CaseLoader(ENCODED_HEARING_STRING);
 
-        var result = caseLoader.findCasesWithHearingID();
+        var result = caseLoader.mapCaseRefToHearingId();
 
         assertNotNull(result);
-        assertFalse(result.getValue().isEmpty());
-        assertEquals("1234", result.getLeft().get("1729631427870175"));
-        assertEquals(1729631427870175L, result.getRight().getFirst().getId());
-        assertEquals("SSCS", result.getRight().getFirst().getJurisdiction());
+        assertFalse(result.isEmpty());
+        assertEquals("1234", result.get("1729631427870175"));
     }
 
     @Test
@@ -54,10 +52,9 @@ public class CaseLoaderTest {
     void givenInvalidEncodedString_thenReturnEmptyListAndMap() {
         CaseLoader caseLoader = new CaseLoader(INVALID_ENCODED_DATA_STRING);
 
-        var result = caseLoader.findCasesWithHearingID();
+        var result = caseLoader.mapCaseRefToHearingId();
 
         assertNotNull(result);
-        assertTrue(result.getKey().isEmpty());
-        assertTrue(result.getValue().isEmpty());
+        assertTrue(result.isEmpty());
     }
 }

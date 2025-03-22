@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.migration.repository;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.json.JSONArray;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
@@ -9,9 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,6 +16,8 @@ import java.util.stream.Stream;
 import java.util.zip.InflaterOutputStream;
 
 import static java.lang.Long.parseLong;
+import static java.util.Map.entry;
+import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 public class CaseLoader {
@@ -35,22 +34,15 @@ public class CaseLoader {
 
     public List<SscsCaseDetails> findCases() {
         return decompressAndB64Decode(encodedDataString)
-            .map(jsonObj -> SscsCaseDetails.builder()
-                .jurisdiction(JURISDICTION)
-                .id(parseLong(jsonObj.get(ID_COLUMN)))
-                .build())
+            .map(row -> SscsCaseDetails.builder()
+                .jurisdiction(JURISDICTION).id(parseLong(row.get(ID_COLUMN))).build())
             .toList();
     }
 
-    public Pair<Map<String, String>, List<SscsCaseDetails>> findCasesWithHearingID() {
-        Map<String, String> caseRefToHearingIdMap = new HashMap<>();
-        List<SscsCaseDetails> caseList = new ArrayList<>();
-        decompressAndB64Decode(encodedDataString).forEach(jsonObj -> {
-            caseRefToHearingIdMap.put(jsonObj.get(ID_COLUMN), jsonObj.get(HEARING_ID_COLUMN));
-            caseList.add(SscsCaseDetails.builder()
-                             .jurisdiction(JURISDICTION).id(parseLong(jsonObj.get(ID_COLUMN))).build());
-        });
-        return Pair.of(caseRefToHearingIdMap, caseList);
+    public Map<String, String> mapCaseRefToHearingId() {
+        return decompressAndB64Decode(encodedDataString)
+            .map(row -> entry(row.get(ID_COLUMN), row.get(HEARING_ID_COLUMN)))
+            .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Stream<Map<String, String>> decompressAndB64Decode(String b64Compressed) {

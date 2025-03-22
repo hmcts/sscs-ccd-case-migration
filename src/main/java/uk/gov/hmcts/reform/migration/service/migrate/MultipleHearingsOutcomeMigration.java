@@ -6,9 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
-import uk.gov.hmcts.reform.migration.repository.CaseLoader;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
 import java.util.Map;
@@ -22,8 +20,6 @@ import static java.lang.Long.parseLong;
 public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     private final HmcHearingsApiService hmcHearingsApiService;
-    private Map<String, String> caseRefToHearingIdMap;
-
 
     public MultipleHearingsOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
@@ -33,14 +29,8 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 
-    @Override
-    public List<SscsCaseDetails> fetchCasesToMigrate() {
-        var caseAndHearingDetails = new CaseLoader(encodedDataString).findCasesWithHearingID();
-        caseRefToHearingIdMap = caseAndHearingDetails.getLeft();
-        return caseAndHearingDetails.getRight();
-    }
-
     List<CaseHearing> getHearingsFromHmc(String caseId) {
+        Map<String, String> caseRefToHearingIdMap = caseLoader.mapCaseRefToHearingId();
         String selectedHearingId = caseRefToHearingIdMap.get(caseId);
         log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingId);
 

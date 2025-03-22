@@ -25,12 +25,12 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
-    protected String encodedDataString;
+    protected final CaseLoader caseLoader;
 
     public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService,
                                 String encodedDataString) {
         this.hearingOutcomeService = hearingOutcomeService;
-        this.encodedDataString = encodedDataString;
+        this.caseLoader = new CaseLoader(encodedDataString);
     }
 
     @Override
@@ -69,7 +69,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return new CaseLoader(encodedDataString).findCases();
+        return caseLoader.findCases();
     }
 
     boolean skipMigration(Map<String, Object> data) {
