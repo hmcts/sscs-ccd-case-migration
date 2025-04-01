@@ -9,39 +9,35 @@ import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.AWAITING_LISTING;
-import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.COMPLETED;
-import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.UPDATE_SUBMITTED;
+import static java.lang.Long.parseLong;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.nonListedHearingsOutcomes.enabled", havingValue = "true")
-public class NonListedHearingsOutcomesMigration extends CaseOutcomeMigration {
-
-    static final String NON_LISTED_OUTCOME_TAB_SUMMARY = "migrate case - link outcome to hearing";
+@ConditionalOnProperty(value = "migration.multipleHearingsOutcomes.enabled", havingValue = "true")
+public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     private final HmcHearingsApiService hmcHearingsApiService;
 
-    public NonListedHearingsOutcomesMigration(HmcHearingsApiService hmcHearingsApiService,
+    public MultipleHearingsOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
-                                              @Value("${migration.nonListedHearingsOutcomes.encoded-data-string}")
+                                              @Value("${migration.multipleHearingsOutcomes.encoded-data-string}")
                                               String encodedDataString) {
         super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
+        Map<String, String> caseRefToHearingIdMap = caseLoader.mapCaseRefToHearingId();
+        String selectedHearingId = caseRefToHearingIdMap.get(caseId);
+        log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingId);
+
         return hmcHearingsApiService.getHearingsRequest(caseId, null)
             .getCaseHearings()
             .stream()
-            .filter(hearing ->
-                        !List.of(COMPLETED, AWAITING_LISTING, UPDATE_SUBMITTED).contains(hearing.getHmcStatus()))
+            .filter(hearing -> Objects.equals(hearing.getHearingId(), parseLong(selectedHearingId)))
             .toList();
-    }
-
-    @Override
-    public String getEventSummary() {
-        return NON_LISTED_OUTCOME_TAB_SUMMARY;
     }
 }

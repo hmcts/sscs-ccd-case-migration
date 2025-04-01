@@ -6,16 +6,17 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-
-import static uk.gov.hmcts.reform.migration.repository.CaseLoader.compressAndB64Encode;
+import java.util.zip.DeflaterOutputStream;
 
 @Slf4j
 public class MigrationDataEncoderApp {
@@ -53,5 +54,13 @@ public class MigrationDataEncoderApp {
                 MIGRATION_FILE, ENCODED_STR_FILE);
             throw new RuntimeException(e);
         }
+    }
+
+    private static String compressAndB64Encode(String text) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
+            deflaterOutputStream.write(text.getBytes());
+        }
+        return new String(Base64.getEncoder().encode(outputStream.toByteArray()));
     }
 }

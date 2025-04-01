@@ -24,11 +24,11 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
     static final String EVENT_DESCRIPTION = "Remove WA fields (scannedDocumentTypes, assignedCaseRoles, "
         + "previouslyAssignedCaseRoles) with incorrect data type";
 
-    private final String encodedDataString;
+    private final CaseLoader caseLoader;
 
     public WaFieldsRemovalServiceImpl(@Value("${migration.waFieldsRemoval.encoded-data-string}")
                                       String encodedDataString) {
-        this.encodedDataString = encodedDataString;
+        this.caseLoader = new CaseLoader(encodedDataString);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return new CaseLoader(encodedDataString).findCases();
+        return caseLoader.findCases();
     }
 
     public String getEventId() {

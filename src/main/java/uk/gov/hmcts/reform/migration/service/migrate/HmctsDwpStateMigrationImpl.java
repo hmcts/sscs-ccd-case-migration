@@ -25,11 +25,11 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     private static final String HMCTS_DWP_STATE = "hmctsDwpState";
 
-    private final String encodedDataString;
+    private final CaseLoader caseLoader;
 
     public HmctsDwpStateMigrationImpl(@Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
                                       String encodedDataString) {
-        this.encodedDataString = encodedDataString;
+        this.caseLoader = new CaseLoader(encodedDataString);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return new CaseLoader(encodedDataString).findCases();
+        return caseLoader.findCases();
     }
 
     @Override

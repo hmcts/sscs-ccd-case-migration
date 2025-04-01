@@ -25,12 +25,12 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
-    private final String encodedDataString;
+    protected final CaseLoader caseLoader;
 
     public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService,
                                 String encodedDataString) {
         this.hearingOutcomeService = hearingOutcomeService;
-        this.encodedDataString = encodedDataString;
+        this.caseLoader = new CaseLoader(encodedDataString);
     }
 
     @Override
@@ -69,7 +69,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return new CaseLoader(encodedDataString).findCases();
+        return caseLoader.findCases();
     }
 
     boolean skipMigration(Map<String, Object> data) {
@@ -110,7 +110,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
             );
             throw new RuntimeException(SKIPPING_CASE_MSG + ", Zero or More than one hearing found");
         }
-        return hmcHearings.get(0);
+        return hmcHearings.getFirst();
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
