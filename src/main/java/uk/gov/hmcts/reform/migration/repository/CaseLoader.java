@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.InflaterOutputStream;
 
@@ -40,16 +40,21 @@ public class CaseLoader {
     }
 
     public Map<String, String> mapCaseRefToHearingId() {
-        return decompressAndB64Decode(encodedDataString)
+        Map<String, String> resultMap = new HashMap<>();
+
+        decompressAndB64Decode(encodedDataString)
             .map(row -> entry(row.get(ID_COLUMN), row.get(HEARING_ID_COLUMN)))
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue,
-                (reference, hearingId) -> {
-                    log.info("Case reference {} is a duplicate. Removing hearing id to skip migration.", reference);
-                    return "";
+            .forEach(entry -> {
+                String key = entry.getKey().trim();
+                if (resultMap.containsKey(key)) {
+                    log.info("Case reference {} is a duplicate. Removing hearing id to skip migration.", key);
+                    resultMap.put(key, " ");
+                } else {
+                    resultMap.put(key, entry.getValue().trim());
                 }
-            ));
+            });
+
+        return resultMap;
     }
 
     private Stream<Map<String, String>> decompressAndB64Decode(String b64Compressed) {
