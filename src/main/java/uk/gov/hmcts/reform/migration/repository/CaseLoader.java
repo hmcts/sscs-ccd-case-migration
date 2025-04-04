@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +19,6 @@ import java.util.zip.InflaterOutputStream;
 
 import static java.lang.Long.parseLong;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 public class CaseLoader {
