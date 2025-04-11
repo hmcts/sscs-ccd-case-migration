@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.migration.repository.CaseLoader;
+import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
@@ -24,11 +24,11 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
     static final String EVENT_DESCRIPTION = "Remove WA fields (scannedDocumentTypes, assignedCaseRoles, "
         + "previouslyAssignedCaseRoles) with incorrect data type";
 
-    private final CaseLoader caseLoader;
+    private final EncodedStringCaseList encodedStringCaseList;
 
     public WaFieldsRemovalServiceImpl(@Value("${migration.waFieldsRemoval.encoded-data-string}")
                                       String encodedDataString) {
-        this.caseLoader = new CaseLoader(encodedDataString);
+        this.encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class WaFieldsRemovalServiceImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return caseLoader.findCases();
+        return encodedStringCaseList.findCases();
     }
 
     public String getEventId() {

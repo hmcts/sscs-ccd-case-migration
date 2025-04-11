@@ -30,7 +30,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
-        Map<String, String> caseRefToHearingIdMap = caseLoader.mapCaseRefToHearingId();
+        Map<String, String> caseRefToHearingIdMap = encodedStringCaseList.mapCaseRefToHearingId();
         String selectedHearingId = caseRefToHearingIdMap.get(caseId);
         log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingId);
 

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CaseLoaderTest {
+public class EncodedStringCaseListTest {
 
     private static final String ENCODED_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VaqNBQC1oglo";
     private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VdJRykhNLMrMS"
@@ -17,9 +17,9 @@ public class CaseLoaderTest {
 
     @Test
     void givenValidEncodedString_thenReturnListOfCases() {
-        CaseLoader caseLoader = new CaseLoader(ENCODED_STRING);
+        EncodedStringCaseList encodedStringCaseList = new EncodedStringCaseList(ENCODED_STRING);
 
-        var result = caseLoader.findCases();
+        var result = encodedStringCaseList.findCases();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -29,9 +29,9 @@ public class CaseLoaderTest {
 
     @Test
     void givenValidEncodedStringWithHearingId_thenReturnListOfCasesAndHearingIdMap() {
-        CaseLoader caseLoader = new CaseLoader(ENCODED_HEARING_STRING);
+        EncodedStringCaseList encodedStringCaseList = new EncodedStringCaseList(ENCODED_HEARING_STRING);
 
-        var result = caseLoader.mapCaseRefToHearingId();
+        var result = encodedStringCaseList.mapCaseRefToHearingId();
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -40,9 +40,9 @@ public class CaseLoaderTest {
 
     @Test
     void givenInvalidEncodedString_thenReturnEmptyList() {
-        CaseLoader caseLoader = new CaseLoader(INVALID_ENCODED_DATA_STRING);
+        EncodedStringCaseList encodedStringCaseList = new EncodedStringCaseList(INVALID_ENCODED_DATA_STRING);
 
-        var result = caseLoader.findCases();
+        var result = encodedStringCaseList.findCases();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -50,9 +50,9 @@ public class CaseLoaderTest {
 
     @Test
     void givenInvalidEncodedString_thenReturnEmptyListAndMap() {
-        CaseLoader caseLoader = new CaseLoader(INVALID_ENCODED_DATA_STRING);
+        EncodedStringCaseList encodedStringCaseList = new EncodedStringCaseList(INVALID_ENCODED_DATA_STRING);
 
-        var result = caseLoader.mapCaseRefToHearingId();
+        var result = encodedStringCaseList.mapCaseRefToHearingId();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
