@@ -11,7 +11,7 @@ public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
             "bool": {
               "must": [
                 { "match": { "state": "readyToList" }},
-                { "match": { "data.hearingRoute": "listAssist" }},
+                { "match": { "data.hearingRoute": "listAssist" }}
               ]
             }
           },
