@@ -20,9 +20,9 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 @ConditionalOnProperty(value = "migration.defaultPanelComposition.enabled", havingValue = "true")
 public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
-    static final String EVENT_ID = "updateListingRequirements";
-    static final String EVENT_SUMMARY = "Set default Panel Composition";
-    static final String EVENT_DESCRIPTION = "Set default Panel Composition";
+    static final String UPDATE_LISTING_REQUIREMENTS_ID = "updateListingRequirements";
+    static final String UPDATE_LISTING_REQUIREMENTS_SUMMARY = "Set default Panel Composition";
+    static final String UPDATE_LISTING_REQUIREMENTS_DESCRIPTION = "Set default Panel Composition";
 
     private final DefaultPanelCompositionQuery searchQuery;
     private final ElasticSearchRepository repository;
@@ -50,14 +50,14 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     }
 
     public String getEventId() {
-        return EVENT_ID;
+        return UPDATE_LISTING_REQUIREMENTS_ID;
     }
 
     public String getEventDescription() {
-        return EVENT_DESCRIPTION;
+        return UPDATE_LISTING_REQUIREMENTS_DESCRIPTION;
     }
 
     public String getEventSummary() {
-        return EVENT_SUMMARY;
+        return UPDATE_LISTING_REQUIREMENTS_SUMMARY;
     }
 }

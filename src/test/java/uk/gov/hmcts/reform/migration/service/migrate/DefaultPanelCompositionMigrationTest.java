@@ -18,9 +18,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
@@ -67,17 +67,17 @@ class DefaultPanelCompositionMigrationTest {
 
     @Test
     void shouldReturnEventId() {
-        assertThat(underTest.getEventId()).isEqualTo(EVENT_ID);
+        assertThat(underTest.getEventId()).isEqualTo(UPDATE_LISTING_REQUIREMENTS_ID);
     }
 
     @Test
     void shouldReturnEventDescription() {
-        assertThat(underTest.getEventSummary()).isEqualTo(EVENT_SUMMARY);
+        assertThat(underTest.getEventSummary()).isEqualTo(UPDATE_LISTING_REQUIREMENTS_SUMMARY);
     }
 
     @Test
     void shouldReturnEventSummary() {
-        assertThat(underTest.getEventDescription()).isEqualTo(EVENT_DESCRIPTION);
+        assertThat(underTest.getEventDescription()).isEqualTo(UPDATE_LISTING_REQUIREMENTS_DESCRIPTION);
     }
 
     private SscsCaseDetails buildCaseWith(String state, HearingRoute hearingRoute) {
