@@ -1,8 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
-
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -13,6 +10,10 @@ import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
+
+import java.util.List;
+
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 
 @Service
 @Slf4j

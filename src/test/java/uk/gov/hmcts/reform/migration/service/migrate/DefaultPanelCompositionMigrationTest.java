@@ -1,15 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_SUMMARY;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
-
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +12,17 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultPanelCompositionMigrationTest {
