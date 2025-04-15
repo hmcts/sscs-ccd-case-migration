@@ -15,7 +15,6 @@ public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
               ]
             }
           },
-          "_source": [ "reference" ],
           "size": %s,
           "sort": [ { "reference.keyword": "asc" } ]
         """;
