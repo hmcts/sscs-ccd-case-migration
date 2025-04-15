@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +45,7 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
 
         ForkJoinPool threadPool = new ForkJoinPool(25);
         threadPool.submit(
-            () -> fetchCasesToMigrate()
+            () -> tryFetchingCases()
                 .parallelStream()
                 .limit(caseProcessLimit)
                 .forEach(caseDetails -> {
@@ -84,6 +86,15 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
         } catch (InterruptedException e) {
             log.warn("Timed out waiting for thread pool to terminate");
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private List<SscsCaseDetails> tryFetchingCases() {
+        try {
+            return fetchCasesToMigrate();
+        } catch (Exception e) {
+            log.error("Failed to load migration cases", e);
+            return Collections.emptyList();
         }
     }
 }
