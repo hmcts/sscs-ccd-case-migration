@@ -15,6 +15,7 @@ public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
               ]
             }
           },
+          "_source": [ "data.hearingRoute" ],
           "size": %s,
           "sort": [ { "reference.keyword": "asc" } ]
         """;
