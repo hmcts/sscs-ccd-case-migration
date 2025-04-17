@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.migration.repository.CaseLoader;
+import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
@@ -25,11 +25,11 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     private static final String HMCTS_DWP_STATE = "hmctsDwpState";
 
-    private final CaseLoader caseLoader;
+    private final EncodedStringCaseList encodedStringCaseList;
 
     public HmctsDwpStateMigrationImpl(@Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
                                       String encodedDataString) {
-        this.caseLoader = new CaseLoader(encodedDataString);
+        this.encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return caseLoader.findCases();
+        return encodedStringCaseList.findCases();
     }
 
     @Override
