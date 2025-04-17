@@ -11,28 +11,23 @@ import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.migrate.DwpDataMigrationServiceImpl;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
-import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
 
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.migrate.DwpDataMigrationServiceImpl.EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.DwpDataMigrationServiceImpl.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.migrate.DwpDataMigrationServiceImpl.EVENT_SUMMARY;
 
 @ExtendWith(MockitoExtension.class)
 public class DwpCaseMigrationProcessorTest {
-
-    private static final IdamTokens tokens = IdamTokens.builder().build();
-    private static final UpdateResult updateResult = new UpdateResult(EVENT_SUMMARY, EVENT_DESCRIPTION);
 
     @Mock
     private ForkJoinPool threadPool;
@@ -61,6 +56,17 @@ public class DwpCaseMigrationProcessorTest {
 
         verify(coreCaseDataService, times(1))
             .applyUpdatesInCcd(eq(1677777777L), eq(EVENT_ID), any());
+    }
+
+    @Test
+    public void shouldLogFailedCaseFetch() {
+        when(elasticSearchRepository.findCases(any(), anyBoolean())).thenThrow(new RuntimeException());
+
+        caseMigrationProcessor.migrateCases();
+
+        verifyNoInteractions(coreCaseDataService);
+        assertTrue(caseMigrationProcessor.getMigratedCases().isEmpty());
+        assertTrue(caseMigrationProcessor.getFailedCases().isEmpty());
     }
 
     @Test

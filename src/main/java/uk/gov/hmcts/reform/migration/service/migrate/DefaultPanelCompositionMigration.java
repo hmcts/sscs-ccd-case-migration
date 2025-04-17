@@ -21,8 +21,8 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     static final String UPDATE_LISTING_REQUIREMENTS_ID = "updateListingRequirements";
-    static final String UPDATE_LISTING_REQUIREMENTS_SUMMARY = "Set default Panel Composition";
-    static final String UPDATE_LISTING_REQUIREMENTS_DESCRIPTION = "Set default Panel Composition";
+    static final String UPDATE_LISTING_REQUIREMENTS_SUMMARY = "Migration: Set default Panel Composition";
+    static final String UPDATE_LISTING_REQUIREMENTS_DESCRIPTION = "Migration: Set default Panel Composition";
 
     private final DefaultPanelCompositionQuery searchQuery;
     private final ElasticSearchRepository repository;
@@ -45,7 +45,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        log.info("Setting default Panel composition for Case: {}", caseDetails.getId());
+        log.info(getEventSummary() + " for Case: {}", caseDetails.getId());
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
