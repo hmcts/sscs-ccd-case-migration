@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery.DEFAULT_PANEL_COMPOSITION;
+import static uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery.LIST_ASSIST_READY_TO_LIST_CASES;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultPanelCompositionQueryTest {
@@ -14,6 +14,6 @@ class DefaultPanelCompositionQueryTest {
 
     @Test
     void shouldReturnQuery() {
-        assertThat(searchQuery.getStartQuery()).isEqualTo(DEFAULT_PANEL_COMPOSITION);
+        assertThat(searchQuery.getStartQuery()).isEqualTo(LIST_ASSIST_READY_TO_LIST_CASES);
     }
 }

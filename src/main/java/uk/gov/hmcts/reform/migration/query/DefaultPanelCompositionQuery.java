@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
 
-    static final String DEFAULT_PANEL_COMPOSITION = """
+    static final String LIST_ASSIST_READY_TO_LIST_CASES = """
         {
           "query": {
             "bool": {
@@ -22,6 +22,6 @@ public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
 
     @Override
     protected String getStartQuery() {
-        return DEFAULT_PANEL_COMPOSITION;
+        return LIST_ASSIST_READY_TO_LIST_CASES;
     }
 }
