@@ -14,7 +14,7 @@ import java.util.List;
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "migration.updateListingReqsMissingAmendReason.enabled", havingValue = "true")
-public class UpdateListingRegsMissingAmedReasonMigration extends DefaultPanelCompositionMigration {
+public class UpdateListingReqsMissingAmendReasonMigration extends DefaultPanelCompositionMigration {
 
     static final String UPDATE_LISTING_REQS_AMEND_REASON_SUMMARY =
         "System generated event to send Updated Listing Request to ListAssist";
@@ -23,7 +23,7 @@ public class UpdateListingRegsMissingAmedReasonMigration extends DefaultPanelCom
 
     private final EncodedStringCaseList encodedStringCaseList;
 
-    public UpdateListingRegsMissingAmedReasonMigration(
+    public UpdateListingReqsMissingAmendReasonMigration(
         DefaultPanelCompositionQuery searchQuery,
         ElasticSearchRepository repository,
         @Value("${migration.updateListingReqsMissingAmendReason.encoded-data-string}")

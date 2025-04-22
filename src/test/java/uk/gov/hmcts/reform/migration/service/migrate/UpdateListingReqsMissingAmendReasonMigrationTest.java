@@ -12,8 +12,8 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.migration.service.migrate.UpdateListingRegsMissingAmedReasonMigration.UPDATE_LISTING_REQS_AMEND_REASON_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.migrate.UpdateListingRegsMissingAmedReasonMigration.UPDATE_LISTING_REQS_AMEND_REASON_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.UpdateListingReqsMissingAmendReasonMigration.UPDATE_LISTING_REQS_AMEND_REASON_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.UpdateListingReqsMissingAmendReasonMigration.UPDATE_LISTING_REQS_AMEND_REASON_SUMMARY;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateListingReqsMissingAmendReasonMigrationTest {
@@ -25,12 +25,12 @@ class UpdateListingReqsMissingAmendReasonMigrationTest {
     @Mock
     private ElasticSearchRepository repository;
 
-    private UpdateListingRegsMissingAmedReasonMigration underTest;
+    private UpdateListingReqsMissingAmendReasonMigration underTest;
 
     @BeforeEach
     void setUp() {
         underTest =
-            new UpdateListingRegsMissingAmedReasonMigration(searchQuery, repository, ENCODED_STRING);
+            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository, ENCODED_STRING);
     }
 
     @Test
