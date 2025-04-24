@@ -1,19 +1,18 @@
 package uk.gov.hmcts.reform.migration.repository;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.zip.InflaterOutputStream;
 
@@ -21,7 +20,7 @@ import static java.lang.Long.parseLong;
 import static java.util.Map.entry;
 
 @Slf4j
-public class CaseLoader {
+public class EncodedStringCaseList {
 
     private static final String JURISDICTION = "SSCS";
     private static final String ID_COLUMN = "reference";
@@ -29,7 +28,7 @@ public class CaseLoader {
 
     private final String encodedDataString;
 
-    public CaseLoader(String encodedDataString) {
+    public EncodedStringCaseList(String encodedDataString) {
         this.encodedDataString = encodedDataString;
     }
 
@@ -64,11 +63,10 @@ public class CaseLoader {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try (OutputStream inflaterOutputStream = new InflaterOutputStream(outputStream)) {
             inflaterOutputStream.write(Base64.getDecoder().decode(b64Compressed));
-            JSONArray data = new JSONArray(outputStream.toString(StandardCharsets.UTF_8));
-            AtomicInteger unprocessed = new AtomicInteger(data.length());
-            log.info("Number of cases to be migrated: ({})", unprocessed.get());
-            return data.toList().stream()
-                .map(row -> (Map<String, String>)row);
+            var caseList = new ObjectMapper()
+                .readValue(outputStream.toByteArray(), new TypeReference<List<Map<String, String>>>() {});
+            log.info("Number of cases to be migrated: ({})", caseList.size());
+            return caseList.stream();
         } catch (IOException e) {
             log.info("Failed to load cases from {}", this.getClass().getName());
         }
