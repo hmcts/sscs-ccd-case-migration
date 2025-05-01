@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 
 import java.util.List;
 
@@ -24,13 +25,15 @@ class UpdateListingReqsMissingAmendReasonMigrationTest {
     private DefaultPanelCompositionQuery searchQuery;
     @Mock
     private ElasticSearchRepository repository;
+    @Mock
+    private SscsCcdConvertService convertService;
 
     private UpdateListingReqsMissingAmendReasonMigration underTest;
 
     @BeforeEach
     void setUp() {
         underTest =
-            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository, ENCODED_STRING);
+            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository, convertService, ENCODED_STRING);
     }
 
     @Test
