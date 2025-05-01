@@ -71,7 +71,8 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
     void setHearingOutcome(Map<String, Object> data, String caseId) {
         SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
         List<HearingOutcome> existingHearingOutcomes = sscsCaseData.getHearingOutcomes();
-        List<HearingOutcome> mappedHearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data);
+        List<HearingOutcome> mappedHearingOutcomes =
+            hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data);
         existingHearingOutcomes.addAll(mappedHearingOutcomes);
         data.put("hearingOutcomes", existingHearingOutcomes);
     }
