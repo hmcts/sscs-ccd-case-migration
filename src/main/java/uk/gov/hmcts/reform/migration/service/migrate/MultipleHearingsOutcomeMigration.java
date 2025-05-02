@@ -35,7 +35,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
                                               HearingOutcomeService hearingOutcomeService,
                                               @Value("${migration.multipleHearingsOutcomes.encoded-data-string}")
                                               String encodedDataString) {
-        super(hearingOutcomeService, encodedDataString); //Will need this in here
+        super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
         this.hearingOutcomeService = hearingOutcomeService;
         caseRefToHearingIdMap = encodedStringCaseList.mapCaseRefToHearingId();
