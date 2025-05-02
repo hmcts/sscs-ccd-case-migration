@@ -32,9 +32,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class MultipleHearingsOutcomeMigrationTest {
 
-    private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslKysLC0NDBQ0lHKSE0sysxL93QBChoaGZso1cYCACSuDIc=";
-    private final String REFERENCE = "889900";
-    private final String HEARING_ID = "1234";
+    private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslKysLC0NDBQ0lHKSE0sysxL93QBChoaGZ"
+        + "so1cYCACSuDIc=";
+    private final String reference = "889900";
+    private final String hearingId = "1234";
 
     @Mock
     private HmcHearingsApiService hmcHearingsApiService;
@@ -57,13 +58,13 @@ public class MultipleHearingsOutcomeMigrationTest {
 
     @Test
     void shouldGetHearingsFromHmc() {
-        CaseHearing caseHearing1 = CaseHearing.builder().hearingId(parseLong(HEARING_ID)).build();
+        CaseHearing caseHearing1 = CaseHearing.builder().hearingId(parseLong(hearingId)).build();
         CaseHearing caseHearing2 = CaseHearing.builder().hearingId(6789L).build();
         HearingsGetResponse response =
             HearingsGetResponse.builder().caseHearings(List.of(caseHearing1, caseHearing2)).build();
         when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
 
-        List<CaseHearing> result = multipleHearingsOutcomeMigration.getHearingsFromHmc(REFERENCE);
+        List<CaseHearing> result = multipleHearingsOutcomeMigration.getHearingsFromHmc(reference);
 
         assertThat(result).containsExactly(caseHearing1);
     }
@@ -71,7 +72,7 @@ public class MultipleHearingsOutcomeMigrationTest {
     @Test
     void shouldSkipMigrationWhenCaseOutcomeIsNull() {
         SscsCaseData caseData = SscsCaseData.builder()
-            .ccdCaseId(REFERENCE)
+            .ccdCaseId(reference)
             .caseOutcome(CaseOutcome.builder().build())
             .build();
 
@@ -83,7 +84,7 @@ public class MultipleHearingsOutcomeMigrationTest {
     @Test
     void shouldSkipMigrationWhenHearingAlreadyUsed() {
         SscsCaseData caseData = SscsCaseData.builder()
-            .ccdCaseId(REFERENCE)
+            .ccdCaseId(reference)
             .caseOutcome(CaseOutcome.builder()
                              .caseOutcome("11")
                              .didPoAttend(YesNo.YES)
@@ -91,7 +92,7 @@ public class MultipleHearingsOutcomeMigrationTest {
             .hearingOutcomes(List.of(
                 HearingOutcome.builder()
                     .value(HearingOutcomeDetails.builder()
-                               .completedHearingId(HEARING_ID)
+                               .completedHearingId(hearingId)
                                .build())
                     .build()))
             .build();
@@ -104,7 +105,7 @@ public class MultipleHearingsOutcomeMigrationTest {
     @Test
     void shouldNotSkipMigrationWhenCaseOutcomeExistsAndHearingNotUsed() {
         SscsCaseData caseData = SscsCaseData.builder()
-            .ccdCaseId(REFERENCE)
+            .ccdCaseId(reference)
             .caseOutcome(CaseOutcome.builder()
                              .caseOutcome("11")
                              .didPoAttend(YesNo.YES)
@@ -124,10 +125,10 @@ public class MultipleHearingsOutcomeMigrationTest {
 
     @Test
     void shouldAppendNewHearingOutcome() {
-        CaseHearing caseHearing = CaseHearing.builder().hearingId(parseLong(HEARING_ID)).build();
+        CaseHearing caseHearing = CaseHearing.builder().hearingId(parseLong(hearingId)).build();
         HearingsGetResponse response = HearingsGetResponse.builder().caseHearings(List.of(caseHearing)).build();
         SscsCaseData caseData = SscsCaseData.builder()
-            .ccdCaseId(REFERENCE)
+            .ccdCaseId(reference)
             .caseOutcome(CaseOutcome.builder()
                              .caseOutcome("11")
                              .didPoAttend(YesNo.YES)
@@ -142,7 +143,7 @@ public class MultipleHearingsOutcomeMigrationTest {
 
         HearingOutcome mappedHearingOutcome = HearingOutcome.builder()
             .value(HearingOutcomeDetails.builder()
-                       .completedHearingId(HEARING_ID)
+                       .completedHearingId(hearingId)
                        .build())
             .build();
 
@@ -152,7 +153,7 @@ public class MultipleHearingsOutcomeMigrationTest {
         when(hearingOutcomeService.mapHmcHearingToHearingOutcome(any(), any()))
             .thenReturn(List.of(mappedHearingOutcome));
 
-        multipleHearingsOutcomeMigration.setHearingOutcome(data, REFERENCE);
+        multipleHearingsOutcomeMigration.setHearingOutcome(data, reference);
 
         SscsCaseData updatedData = objectMapper.convertValue(data, SscsCaseData.class);
         assertThat(updatedData.getHearingOutcomes().size()).isEqualTo(2);
