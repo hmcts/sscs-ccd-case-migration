@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.migration.query;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CancelTestHearingsSearchQuery extends ElasticSearchQuery{
+public class CancelTestHearingsSearchQuery extends ElasticSearchQuery {
     static final String CASES_WITH_HEARINGS = """
         {
           "query": {

@@ -27,7 +27,8 @@ public class HmcHearingsApiService {
             hmcStatus);
     }
 
-    public HearingsUpdateResponse sendCancelHearingRequest(HearingCancelRequestPayload hearingPayload, String hearingId) {
+    public HearingsUpdateResponse sendCancelHearingRequest(
+        HearingCancelRequestPayload hearingPayload, String hearingId) {
         log.info("Sending Cancel Hearing Request for Hearing ID {} and request:\n{}",
                  hearingId,
                  hearingPayload);
