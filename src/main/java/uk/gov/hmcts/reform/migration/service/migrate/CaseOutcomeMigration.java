@@ -101,7 +101,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         return CASE_OUTCOME_MIGRATION_SUMMARY;
     }
 
-    private CaseHearing getHmcHearing(String caseId) {
+    protected CaseHearing getHmcHearing(String caseId) {
         var hmcHearings = getHearingsFromHmc(caseId);
 
         if (hmcHearings.size() != 1) {
