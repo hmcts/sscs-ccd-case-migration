@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +12,8 @@ import uk.gov.hmcts.reform.domain.hmc.HearingsUpdateResponse;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.query.CancelTestHearingsSearchQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,7 +55,8 @@ class CancelTestHearingsServiceTest {
         var caseDetails = CaseDetails.builder().id(1L).data(data).build();
         when(hmcHearingsApiService.getHearingsRequest(eq("1"), eq(AWAITING_LISTING))).thenReturn(
             HearingsGetResponse.builder().caseHearings(List.of(CaseHearing.builder().hearingId(1L).build())).build());
-        when(hmcHearingsApiService.sendCancelHearingRequest(any(), eq("1"))).thenReturn(HearingsUpdateResponse.builder().build());
+        when(hmcHearingsApiService.sendCancelHearingRequest(any(), eq("1")))
+            .thenReturn(HearingsUpdateResponse.builder().build());
         var response = cancelTestHearingsService.migrate(caseDetails);
         verify(hmcHearingsApiService, times(1)).sendCancelHearingRequest(any(), eq("1"));
         assertThat(response.description()).isEqualTo(EVENT_DESCRIPTION);
@@ -62,7 +64,7 @@ class CancelTestHearingsServiceTest {
     }
 
     @Test
-    void testCancelHearingsServiceShouldSkipCaseWithNoHearingsFromHMC() {
+    void testCancelHearingsServiceShouldSkipCaseWithNoHearingsFromHmc() {
         var data = buildCaseDataMap(buildCaseData());
         var caseDetails = CaseDetails.builder().id(1L).data(data).build();
         when(hmcHearingsApiService.getHearingsRequest(eq("1"), eq(AWAITING_LISTING))).thenReturn(
