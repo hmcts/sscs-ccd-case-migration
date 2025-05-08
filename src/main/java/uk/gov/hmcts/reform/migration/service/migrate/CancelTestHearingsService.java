@@ -25,7 +25,7 @@ import java.util.List;
 @ConditionalOnProperty(value = "migration.cancel-test-hearing.enabled", havingValue = "true")
 public class CancelTestHearingsService extends CaseMigrationProcessor {
 
-    static final String EVENT_ID = "adminCancelTestHearings";
+    static final String EVENT_ID = "updateListingRequirements";
     static final String EVENT_SUMMARY = "Send cancellation request for test hearing";
     static final String EVENT_DESCRIPTION = "Send cancellation request for test hearing";
     private final ElasticSearchRepository repository;
