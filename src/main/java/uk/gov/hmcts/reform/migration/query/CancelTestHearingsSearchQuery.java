@@ -8,11 +8,12 @@ public class CancelTestHearingsSearchQuery extends ElasticSearchQuery {
         {
           "query": {
             "bool": {
-              "must": {
-                "exists": {
-                    "field: "data.hearings"
-                }
-              }
+                "must": [
+                    {"exists": { "field": "data.hearings" }}
+              ],
+              "must_not": [
+                {"exists": {"field": "data.hearings.value.hearingDate"}}
+              ]
             }
           },
           "_source": [ "data" ],
