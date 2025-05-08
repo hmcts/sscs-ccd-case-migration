@@ -22,6 +22,7 @@ public interface HmcHearingsApi {
 
     String SERVICE_AUTHORIZATION = "ServiceAuthorization";
     String HEARINGS_ENDPOINT = "/hearings";
+    String HEARING_ENDPOINT = "/hearing";
     String ID = "id";
 
     @GetMapping(HEARINGS_ENDPOINT + "/{caseId}")
@@ -32,7 +33,7 @@ public interface HmcHearingsApi {
         @RequestParam(name = "status", required = false) HmcStatus hmcStatus
     );
 
-    @DeleteMapping(value = HEARINGS_ENDPOINT + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = HEARING_ENDPOINT + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     HearingsUpdateResponse cancelHearingRequest(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
