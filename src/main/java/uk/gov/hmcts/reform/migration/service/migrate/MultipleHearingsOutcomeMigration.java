@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,10 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
     void setHearingOutcome(Map<String, Object> data, String caseId) {
         SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
         List<HearingOutcome> existingHearingOutcomes = sscsCaseData.getHearingOutcomes();
+        if (isNull(existingHearingOutcomes)) {
+            existingHearingOutcomes = new ArrayList<>();
+        }
+
         List<HearingOutcome> mappedHearingOutcomes =
             hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data);
         existingHearingOutcomes.addAll(mappedHearingOutcomes);
