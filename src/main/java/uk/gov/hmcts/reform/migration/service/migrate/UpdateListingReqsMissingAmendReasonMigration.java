@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 
 import java.util.List;
 
@@ -27,11 +26,10 @@ public class UpdateListingReqsMissingAmendReasonMigration extends DefaultPanelCo
     public UpdateListingReqsMissingAmendReasonMigration(
         DefaultPanelCompositionQuery searchQuery,
         ElasticSearchRepository repository,
-        SscsCcdConvertService ccdConvertService,
         @Value("${migration.updateListingReqsMissingAmendReason.encoded-data-string}")
         String encodedDataString
     ) {
-        super(searchQuery, repository, ccdConvertService);
+        super(searchQuery, repository);
         this.encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
     }
 
