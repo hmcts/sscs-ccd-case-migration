@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     public UpdateResult migrate(CaseDetails caseDetails) {
         log.info(getEventSummary() + " for Case: {}", caseDetails.getId());
         var mapper = new ObjectMapper();
-        mapper.findAndRegisterModules();
+        mapper.registerModule(new JavaTimeModule());
         var caseData = caseDetails.getData();
         var defaultListingValues = mapper.convertValue(caseData.get("defaultListingValues"), OverrideFields.class);
         var overrideFields = nonNull(caseData.get("overrideFields"))
