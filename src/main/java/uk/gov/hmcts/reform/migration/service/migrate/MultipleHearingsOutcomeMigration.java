@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -7,12 +8,19 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.Long.parseLong;
+import static java.util.Objects.isNull;
 
 @Service
 @Slf4j
@@ -20,6 +28,9 @@ import static java.lang.Long.parseLong;
 public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     private final HmcHearingsApiService hmcHearingsApiService;
+    private final HearingOutcomeService hearingOutcomeService;
+    private final ObjectMapper objectMapper;
+    private final Map<String, String> caseRefToHearingIdMap;
 
     public MultipleHearingsOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
                                               HearingOutcomeService hearingOutcomeService,
@@ -27,10 +38,12 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
                                               String encodedDataString) {
         super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
+        this.hearingOutcomeService = hearingOutcomeService;
+        caseRefToHearingIdMap = encodedStringCaseList.mapCaseRefToHearingId();
+        this.objectMapper = new ObjectMapper().findAndRegisterModules();
     }
 
     List<CaseHearing> getHearingsFromHmc(String caseId) {
-        Map<String, String> caseRefToHearingIdMap = encodedStringCaseList.mapCaseRefToHearingId();
         String selectedHearingId = caseRefToHearingIdMap.get(caseId);
         log.info("Mapping case id {} to selected hearingID {}", caseId, selectedHearingId);
 
@@ -39,5 +52,31 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
             .stream()
             .filter(hearing -> Objects.equals(hearing.getHearingId(), parseLong(selectedHearingId)))
             .toList();
+    }
+
+    @Override
+    boolean skipMigration(Map<String, Object> data) {
+        SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
+
+        boolean isSelectedHearingUsed = Optional.ofNullable(sscsCaseData.getHearingOutcomes())
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(HearingOutcome::getValue)
+            .map(HearingOutcomeDetails::getCompletedHearingId)
+            .anyMatch(completedHearingId -> caseRefToHearingIdMap.containsValue(completedHearingId));
+
+        return isNull(sscsCaseData.getCaseOutcome().getCaseOutcome()) || isSelectedHearingUsed;
+    }
+
+    @Override
+    void setHearingOutcome(Map<String, Object> data, String caseId) {
+        SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
+        List<HearingOutcome> existingHearingOutcomes = Optional.ofNullable(sscsCaseData.getHearingOutcomes())
+            .orElse(new ArrayList<>());
+
+        List<HearingOutcome> mappedHearingOutcomes =
+            hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data);
+        existingHearingOutcomes.addAll(mappedHearingOutcomes);
+        data.put("hearingOutcomes", existingHearingOutcomes);
     }
 }
