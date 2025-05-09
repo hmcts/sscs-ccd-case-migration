@@ -8,11 +8,15 @@ import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
+import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 
 @Service
@@ -26,11 +30,14 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     private final DefaultPanelCompositionQuery searchQuery;
     private final ElasticSearchRepository repository;
+    private final SscsCcdConvertService ccdConvertService;
 
     public DefaultPanelCompositionMigration(DefaultPanelCompositionQuery searchQuery,
-                                            ElasticSearchRepository repository) {
+                                            ElasticSearchRepository repository,
+                                            SscsCcdConvertService ccdConvertService) {
         this.searchQuery = searchQuery;
         this.repository = repository;
+        this.ccdConvertService = ccdConvertService;
     }
 
     @Override
@@ -46,6 +53,16 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
         log.info(getEventSummary() + " for Case: {}", caseDetails.getId());
+        var sscsCaseData = ccdConvertService.getCaseData(caseDetails.getData());
+        var snlFields = sscsCaseData.getSchedulingAndListingFields();
+        var overrideFields = nonNull(snlFields.getOverrideFields())
+            ? snlFields.getOverrideFields() : OverrideFields.builder().build();
+        if (isNull(overrideFields.getDuration())) {
+            overrideFields.setDuration(snlFields.getDefaultListingValues().getDuration());
+            log.info("Setting override fields duration to {} for Case: {}",
+                     overrideFields.getDuration(), caseDetails.getId());
+            caseDetails.getData().put("overrideFields", overrideFields);
+        }
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
