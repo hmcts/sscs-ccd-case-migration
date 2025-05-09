@@ -33,7 +33,8 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     private final SscsCcdConvertService ccdConvertService;
 
     public DefaultPanelCompositionMigration(DefaultPanelCompositionQuery searchQuery,
-                                            ElasticSearchRepository repository, SscsCcdConvertService ccdConvertService) {
+                                            ElasticSearchRepository repository,
+                                            SscsCcdConvertService ccdConvertService) {
         this.searchQuery = searchQuery;
         this.repository = repository;
         this.ccdConvertService = ccdConvertService;
