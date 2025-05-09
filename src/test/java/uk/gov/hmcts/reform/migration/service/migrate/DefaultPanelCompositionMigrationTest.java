@@ -13,13 +13,11 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_ID;
@@ -35,15 +33,13 @@ class DefaultPanelCompositionMigrationTest {
     private DefaultPanelCompositionQuery searchQuery;
     @Mock
     private ElasticSearchRepository repository;
-    @Mock
-    private SscsCcdConvertService ccdConvertService;
 
     private DefaultPanelCompositionMigration underTest;
 
     @BeforeEach
     void setUp() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository, ccdConvertService);
+            new DefaultPanelCompositionMigration(searchQuery, repository);
     }
 
     @Test
@@ -70,8 +66,6 @@ class DefaultPanelCompositionMigrationTest {
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().data(data).build();
 
-        when(ccdConvertService.getCaseData(eq(data))).thenReturn(caseData);
-
         underTest.migrate(caseDetails);
 
         assertEquals(caseDetails.getData(), data);
@@ -88,7 +82,6 @@ class DefaultPanelCompositionMigrationTest {
                 .overrideFields(OverrideFields.builder().duration(90).build()).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().data(data).build();
-        when(ccdConvertService.getCaseData(eq(data))).thenReturn(caseData);
 
         underTest.migrate(caseDetails);
 
