@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -10,8 +11,7 @@ import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HearingsUpdateResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
-import uk.gov.hmcts.reform.migration.query.CancelTestHearingsSearchQuery;
-import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
@@ -28,22 +28,21 @@ public class CancelTestHearingsService extends CaseMigrationProcessor {
     static final String EVENT_ID = "updateListingRequirements";
     static final String EVENT_SUMMARY = "Send cancellation request for test hearing";
     static final String EVENT_DESCRIPTION = "Send cancellation request for test hearing";
-    private final ElasticSearchRepository repository;
-    private final CancelTestHearingsSearchQuery searchQuery;
+    private final EncodedStringCaseList encodedStringCaseList;
     private final HmcHearingsApiService hmcHearingsApiService;
 
 
-    public CancelTestHearingsService(ElasticSearchRepository repository, CancelTestHearingsSearchQuery searchQuery,
+    public CancelTestHearingsService(@Value("${migration.cancel-test-hearing.encoded-data-string}")
+                                     String encodedDataString,
                                      HmcHearingsApiService hmcHearingsApiService) {
-        this.repository = repository;
-        this.searchQuery = searchQuery;
+        encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return repository.findCases(searchQuery, true);
+        return encodedStringCaseList.findCases();
     }
 
     @Override

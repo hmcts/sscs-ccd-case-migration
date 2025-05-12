@@ -10,8 +10,6 @@ import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HearingsUpdateResponse;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
-import uk.gov.hmcts.reform.migration.query.CancelTestHearingsSearchQuery;
-import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 
 import java.util.List;
 
@@ -30,12 +28,6 @@ import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 class CancelTestHearingsServiceTest {
 
     @Mock
-    private ElasticSearchRepository repository;
-
-    @Mock
-    private CancelTestHearingsSearchQuery query;
-
-    @Mock
     private HmcHearingsApiService hmcHearingsApiService;
 
     private CancelTestHearingsService cancelTestHearingsService;
@@ -46,7 +38,7 @@ class CancelTestHearingsServiceTest {
 
     @BeforeEach
     public void setUp() {
-        cancelTestHearingsService = new CancelTestHearingsService(repository, query, hmcHearingsApiService);
+        cancelTestHearingsService = new CancelTestHearingsService(null, hmcHearingsApiService);
     }
 
     @Test
