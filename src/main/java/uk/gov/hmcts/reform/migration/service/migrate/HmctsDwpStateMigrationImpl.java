@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 
 @Service
 @Slf4j
@@ -25,11 +25,11 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     private static final String HMCTS_DWP_STATE = "hmctsDwpState";
 
-    private final EncodedStringCaseList encodedStringCaseList;
+    private final String encodedDataString;
 
     public HmctsDwpStateMigrationImpl(@Value("${migration.hmctsDwpStateMigration.encoded-data-string}")
                                       String encodedDataString) {
-        this.encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
+        this.encodedDataString = encodedDataString;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class HmctsDwpStateMigrationImpl extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return encodedStringCaseList.findCases();
+        return findCases(encodedDataString);
     }
 
     @Override

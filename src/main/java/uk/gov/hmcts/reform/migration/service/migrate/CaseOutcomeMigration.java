@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
-import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
@@ -15,6 +14,7 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 
 @Slf4j
 public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
@@ -25,12 +25,12 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
 
     private final HearingOutcomeService hearingOutcomeService;
-    protected final EncodedStringCaseList encodedStringCaseList;
+    protected final String encodedDataString;
 
     public CaseOutcomeMigration(HearingOutcomeService hearingOutcomeService,
                                 String encodedDataString) {
         this.hearingOutcomeService = hearingOutcomeService;
-        this.encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
+        this.encodedDataString = encodedDataString;
     }
 
     @Override
@@ -69,7 +69,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return encodedStringCaseList.findCases();
+        return findCases(encodedDataString);
     }
 
     boolean skipMigration(Map<String, Object> data) {

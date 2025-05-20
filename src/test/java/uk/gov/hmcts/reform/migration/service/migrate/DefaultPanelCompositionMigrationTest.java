@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_SUMMARY;
@@ -42,11 +44,11 @@ class DefaultPanelCompositionMigrationTest {
     @BeforeEach
     void setUp() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository);
+            new DefaultPanelCompositionMigration(searchQuery, repository, false, "dummy-string");
     }
 
     @Test
-    void shouldReturnMigrationCases() {
+    void shouldFetchCasesToMigrateFromRepository() {
         var caseA = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
         var caseB = buildCaseWith("readyToList", HearingRoute.GAPS);
         var caseC = buildCaseWith("draft", HearingRoute.LIST_ASSIST);
@@ -58,6 +60,17 @@ class DefaultPanelCompositionMigrationTest {
 
         assertThat(migrationCases).hasSize(1);
         assertThat(migrationCases).contains(caseA);
+    }
+
+    @Test
+    void shouldFetchCasesToMigrateFromEncodedDataString() {
+        underTest =
+            new DefaultPanelCompositionMigration(searchQuery, repository, true, ENCODED_STRING);
+
+        var casesToMigrate = underTest.fetchCasesToMigrate();
+
+        assertThat(casesToMigrate).hasSize(1);
+        assertEquals(ENCODED_CASE_ID, casesToMigrate.getFirst().getId());
     }
 
     @Test
