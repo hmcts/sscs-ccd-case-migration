@@ -65,7 +65,7 @@ public class EncodedStringCaseList {
             log.info("Number of cases to be migrated: ({})", caseList.size());
             return caseList.stream();
         } catch (IOException e) {
-            log.info("Failed to load cases from encode string {}", b64Compressed);
+            log.info("Failed to load cases from encoded string {}", b64Compressed);
         }
         return Stream.empty();
     }
