@@ -26,20 +26,17 @@ public class EncodedStringCaseList {
     private static final String ID_COLUMN = "reference";
     private static final String HEARING_ID_COLUMN = "hearingID";
 
-    private final String encodedDataString;
-
-    public EncodedStringCaseList(String encodedDataString) {
-        this.encodedDataString = encodedDataString;
+    private EncodedStringCaseList() {
     }
 
-    public List<SscsCaseDetails> findCases() {
+    public static List<SscsCaseDetails> findCases(String encodedDataString) {
         return decompressAndB64Decode(encodedDataString)
             .map(row -> SscsCaseDetails.builder()
                 .jurisdiction(JURISDICTION).id(parseLong(row.get(ID_COLUMN))).build())
             .toList();
     }
 
-    public Map<String, String> mapCaseRefToHearingId() {
+    public static Map<String, String> mapCaseRefToHearingId(String encodedDataString) {
         Map<String, String> resultMap = new HashMap<>();
 
         decompressAndB64Decode(encodedDataString)
@@ -59,7 +56,7 @@ public class EncodedStringCaseList {
         return resultMap;
     }
 
-    private Stream<Map<String, String>> decompressAndB64Decode(String b64Compressed) {
+    private static Stream<Map<String, String>> decompressAndB64Decode(String b64Compressed) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try (OutputStream inflaterOutputStream = new InflaterOutputStream(outputStream)) {
             inflaterOutputStream.write(Base64.getDecoder().decode(b64Compressed));
@@ -68,7 +65,7 @@ public class EncodedStringCaseList {
             log.info("Number of cases to be migrated: ({})", caseList.size());
             return caseList.stream();
         } catch (IOException e) {
-            log.info("Failed to load cases from {}", this.getClass().getName());
+            log.info("Failed to load cases from encoded string {}", b64Compressed);
         }
         return Stream.empty();
     }

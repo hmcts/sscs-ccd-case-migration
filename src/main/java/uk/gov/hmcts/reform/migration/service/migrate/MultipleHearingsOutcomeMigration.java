@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static java.lang.Long.parseLong;
 import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.mapCaseRefToHearingId;
 
 @Service
 @Slf4j
@@ -39,7 +40,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
         super(hearingOutcomeService, encodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
         this.hearingOutcomeService = hearingOutcomeService;
-        caseRefToHearingIdMap = encodedStringCaseList.mapCaseRefToHearingId();
+        this.caseRefToHearingIdMap = mapCaseRefToHearingId(encodedDataString);
         this.objectMapper = new ObjectMapper().findAndRegisterModules();
     }
 
@@ -63,7 +64,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
             .stream()
             .map(HearingOutcome::getValue)
             .map(HearingOutcomeDetails::getCompletedHearingId)
-            .anyMatch(completedHearingId -> caseRefToHearingIdMap.containsValue(completedHearingId));
+            .anyMatch(caseRefToHearingIdMap::containsValue);
 
         return isNull(sscsCaseData.getCaseOutcome().getCaseOutcome()) || isSelectedHearingUsed;
     }
