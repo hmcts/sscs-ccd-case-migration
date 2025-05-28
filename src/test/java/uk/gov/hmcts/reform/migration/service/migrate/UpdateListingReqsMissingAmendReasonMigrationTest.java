@@ -12,13 +12,13 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
 import static uk.gov.hmcts.reform.migration.service.migrate.UpdateListingReqsMissingAmendReasonMigration.UPDATE_LISTING_REQS_AMEND_REASON_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.UpdateListingReqsMissingAmendReasonMigration.UPDATE_LISTING_REQS_AMEND_REASON_SUMMARY;
 
 @ExtendWith(MockitoExtension.class)
 class UpdateListingReqsMissingAmendReasonMigrationTest {
-
-    private static final String ENCODED_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VaqNBQC1oglo";
 
     @Mock
     private DefaultPanelCompositionQuery searchQuery;
@@ -35,7 +35,7 @@ class UpdateListingReqsMissingAmendReasonMigrationTest {
 
     @Test
     void shouldReturnMigrationCases() {
-        var migrationCase = SscsCaseDetails.builder().id(1729631427870175L).jurisdiction("SSCS").build();
+        var migrationCase = SscsCaseDetails.builder().id(ENCODED_CASE_ID).jurisdiction("SSCS").build();
         List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
 
         assertThat(migrationCases).hasSize(1);

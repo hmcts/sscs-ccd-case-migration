@@ -18,10 +18,15 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.HEARING;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetailsToSscsCaseDetails;
@@ -39,11 +44,11 @@ class DefaultPanelCompositionMigrationTest {
     @BeforeEach
     void setUp() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository);
+            new DefaultPanelCompositionMigration(searchQuery, repository, false, "dummy-string");
     }
 
     @Test
-    void shouldReturnMigrationCases() {
+    void shouldFetchCasesToMigrateFromRepository() {
         var caseA = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
         var caseB = buildCaseWith("readyToList", HearingRoute.GAPS);
         var caseC = buildCaseWith("draft", HearingRoute.LIST_ASSIST);
@@ -58,13 +63,24 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @Test
+    void shouldFetchCasesToMigrateFromEncodedDataString() {
+        underTest =
+            new DefaultPanelCompositionMigration(searchQuery, repository, true, ENCODED_STRING);
+
+        var casesToMigrate = underTest.fetchCasesToMigrate();
+
+        assertThat(casesToMigrate).hasSize(1);
+        assertEquals(ENCODED_CASE_ID, casesToMigrate.getFirst().getId());
+    }
+
+    @Test
     void shouldReturnMigratedCaseData() {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
                 .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
         var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().data(data).build();
+        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
 
         underTest.migrate(caseDetails);
 
@@ -81,13 +97,25 @@ class DefaultPanelCompositionMigrationTest {
                 .defaultListingValues(OverrideFields.builder().duration(60).build())
                 .overrideFields(OverrideFields.builder().duration(90).build()).build());
         var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().data(data).build();
+        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
 
         underTest.migrate(caseDetails);
 
         assertEquals(caseDetails.getData(), data);
         assertEquals(90, convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
             .getSchedulingAndListingFields().getOverrideFields().getDuration());
+    }
+
+    @Test
+    void shouldNotMigrateCaseIfNotReadyToList() {
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(
+            SchedulingAndListingFields.builder()
+                .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().state(HEARING.toString()).data(data).build();
+
+        assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
 
     @Test

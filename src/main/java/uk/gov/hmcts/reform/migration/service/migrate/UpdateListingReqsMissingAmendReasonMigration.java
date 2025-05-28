@@ -6,10 +6,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
-import uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-
-import java.util.List;
 
 @Service
 @Slf4j
@@ -21,21 +17,13 @@ public class UpdateListingReqsMissingAmendReasonMigration extends DefaultPanelCo
     static final String UPDATE_LISTING_REQS_AMEND_REASON_DESCRIPTION =
         "Automated request did not send when Update Listing Requirements event used";
 
-    private final EncodedStringCaseList encodedStringCaseList;
-
     public UpdateListingReqsMissingAmendReasonMigration(
         DefaultPanelCompositionQuery searchQuery,
         ElasticSearchRepository repository,
         @Value("${migration.updateListingReqsMissingAmendReason.encoded-data-string}")
         String encodedDataString
     ) {
-        super(searchQuery, repository);
-        this.encodedStringCaseList = new EncodedStringCaseList(encodedDataString);
-    }
-
-    @Override
-    public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return encodedStringCaseList.findCases();
+        super(searchQuery, repository, true, encodedDataString);
     }
 
     @Override
