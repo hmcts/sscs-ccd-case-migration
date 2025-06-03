@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -26,7 +28,6 @@ import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelComposit
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.DefaultPanelCompositionMigration.UPDATE_LISTING_REQUIREMENTS_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.HEARING;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetailsToSscsCaseDetails;
@@ -53,13 +54,15 @@ class DefaultPanelCompositionMigrationTest {
         var caseB = buildCaseWith("readyToList", HearingRoute.GAPS);
         var caseC = buildCaseWith("draft", HearingRoute.LIST_ASSIST);
         var caseD = buildCaseWith("validAppeal", HearingRoute.LIST_ASSIST);
-        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD);
+        var caseE = buildCaseWith("handlingError", HearingRoute.LIST_ASSIST);
+        var caseF = buildCaseWith("handlingError", HearingRoute.GAPS);
+        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD, caseE, caseF);
         when(repository.findCases(searchQuery, true)).thenReturn(caseList);
 
         List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
 
-        assertThat(migrationCases).hasSize(1);
-        assertThat(migrationCases).contains(caseA);
+        assertThat(migrationCases).hasSize(2);
+        assertThat(migrationCases).contains(caseA, caseE);
     }
 
     @Test
@@ -73,14 +76,15 @@ class DefaultPanelCompositionMigrationTest {
         assertEquals(ENCODED_CASE_ID, casesToMigrate.getFirst().getId());
     }
 
-    @Test
-    void shouldReturnMigratedCaseData() {
+    @ParameterizedTest
+    @ValueSource(strings = {"readyToList", "handlingError"})
+    void shouldReturnMigratedCaseData(String state) {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
                 .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
         var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+        var caseDetails = CaseDetails.builder().state(state).data(data).build();
 
         underTest.migrate(caseDetails);
 
@@ -89,15 +93,16 @@ class DefaultPanelCompositionMigrationTest {
             .getSchedulingAndListingFields().getOverrideFields().getDuration());
     }
 
-    @Test
-    void shouldNotResetOverrideFieldDuration() {
+    @ParameterizedTest
+    @ValueSource(strings = {"readyToList", "handlingError"})
+    void shouldNotResetOverrideFieldDuration(String state) {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
                 .defaultListingValues(OverrideFields.builder().duration(60).build())
                 .overrideFields(OverrideFields.builder().duration(90).build()).build());
         var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+        var caseDetails = CaseDetails.builder().state(state).data(data).build();
 
         underTest.migrate(caseDetails);
 
