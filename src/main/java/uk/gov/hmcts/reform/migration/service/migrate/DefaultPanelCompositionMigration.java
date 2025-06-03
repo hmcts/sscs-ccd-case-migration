@@ -57,7 +57,8 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         } else {
             return repository.findCases(searchQuery, true)
                 .stream()
-                .filter(caseDetails -> (READY_TO_LIST.toString().equals(caseDetails.getState()) || HANDLING_ERROR.toString().equals(caseDetails.getState()))
+                .filter(caseDetails -> (READY_TO_LIST.toString().equals(caseDetails.getState())
+                    || HANDLING_ERROR.toString().equals(caseDetails.getState()))
                     && caseDetails.getData().getSchedulingAndListingFields().getHearingRoute()
                     .equals(HearingRoute.LIST_ASSIST))
                 .toList();
@@ -66,7 +67,8 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        if (caseDetails.getState().equals(READY_TO_LIST.toString()) || caseDetails.getState().equals(HANDLING_ERROR.toString()) ) {
+        if (caseDetails.getState().equals(READY_TO_LIST.toString())
+            || caseDetails.getState().equals(HANDLING_ERROR.toString())) {
             log.info(getEventSummary() + " for Case: {}", caseDetails.getId());
             var mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
