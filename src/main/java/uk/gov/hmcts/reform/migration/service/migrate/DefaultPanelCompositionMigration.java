@@ -21,6 +21,7 @@ import java.util.List;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.HANDLING_ERROR;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 
 @Service
@@ -56,7 +57,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         } else {
             return repository.findCases(searchQuery, true)
                 .stream()
-                .filter(caseDetails -> READY_TO_LIST.toString().equals(caseDetails.getState())
+                .filter(caseDetails -> (READY_TO_LIST.toString().equals(caseDetails.getState()) || HANDLING_ERROR.toString().equals(caseDetails.getState()))
                     && caseDetails.getData().getSchedulingAndListingFields().getHearingRoute()
                     .equals(HearingRoute.LIST_ASSIST))
                 .toList();
@@ -65,7 +66,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
+        if (caseDetails.getState().equals(READY_TO_LIST.toString()) || caseDetails.getState().equals(HANDLING_ERROR.toString()) ) {
             log.info(getEventSummary() + " for Case: {}", caseDetails.getId());
             var mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
