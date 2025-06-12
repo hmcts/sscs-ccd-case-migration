@@ -184,10 +184,8 @@ ext {
   junitVintageVersion = '5.11.4'
   powermockVersion = '2.0.9'
   springCloudVersion = '2024.0.0'
+  jacksonVersion = '2.19.0'
 }
-
-ext['jackson.version'] = '2.17.2'
-ext['snakeyaml.version'] = '2.0'
 
 dependencies {
   implementation group: 'org.json', name: 'json', version: '20240303'
@@ -202,12 +200,12 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.1.0'
 
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.3'
-  implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: '2.17.2'
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.17.2'
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.17.2'
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.17.2'
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.17.2'
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.17.2'
+  implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
 
   implementation group: 'com.github.hmcts', name: 'sscs-common', version: 'f032bb1'
 
@@ -250,19 +248,6 @@ dependencies {
 dependencyManagement {
   imports {
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-  }
-
-  dependencies {
-    dependency 'com.google.guava:guava:32.1.1-jre'
-
-    dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
-
-    dependencySet(group: 'org.codehaus.groovy', version: '3.0.20') {
-      entry 'groovy'
-      entry 'groovy-xml'
-      entry 'groovy-json'
-    }
-
   }
 }
 
