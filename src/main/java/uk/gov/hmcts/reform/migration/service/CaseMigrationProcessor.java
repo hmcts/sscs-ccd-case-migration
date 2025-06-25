@@ -1,10 +1,14 @@
 package uk.gov.hmcts.reform.migration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.ArrayList;
@@ -87,6 +91,12 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
             log.warn("Timed out waiting for thread pool to terminate");
             Thread.currentThread().interrupt();
         }
+    }
+
+    protected SscsCaseData convertToSscsCaseData(Map<String, Object> caseData) {
+        var mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.convertValue(caseData, SscsCaseData.class);
     }
 
     private List<SscsCaseDetails> tryFetchingCases() {

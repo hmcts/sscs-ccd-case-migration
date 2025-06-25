@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,7 +10,6 @@ import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
@@ -67,9 +64,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     public UpdateResult migrate(CaseDetails caseDetails) {
         if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
             log.info(getEventSummary() + " for Case: {}", caseDetails.getId());
-            var mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
-            var caseData = mapper.convertValue(caseDetails.getData(), SscsCaseData.class);
+            var caseData = convertToSscsCaseData(caseDetails.getData());
             var snlFields = caseData.getSchedulingAndListingFields();
             var overrideFields = nonNull(snlFields.getOverrideFields())
                 ? snlFields.getOverrideFields() : OverrideFields.builder().build();

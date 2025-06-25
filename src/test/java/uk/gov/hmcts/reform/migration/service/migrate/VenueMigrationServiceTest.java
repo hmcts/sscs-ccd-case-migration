@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.robotics.RoboticsJsonMapper;
 
 import java.util.HashMap;
@@ -18,6 +17,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
@@ -31,14 +31,12 @@ class VenueMigrationServiceTest {
 
     @Mock
     private RoboticsJsonMapper roboticsJsonMapper;
-    @Mock
-    private SscsCcdConvertService ccdConvertService;
 
     private VenueMigrationService underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new VenueMigrationService(ENCODED_STRING, ccdConvertService, roboticsJsonMapper);
+        underTest = new VenueMigrationService(ENCODED_STRING, roboticsJsonMapper);
     }
 
     @Test
@@ -54,9 +52,7 @@ class VenueMigrationServiceTest {
     void shouldUpdateVenue() {
         var caseData = new HashMap<>(Map.of("processingVenue", (Object)"Bradford"));
         var caseDetails = CaseDetails.builder().data(caseData).build();
-        var sscsCaseData = SscsCaseData.builder().processingVenue("Bradford").build();
-        when(ccdConvertService.getCaseData(eq(caseData))).thenReturn(sscsCaseData);
-        when(roboticsJsonMapper.findVenueName(eq(sscsCaseData))).thenReturn(Optional.of("Leeds"));
+        when(roboticsJsonMapper.findVenueName(any(SscsCaseData.class))).thenReturn(Optional.of("Leeds"));
 
         underTest.migrate(caseDetails);
 
@@ -68,7 +64,6 @@ class VenueMigrationServiceTest {
         var caseData = new HashMap<>(Map.of("processingVenue", (Object)"Bradford"));
         var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
         var sscsCaseData = SscsCaseData.builder().processingVenue("Bradford").build();
-        when(ccdConvertService.getCaseData(eq(caseData))).thenReturn(sscsCaseData);
         when(roboticsJsonMapper.findVenueName(eq(sscsCaseData))).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));

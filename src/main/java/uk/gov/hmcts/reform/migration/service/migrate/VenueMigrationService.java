@@ -29,16 +29,13 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     private final String encodedDataString;
     private final RoboticsJsonMapper roboticsJsonMapper;
-    private final SscsCcdConvertService sscsCcdConvertService;
 
 
     public VenueMigrationService(@Value("${migration.processingVenue.encoded-string}")
                                  String encodedDataString,
-                                 SscsCcdConvertService sscsCcdConvertService,
                                  RoboticsJsonMapper roboticsJsonMapper) {
         this.encodedDataString = encodedDataString;
         this.roboticsJsonMapper = roboticsJsonMapper;
-        this.sscsCcdConvertService = sscsCcdConvertService;
     }
 
     @Override
@@ -48,9 +45,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        var sscsCaseData = sscsCcdConvertService.getCaseData(caseDetails.getData());
-
-        String venue = roboticsJsonMapper.findVenueName(sscsCaseData)
+        String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
             .orElseThrow(() -> {
                 String failureMsg = format(FAILURE_MSG, caseDetails.getId());
                 log.error(failureMsg);
