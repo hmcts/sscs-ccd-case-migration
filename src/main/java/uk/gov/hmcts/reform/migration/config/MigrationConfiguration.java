@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.migration.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.Logger;
 import feign.codec.Encoder;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +31,5 @@ public class MigrationConfiguration {
         HttpMessageConverter jacksonConverter = new MappingJackson2HttpMessageConverter(objectMapper);
         ObjectFactory<HttpMessageConverters> objectFactory = () -> new HttpMessageConverters(jacksonConverter);
         return new SpringEncoder(objectFactory);
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        var mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        return mapper;
     }
 }

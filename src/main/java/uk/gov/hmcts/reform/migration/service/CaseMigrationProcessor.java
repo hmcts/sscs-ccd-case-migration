@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +34,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
 
     @Autowired
     private CoreCaseDataService coreCaseDataService;
-
-    @Autowired
-    private ObjectMapper mapper;
 
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
@@ -96,6 +94,8 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     }
 
     protected SscsCaseData convertToSscsCaseData(Map<String, Object> caseData) {
+        var mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
         return mapper.convertValue(caseData, SscsCaseData.class);
     }
 
