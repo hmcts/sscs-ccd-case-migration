@@ -67,8 +67,8 @@ migration:
     enabled: ${HMCTS_DWP_STATE_MIGRATION_ENABLED:false}
     encoded-data-string: ${HMCTS_DWP_STATE_ENCODED_DATA_STRING:==dummy++encoded--string==}
   processingVenue:
-    enabled: ${VENUE_MIGRATION_ENABLED:true}
-    encoded-string: eJyLrlYqSk1LLUrNS05VslIyNDc1MDO3NLU0NDEzNbcwV6qNBQC2Kgl5
+    enabled: ${VENUE_MIGRATION_ENABLED:false}
+    encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
