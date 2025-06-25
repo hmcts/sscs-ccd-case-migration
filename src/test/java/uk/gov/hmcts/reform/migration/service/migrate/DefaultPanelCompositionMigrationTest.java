@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
@@ -19,6 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
@@ -38,6 +41,8 @@ class DefaultPanelCompositionMigrationTest {
     private DefaultPanelCompositionQuery searchQuery;
     @Mock
     private ElasticSearchRepository repository;
+    @Mock
+    private ObjectMapper objectMapper;
 
     private DefaultPanelCompositionMigration underTest;
 
@@ -45,6 +50,7 @@ class DefaultPanelCompositionMigrationTest {
     void setUp() {
         underTest =
             new DefaultPanelCompositionMigration(searchQuery, repository, false, "dummy-string");
+        ReflectionTestUtils.setField(underTest, "mapper", objectMapper);
     }
 
     @Test
@@ -81,6 +87,7 @@ class DefaultPanelCompositionMigrationTest {
                 .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+        when(objectMapper.convertValue(eq(data), eq(SscsCaseData.class))).thenReturn(caseData);
 
         underTest.migrate(caseDetails);
 
@@ -98,6 +105,7 @@ class DefaultPanelCompositionMigrationTest {
                 .overrideFields(OverrideFields.builder().duration(90).build()).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+        when(objectMapper.convertValue(eq(data), eq(SscsCaseData.class))).thenReturn(caseData);
 
         underTest.migrate(caseDetails);
 

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.robotics.RoboticsJsonMapper;
 
@@ -29,16 +28,13 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     private final String encodedDataString;
     private final RoboticsJsonMapper roboticsJsonMapper;
-    private final SscsCcdConvertService sscsCcdConvertService;
 
 
     public VenueMigrationService(@Value("${migration.processingVenue.encoded-string}")
                                  String encodedDataString,
-                                 SscsCcdConvertService sscsCcdConvertService,
                                  RoboticsJsonMapper roboticsJsonMapper) {
         this.encodedDataString = encodedDataString;
         this.roboticsJsonMapper = roboticsJsonMapper;
-        this.sscsCcdConvertService = sscsCcdConvertService;
     }
 
     @Override
@@ -48,9 +44,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        var sscsCaseData = sscsCcdConvertService.getCaseData(caseDetails.getData());
-
-        String venue = roboticsJsonMapper.findVenueName(sscsCaseData)
+        String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
             .orElseThrow(() -> {
                 String failureMsg = format(FAILURE_MSG, caseDetails.getId());
                 log.error(failureMsg);
