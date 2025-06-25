@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.migration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +10,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.migration.ccd.CoreCaseDataService;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.migrate.DwpDataMigrationServiceImpl;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.HashMap;
@@ -40,8 +38,6 @@ public class DwpCaseMigrationProcessorTest {
     private ElasticSearchRepository elasticSearchRepository;
     @Mock
     private CoreCaseDataService coreCaseDataService;
-    @Mock
-    private ObjectMapper objectMapper;
 
     @InjectMocks
     DwpDataMigrationServiceImpl caseMigrationProcessor;
@@ -53,7 +49,6 @@ public class DwpCaseMigrationProcessorTest {
     public void setUp() {
         ReflectionTestUtils.setField(caseMigrationProcessor, "caseProcessLimit", 1);
         ReflectionTestUtils.setField(caseMigrationProcessor, "coreCaseDataService", coreCaseDataService);
-        ReflectionTestUtils.setField(caseMigrationProcessor, "mapper", objectMapper);
     }
 
     @Test
@@ -90,12 +85,9 @@ public class DwpCaseMigrationProcessorTest {
     @Test
     public void shouldConvertMapToSscsCaseData() {
         var caseData = new HashMap<String, Object>(Map.of("processingVenue", "Bradford"));
-        var expected = SscsCaseData.builder().processingVenue("Bradford").build();
-        when(objectMapper.convertValue(eq(caseData), eq(SscsCaseData.class))).thenReturn(expected);
+        var sscsCaseData = caseMigrationProcessor.convertToSscsCaseData(caseData);
 
-        var actual = caseMigrationProcessor.convertToSscsCaseData(caseData);
-
-        assertEquals(expected, actual);
+        assertEquals("Bradford", sscsCaseData.getProcessingVenue());
     }
 
     @Test
