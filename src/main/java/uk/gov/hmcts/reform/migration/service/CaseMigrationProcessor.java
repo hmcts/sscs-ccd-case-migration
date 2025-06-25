@@ -35,6 +35,9 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     @Autowired
     private CoreCaseDataService coreCaseDataService;
 
+    @Autowired
+    private ObjectMapper mapper;
+
     @Getter
     private final List<Long> migratedCases = new ArrayList<>();
 
@@ -94,8 +97,6 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     }
 
     protected SscsCaseData convertToSscsCaseData(Map<String, Object> caseData) {
-        var mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
         return mapper.convertValue(caseData, SscsCaseData.class);
     }
 
