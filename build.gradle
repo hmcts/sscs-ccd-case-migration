@@ -207,7 +207,7 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.17.2'
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.17.2'
 
-  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '8aea23b'
+  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '6.3.2'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBoot.class.package.implementationVersion
   testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.6.0'
