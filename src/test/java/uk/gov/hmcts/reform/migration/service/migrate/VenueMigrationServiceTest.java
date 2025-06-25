@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -17,7 +19,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
@@ -31,12 +32,15 @@ class VenueMigrationServiceTest {
 
     @Mock
     private RoboticsJsonMapper roboticsJsonMapper;
+    @Mock
+    private ObjectMapper objectMapper;
 
     private VenueMigrationService underTest;
 
     @BeforeEach
     void setUp() {
         underTest = new VenueMigrationService(ENCODED_STRING, roboticsJsonMapper);
+        ReflectionTestUtils.setField(underTest, "mapper", objectMapper);
     }
 
     @Test
@@ -52,7 +56,9 @@ class VenueMigrationServiceTest {
     void shouldUpdateVenue() {
         var caseData = new HashMap<>(Map.of("processingVenue", (Object)"Bradford"));
         var caseDetails = CaseDetails.builder().data(caseData).build();
-        when(roboticsJsonMapper.findVenueName(any(SscsCaseData.class))).thenReturn(Optional.of("Leeds"));
+        var sscsCaseData = SscsCaseData.builder().processingVenue("Bradford").build();
+        when(objectMapper.convertValue(eq(caseData), eq(SscsCaseData.class))).thenReturn(sscsCaseData);
+        when(roboticsJsonMapper.findVenueName(eq(sscsCaseData))).thenReturn(Optional.of("Leeds"));
 
         underTest.migrate(caseDetails);
 
