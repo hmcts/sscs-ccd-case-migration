@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.exception.CaseMigrationException;
 import uk.gov.hmcts.reform.migration.query.CaseManagementLocactionQuery;
@@ -30,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.YES;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
@@ -51,8 +48,6 @@ public class CaseManagementLocationMigrationImplTest {
     CaseManagementLocactionQuery searchQuery;
     @Mock
     ElasticSearchRepository repository;
-    @Mock
-    private ObjectMapper objectMapper;
 
     private CaseManagementLocationMigrationImpl caseManagementLocationService;
 
@@ -63,7 +58,6 @@ public class CaseManagementLocationMigrationImplTest {
         caseManagementLocationService =
             new CaseManagementLocationMigrationImpl(searchQuery, repository, refDataService,
                                                     venueService, rpcService, airLookupService);
-        ReflectionTestUtils.setField(caseManagementLocationService, "mapper", objectMapper);
     }
 
 
@@ -85,7 +79,6 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.setRegionalProcessingCenter(rpc);
         var data = buildCaseDataMap(caseData);
         caseDetails.setData(data);
-        when(objectMapper.convertValue(eq(data), eq(SscsCaseData.class))).thenReturn(caseData);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
@@ -107,7 +100,6 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.setRegionalProcessingCenter(rpc);
         var data = buildCaseDataMap(caseData);
         caseDetails.setData(data);
-        when(objectMapper.convertValue(eq(data), eq(SscsCaseData.class))).thenReturn(caseData);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
@@ -125,7 +117,6 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.setRegionalProcessingCenter(null);
         var data = buildCaseDataMap(caseData);
         caseDetails.setData(data);
-        when(objectMapper.convertValue(eq(data), eq(SscsCaseData.class))).thenReturn(caseData);
 
         assertThrows(CaseMigrationException.class, () -> caseManagementLocationService.migrate(caseDetails));
     }
@@ -139,7 +130,6 @@ public class CaseManagementLocationMigrationImplTest {
         caseData.getAppeal().getAppellant().setIsAppointee(YES);
         var data = buildCaseDataMap(caseData);
         caseDetails.setData(data);
-        when(objectMapper.convertValue(eq(data), eq(SscsCaseData.class))).thenReturn(caseData);
         when(airLookupService.lookupAirVenueNameByPostCode(anyString(), any())).thenReturn("");
         when(venueService.getEpimsIdForVenue(anyString())).thenReturn("epimsId");
         when(refDataService.getCourtVenueRefDataByEpimsId(anyString()))
