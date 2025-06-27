@@ -38,7 +38,7 @@ public class OldDraftAppealsArchiveService extends CaseMigrationProcessor {
         return repository.findCases(searchQuery, false)
             .stream()
             .filter(caseDetails -> DRAFT.toString().equals(caseDetails.getState())
-                && !caseDetails.getCreatedDate().toLocalDate().isAfter(now().minusMonths(6)))
+                && caseDetails.getCreatedDate().toLocalDate().isAfter(now().minusMonths(1)))
             .toList();
     }
 
