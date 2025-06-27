@@ -40,7 +40,7 @@ class OldDraftAppealsArchiveServiceTest {
 
     @Test
     void shouldReturnMigrationCases() {
-        var caseA = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(5)).build();
+        var caseA = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusDays(18)).build();
         var caseB = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(6)).build();
         var caseC = SscsCaseDetails.builder().id(1L).state("draft").createdDate(now().minusMonths(7)).build();
         var caseD = SscsCaseDetails.builder().id(1L).state("appealCreated").createdDate(now().minusMonths(6)).build();
@@ -49,8 +49,8 @@ class OldDraftAppealsArchiveServiceTest {
 
         List<SscsCaseDetails> migrationCases = oldDraftAppealsArchiveService.fetchCasesToMigrate();
 
-        assertThat(migrationCases).hasSize(2);
-        assertThat(migrationCases).contains(caseB, caseC);
+        assertThat(migrationCases).hasSize(1);
+        assertThat(migrationCases).contains(caseA);
     }
 
     @Test
