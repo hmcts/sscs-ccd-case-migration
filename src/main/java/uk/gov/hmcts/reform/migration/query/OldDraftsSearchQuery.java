@@ -11,7 +11,7 @@ public class OldDraftsSearchQuery extends ElasticSearchQuery {
             "bool": {
               "must": [
                 { "match": { "state": "draft" }},
-                { "range": { "created_date": { "gte": "now-1M/d" }}}
+                { "range": { "created_date": { "lte": "now-6M/d" }}}
               ]
             }
           },
