@@ -16,7 +16,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 @Configuration
 @Slf4j
-public class MigrationFeignConfiguration {
+public class MigrationConfiguration {
 
     @Bean
     Logger.Level feignLoggerLevel() {

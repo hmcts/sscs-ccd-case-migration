@@ -9,7 +9,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
 import uk.gov.hmcts.reform.migration.service.DataMigrationService;
 import uk.gov.hmcts.reform.sscs.ccd.config.CcdRequestDetails;
@@ -21,7 +20,6 @@ import java.util.Map;
 @EnableRetry
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.idam.client",
     "uk.gov.hmcts.reform.migration.hmc", "uk.gov.hmcts.reform.sscs.client"})
-@PropertySource("classpath:application.properties")
 @ComponentScan(basePackages = {"uk.gov.hmcts.reform", "uk.gov.hmcts.reform.sscs",
     "uk.gov.hmcts.reform.sscs.ccd.config"})
 public class CaseMigrationRunner implements CommandLineRunner {

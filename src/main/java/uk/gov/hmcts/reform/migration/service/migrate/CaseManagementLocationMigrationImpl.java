@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
 import uk.gov.hmcts.reform.sscs.ccd.domain.RegionalProcessingCenter;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.service.SscsCcdConvertService;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.model.CourtVenue;
 import uk.gov.hmcts.reform.sscs.service.AirLookupService;
@@ -49,7 +48,6 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
     private final VenueService venueService;
     private final RegionalProcessingCenterService regionalProcessingCenterService;
     private final AirLookupService airLookupService;
-    private final SscsCcdConvertService ccdConvertService;
     private final HashMap<String, String> regiondIdsCache = new HashMap<>();
 
     public CaseManagementLocationMigrationImpl(CaseManagementLocactionQuery searchQuery,
@@ -57,15 +55,13 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
                                                RefDataService refDataService,
                                                VenueService venueService,
                                                RegionalProcessingCenterService regionalProcessingCenterService,
-                                               AirLookupService airLookupService,
-                                               SscsCcdConvertService ccdConvertService) {
+                                               AirLookupService airLookupService) {
         this.searchQuery = searchQuery;
         this.repository = repository;
         this.refDataService = refDataService;
         this.venueService = venueService;
         this.regionalProcessingCenterService = regionalProcessingCenterService;
         this.airLookupService = airLookupService;
-        this.ccdConvertService = ccdConvertService;
     }
 
     @Override
@@ -78,7 +74,7 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
         var data = caseDetails.getData();
         if (nonNull(data)) {
             if (!data.containsKey("caseManagementLocation")) {
-                Map<String, Object> managementLocation = getManagementLocation(data);
+                Map<String, Object> managementLocation = getManagementLocation(convertToSscsCaseData(data));
                 if (!isNull(managementLocation)) {
                     data.put("caseManagementLocation", managementLocation);
                 }
@@ -87,8 +83,7 @@ public class CaseManagementLocationMigrationImpl extends CaseMigrationProcessor 
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
-    private Map<String, Object> getManagementLocation(Map<String, Object> data) {
-        SscsCaseData caseData = ccdConvertService.getCaseData(data);
+    private Map<String, Object> getManagementLocation(SscsCaseData caseData) {
         String postCode = resolvePostCode(caseData);
         String firstHalfOfPostcode = getFirstHalfOfPostcode(postCode);
 

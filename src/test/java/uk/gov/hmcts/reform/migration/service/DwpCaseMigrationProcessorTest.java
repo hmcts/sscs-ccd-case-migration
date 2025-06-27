@@ -12,9 +12,12 @@ import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.migrate.DwpDataMigrationServiceImpl;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -77,6 +80,14 @@ public class DwpCaseMigrationProcessorTest {
 
         verify(coreCaseDataService)
                  .applyUpdatesInCcd(eq(1677777777L), eq(EVENT_ID), any());
+    }
+
+    @Test
+    public void shouldConvertMapToSscsCaseData() {
+        var caseData = new HashMap<String, Object>(Map.of("processingVenue", "Bradford"));
+        var sscsCaseData = caseMigrationProcessor.convertToSscsCaseData(caseData);
+
+        assertEquals("Bradford", sscsCaseData.getProcessingVenue());
     }
 
     @Test
