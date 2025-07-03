@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -107,8 +109,9 @@ class DefaultPanelCompositionMigrationTest {
             .getSchedulingAndListingFields().getOverrideFields().getDuration());
     }
 
-    @Test
-    void shouldSetAmendReasonsIfEmpty() {
+    @ParameterizedTest
+    @ValueSource(strings = {"[]", "[\"partyreq\"]", "[\"judgereq\", \"adminreq\"]"})
+    void shouldSetAmendReasonsToAdminReequest() {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
@@ -121,24 +124,6 @@ class DefaultPanelCompositionMigrationTest {
 
         assertEquals(caseDetails.getData(), data);
         assertEquals(List.of(AmendReason.ADMIN_REQUEST), convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
-            .getSchedulingAndListingFields().getAmendReasons());
-    }
-
-    @Test
-    void shouldNotSetAmendReasonsIfContainsReason() {
-        var caseData = buildCaseData();
-        caseData.setSchedulingAndListingFields(
-            SchedulingAndListingFields.builder()
-                .defaultListingValues(OverrideFields.builder().duration(60).build())
-                .amendReasons(List.of(AmendReason.JUDGE_REQUEST))
-                .build());
-        var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
-
-        underTest.migrate(caseDetails);
-
-        assertEquals(caseDetails.getData(), data);
-        assertEquals(List.of(AmendReason.JUDGE_REQUEST), convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
             .getSchedulingAndListingFields().getAmendReasons());
     }
 

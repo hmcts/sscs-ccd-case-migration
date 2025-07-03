@@ -76,10 +76,9 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                 caseDetails.getData().put("overrideFields", overrideFields);
             }
 
-            if (isNull((snlFields.getAmendReasons())) || snlFields.getAmendReasons().isEmpty()) {
-                log.info("Setting Amend Reasons to Admin Request for Case: {}", caseDetails.getId());
-                caseDetails.getData().put("amendReasons", List.of(AmendReason.ADMIN_REQUEST));
-            }
+            log.info("Setting Amend Reasons to Admin Request for Case: {}", caseDetails.getId());
+            caseDetails.getData().put("amendReasons", List.of(AmendReason.ADMIN_REQUEST));
+
             return new UpdateResult(getEventSummary(), getEventDescription());
         } else {
             String failureMsg = String.format("Skipping Case (%s) for migration because state has changed (%s)",
