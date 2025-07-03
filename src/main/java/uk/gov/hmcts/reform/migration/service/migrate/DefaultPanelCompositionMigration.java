@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -74,6 +75,10 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                          overrideFields.getDuration(), caseDetails.getId());
                 caseDetails.getData().put("overrideFields", overrideFields);
             }
+
+            log.info("Setting Amend Reasons to Admin Request for Case: {}", caseDetails.getId());
+            caseDetails.getData().put("amendReasons", List.of(AmendReason.ADMIN_REQUEST));
+
             return new UpdateResult(getEventSummary(), getEventDescription());
         } else {
             String failureMsg = String.format("Skipping Case (%s) for migration because state has changed (%s)",

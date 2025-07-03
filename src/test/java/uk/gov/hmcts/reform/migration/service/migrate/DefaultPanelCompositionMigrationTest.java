@@ -3,11 +3,14 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
@@ -15,6 +18,7 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -106,6 +110,24 @@ class DefaultPanelCompositionMigrationTest {
             .getSchedulingAndListingFields().getOverrideFields().getDuration());
     }
 
+    @ParameterizedTest
+    @MethodSource("amendReasonListProvider")
+    void shouldSetAmendReasonsToAdminRequest(List<AmendReason> amendReasons) {
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(
+            SchedulingAndListingFields.builder()
+                .defaultListingValues(OverrideFields.builder().duration(60).build())
+                .amendReasons(amendReasons)
+                .build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+
+        underTest.migrate(caseDetails);
+
+        assertEquals(caseDetails.getData(), data);
+        assertEquals(List.of(AmendReason.ADMIN_REQUEST), data.get("amendReasons"));
+    }
+
     @Test
     void shouldNotMigrateCaseIfNotReadyToList() {
         var caseData = buildCaseData();
@@ -141,5 +163,14 @@ class DefaultPanelCompositionMigrationTest {
                           SchedulingAndListingFields.builder().hearingRoute(hearingRoute).build()
                       ).build()
             ).build();
+    }
+
+    static Stream<List<AmendReason>> amendReasonListProvider() {
+        return Stream.of(
+            null,
+            List.of(),
+            List.of(AmendReason.JUDGE_REQUEST),
+            List.of(AmendReason.ADMIN_REQUEST, AmendReason.PARTY_REQUEST)
+        );
     }
 }
