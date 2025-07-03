@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -73,6 +74,11 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                 log.info("Setting override fields duration to {} for Case: {}",
                          overrideFields.getDuration(), caseDetails.getId());
                 caseDetails.getData().put("overrideFields", overrideFields);
+            }
+
+            if (isNull((snlFields.getAmendReasons())) || snlFields.getAmendReasons().isEmpty()) {
+                log.info("Setting Amend Reasons to Admin Request for Case: {}", caseDetails.getId());
+                caseDetails.getData().put("amendReasons", List.of(AmendReason.ADMIN_REQUEST));
             }
             return new UpdateResult(getEventSummary(), getEventDescription());
         } else {

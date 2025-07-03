@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
+import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
@@ -104,6 +105,23 @@ class DefaultPanelCompositionMigrationTest {
         assertEquals(caseDetails.getData(), data);
         assertEquals(90, convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
             .getSchedulingAndListingFields().getOverrideFields().getDuration());
+    }
+
+    @Test
+    void shouldSetAmendReasons() {
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(
+            SchedulingAndListingFields.builder()
+                .defaultListingValues(OverrideFields.builder().duration(60).build())
+                .build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+
+        underTest.migrate(caseDetails);
+
+        assertEquals(caseDetails.getData(), data);
+        assertEquals(List.of(AmendReason.ADMIN_REQUEST), convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
+            .getSchedulingAndListingFields().getAmendReasons());
     }
 
     @Test
