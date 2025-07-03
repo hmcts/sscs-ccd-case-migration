@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,12 +111,13 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"[]", "[\"partyreq\"]", "[\"judgereq\", \"adminreq\"]"})
-    void shouldSetAmendReasonsToAdminReequest() {
+    @MethodSource("amendReasonListProvider")
+    void shouldSetAmendReasonsToAdminRequest(List<AmendReason> amendReasons) {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
                 .defaultListingValues(OverrideFields.builder().duration(60).build())
+                .amendReasons(amendReasons)
                 .build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
@@ -123,8 +125,7 @@ class DefaultPanelCompositionMigrationTest {
         underTest.migrate(caseDetails);
 
         assertEquals(caseDetails.getData(), data);
-        assertEquals(List.of(AmendReason.ADMIN_REQUEST), convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
-            .getSchedulingAndListingFields().getAmendReasons());
+        assertEquals(List.of(AmendReason.ADMIN_REQUEST), data.get("amendReasons"));
     }
 
     @Test
@@ -162,5 +163,14 @@ class DefaultPanelCompositionMigrationTest {
                           SchedulingAndListingFields.builder().hearingRoute(hearingRoute).build()
                       ).build()
             ).build();
+    }
+
+    static Stream<List<AmendReason>> amendReasonListProvider() {
+        return Stream.of(
+            null,
+            List.of(),
+            List.of(AmendReason.JUDGE_REQUEST),
+            List.of(AmendReason.ADMIN_REQUEST, AmendReason.PARTY_REQUEST)
+        );
     }
 }
