@@ -108,7 +108,7 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @Test
-    void shouldSetAmendReasons() {
+    void shouldSetAmendReasonsIfEmpty() {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
@@ -121,6 +121,24 @@ class DefaultPanelCompositionMigrationTest {
 
         assertEquals(caseDetails.getData(), data);
         assertEquals(List.of(AmendReason.ADMIN_REQUEST), convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
+            .getSchedulingAndListingFields().getAmendReasons());
+    }
+
+    @Test
+    void shouldNotSetAmendReasonsIfContainsReason() {
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(
+            SchedulingAndListingFields.builder()
+                .defaultListingValues(OverrideFields.builder().duration(60).build())
+                .amendReasons(List.of(AmendReason.JUDGE_REQUEST))
+                .build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().state(READY_TO_LIST.toString()).data(data).build();
+
+        underTest.migrate(caseDetails);
+
+        assertEquals(caseDetails.getData(), data);
+        assertEquals(List.of(AmendReason.JUDGE_REQUEST), convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
             .getSchedulingAndListingFields().getAmendReasons());
     }
 
