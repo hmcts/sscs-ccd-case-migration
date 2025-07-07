@@ -43,8 +43,8 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     public DefaultPanelCompositionMigration(DefaultPanelCompositionQuery searchQuery,
                                             ElasticSearchRepository repository,
-                                            @Value("${migration.defaultPanelComposition.use-pre-fetched-case-list}")
                                             HmcHearingsApiService hmcHearingsApiService,
+                                            @Value("${migration.defaultPanelComposition.use-pre-fetched-case-list}")
                                             boolean usePreFetchedCaseList,
                                             @Value("${migration.defaultPanelComposition.encoded-data-string}")
                                             String encodedDataString) {
@@ -86,7 +86,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
             if (hearingInAwaitingListingListAssistState.isPresent()) {
                 log.info(getEventSummary() + " for Case: {} with hearing ID: {} and hmc status: {}",
-                         caseDetails.getId(),
+                         caseId,
                          hearingInAwaitingListingListAssistState.get().getHearingId(),
                          hearingInAwaitingListingListAssistState.get().getHmcStatus());
                 var caseData = convertToSscsCaseData(caseDetails.getData());
@@ -97,19 +97,19 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                     overrideFields.setDuration(snlFields.getDefaultListingValues().getDuration());
                     log.info(
                         "Setting override fields duration to {} for Case: {}",
-                        overrideFields.getDuration(), caseDetails.getId()
+                        overrideFields.getDuration(), caseId
                     );
                     caseDetails.getData().put("overrideFields", overrideFields);
                 }
 
-                log.info("Setting Amend Reasons to Admin Request for Case: {}", caseDetails.getId());
+                log.info("Setting Amend Reasons to Admin Request for Case: {}", caseId);
                 caseDetails.getData().put("amendReasons", List.of(AmendReason.ADMIN_REQUEST));
 
                 return new UpdateResult(getEventSummary(), getEventDescription());
             } else {
                 String failureMsg = String.format("Skipping Case (%s) for migration because hmc status is not "
                                                       + "Awaiting Listing, Update Requested or Update Submitted",
-                                                  caseDetails.getId());
+                                                  caseId);
                 log.error(failureMsg);
                 throw new RuntimeException(failureMsg);
             }
