@@ -33,7 +33,8 @@ class UpdateListingReqsMissingAmendReasonMigrationTest {
     @BeforeEach
     void setUp() {
         underTest =
-            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository, hmcHearingsApiService, ENCODED_STRING);
+            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository,
+                                                             hmcHearingsApiService, ENCODED_STRING);
     }
 
     @Test
