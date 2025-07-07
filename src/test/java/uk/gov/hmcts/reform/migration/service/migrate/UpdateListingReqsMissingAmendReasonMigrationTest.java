@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -24,13 +25,15 @@ class UpdateListingReqsMissingAmendReasonMigrationTest {
     private DefaultPanelCompositionQuery searchQuery;
     @Mock
     private ElasticSearchRepository repository;
+    @Mock
+    private HmcHearingsApiService hmcHearingsApiService;
 
     private UpdateListingReqsMissingAmendReasonMigration underTest;
 
     @BeforeEach
     void setUp() {
         underTest =
-            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository, ENCODED_STRING);
+            new UpdateListingReqsMissingAmendReasonMigration(searchQuery, repository, hmcHearingsApiService, ENCODED_STRING);
     }
 
     @Test

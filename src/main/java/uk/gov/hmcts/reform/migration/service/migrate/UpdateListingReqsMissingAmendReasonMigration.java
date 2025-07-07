@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 
@@ -20,10 +21,11 @@ public class UpdateListingReqsMissingAmendReasonMigration extends DefaultPanelCo
     public UpdateListingReqsMissingAmendReasonMigration(
         DefaultPanelCompositionQuery searchQuery,
         ElasticSearchRepository repository,
+        HmcHearingsApiService hmcHearingsApiService,
         @Value("${migration.updateListingReqsMissingAmendReason.encoded-data-string}")
         String encodedDataString
     ) {
-        super(searchQuery, repository, true, encodedDataString);
+        super(searchQuery, repository, hmcHearingsApiService,true,  encodedDataString);
     }
 
     @Override
