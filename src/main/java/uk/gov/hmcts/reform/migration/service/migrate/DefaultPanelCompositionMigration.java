@@ -13,16 +13,12 @@ import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 
@@ -80,27 +76,14 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                 .getCaseHearings()
                 .stream()
                 .findFirst()
-                .filter(hearing -> Objects.equals(hearing.getHmcStatus(), HmcStatus.AWAITING_LISTING)
-                    || Objects.equals(hearing.getHmcStatus(),HmcStatus.UPDATE_REQUESTED)
-                    || Objects.equals(hearing.getHmcStatus(),HmcStatus.UPDATE_SUBMITTED));
+                .filter(hearing -> List.of(HmcStatus.AWAITING_LISTING, HmcStatus.UPDATE_REQUESTED,
+                                           HmcStatus.UPDATE_SUBMITTED).contains(hearing.getHmcStatus()));
 
             if (hearingInAwaitingListingListAssistState.isPresent()) {
                 log.info(getEventSummary() + " for Case: {} with hearing ID: {} and hmc status: {}",
                          caseId,
                          hearingInAwaitingListingListAssistState.get().getHearingId(),
                          hearingInAwaitingListingListAssistState.get().getHmcStatus());
-                var caseData = convertToSscsCaseData(caseDetails.getData());
-                var snlFields = caseData.getSchedulingAndListingFields();
-                var overrideFields = nonNull(snlFields.getOverrideFields())
-                    ? snlFields.getOverrideFields() : OverrideFields.builder().build();
-                if (isNull(overrideFields.getDuration())) {
-                    overrideFields.setDuration(snlFields.getDefaultListingValues().getDuration());
-                    log.info(
-                        "Setting override fields duration to {} for Case: {}",
-                        overrideFields.getDuration(), caseId
-                    );
-                    caseDetails.getData().put("overrideFields", overrideFields);
-                }
 
                 log.info("Setting Amend Reasons to Admin Request for Case: {}", caseId);
                 caseDetails.getData().put("amendReasons", List.of(AmendReason.ADMIN_REQUEST));

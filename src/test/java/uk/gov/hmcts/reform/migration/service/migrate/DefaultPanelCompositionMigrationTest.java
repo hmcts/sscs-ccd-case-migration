@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -40,7 +39,6 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.HEARING;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
-import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetailsToSscsCaseDetails;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultPanelCompositionMigrationTest {
@@ -93,9 +91,6 @@ class DefaultPanelCompositionMigrationTest {
     @Test
     void shouldReturnMigratedCaseData() {
         var caseData = buildCaseData();
-        caseData.setSchedulingAndListingFields(
-            SchedulingAndListingFields.builder()
-                .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
 
@@ -106,29 +101,6 @@ class DefaultPanelCompositionMigrationTest {
         underTest.migrate(caseDetails);
 
         assertEquals(caseDetails.getData(), data);
-        assertEquals(60, convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
-            .getSchedulingAndListingFields().getOverrideFields().getDuration());
-    }
-
-    @Test
-    void shouldNotResetOverrideFieldDuration() {
-        var caseData = buildCaseData();
-        caseData.setSchedulingAndListingFields(
-            SchedulingAndListingFields.builder()
-                .defaultListingValues(OverrideFields.builder().duration(60).build())
-                .overrideFields(OverrideFields.builder().duration(90).build()).build());
-        var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
-
-        HearingsGetResponse response =
-            HearingsGetResponse.builder().caseHearings(List.of(caseHearing1, caseHearing2)).build();
-        when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
-
-        underTest.migrate(caseDetails);
-
-        assertEquals(caseDetails.getData(), data);
-        assertEquals(90, convertCaseDetailsToSscsCaseDetails(caseDetails).getData()
-            .getSchedulingAndListingFields().getOverrideFields().getDuration());
     }
 
     @ParameterizedTest
@@ -137,7 +109,6 @@ class DefaultPanelCompositionMigrationTest {
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
-                .defaultListingValues(OverrideFields.builder().duration(60).build())
                 .amendReasons(amendReasons)
                 .build());
         var data = buildCaseDataMap(caseData);
@@ -155,9 +126,6 @@ class DefaultPanelCompositionMigrationTest {
     @Test
     void shouldNotMigrateCaseIfNotReadyToList() {
         var caseData = buildCaseData();
-        caseData.setSchedulingAndListingFields(
-            SchedulingAndListingFields.builder()
-                .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().state(HEARING.toString()).data(data).build();
 
@@ -167,9 +135,6 @@ class DefaultPanelCompositionMigrationTest {
     @Test
     void shouldNotMigrateCaseifNotInAwaitingListingOrUpdateRequestedState() {
         var caseData = buildCaseData();
-        caseData.setSchedulingAndListingFields(
-            SchedulingAndListingFields.builder()
-                .defaultListingValues(OverrideFields.builder().duration(60).build()).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
 
