@@ -70,6 +70,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
 
             String caseId = caseDetails.getId().toString();
+            log.info(getEventSummary() + " for Case: {}", caseId);
 
             Optional<CaseHearing> hearingInAwaitingListingListAssistState =
                 hmcHearingsApiService.getHearingsRequest(caseId, null)
