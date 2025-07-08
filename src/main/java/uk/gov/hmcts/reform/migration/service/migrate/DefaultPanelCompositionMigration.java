@@ -76,9 +76,9 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                 hmcHearingsApiService.getHearingsRequest(caseId, null)
                 .getCaseHearings()
                 .stream()
-                .findFirst()
                 .filter(hearing -> List.of(HmcStatus.AWAITING_LISTING, HmcStatus.UPDATE_REQUESTED,
-                                           HmcStatus.UPDATE_SUBMITTED).contains(hearing.getHmcStatus()));
+                                           HmcStatus.UPDATE_SUBMITTED).contains(hearing.getHmcStatus()))
+                .findFirst();
 
             if (hearingInAwaitingListingListAssistState.isPresent()) {
                 log.info(getEventSummary() + " for Case: {} with hearing ID: {} and hmc status: {}",
