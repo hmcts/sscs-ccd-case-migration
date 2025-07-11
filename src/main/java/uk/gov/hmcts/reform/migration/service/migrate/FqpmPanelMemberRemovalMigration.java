@@ -22,7 +22,8 @@ public class FqpmPanelMemberRemovalMigration extends CaseMigrationProcessor {
     static final String EVENT_DESCRIPTION = "Cleared FQPM panel member";
     private final String encodedDataString;
 
-    public FqpmPanelMemberRemovalMigration(@Value("${migration.fqpmPanelMigration.encoded-data-string}") String encodedDataString) {
+    public FqpmPanelMemberRemovalMigration(
+        @Value("${migration.fqpmPanelMigration.encoded-data-string}") String encodedDataString) {
         this.encodedDataString = encodedDataString;
     }
 
@@ -44,8 +45,8 @@ public class FqpmPanelMemberRemovalMigration extends CaseMigrationProcessor {
                     log.info("Skipping case for clearFqpmPanelMember migration. Case id: {} Reason: fqpm is not"
                                  + " 'present on the case",
                              caseId);
-                    throw new RuntimeException("Skipping case for clearFqpmPanelMember migration. Reason: clearFqpmPanelMember is not"
-                                                   + " 'present on the case'");
+                    throw new RuntimeException("Skipping case for clearFqpmPanelMember migration. Reason: "
+                                                   + "clearFqpmPanelMember is not 'present on the case'");
 
                 } else {
                     panelMemberComposition.setPanelCompositionDisabilityAndFqMember(Collections.emptyList());
