@@ -1,0 +1,65 @@
+package uk.gov.hmcts.reform.migration.service.migrate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
+import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
+import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
+
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.PanelMemberComposition;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+
+class PanelMemberCompositionRemovalMigrationTest {
+    private PanelMemberCompositionRemovalMigration underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new PanelMemberCompositionRemovalMigration(ENCODED_STRING);
+    }
+
+    @Test
+    void shouldFetchCasesToMigrate() {
+        var migrationCase = SscsCaseDetails.builder().id(ENCODED_CASE_ID).jurisdiction("SSCS").build();
+        List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
+
+        assertThat(migrationCases).hasSize(1);
+        assertThat(migrationCases).contains(migrationCase);
+    }
+
+    @Test
+    void shouldMigrate() {
+        // PCM not null, FQPM or medical member is set
+        var caseData = buildCaseData();
+        caseData.setPanelMemberComposition(PanelMemberComposition.builder()
+                                               .panelCompositionDisabilityAndFqMember(List.of("50"))
+                                               .build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().data(data).id(1234L).build();
+
+        underTest.migrate(caseDetails);
+
+        assertThat(caseDetails.getData().get("panelMemberComposition")).isNull();
+    }
+
+    @Test
+    void shouldGetEventId() {
+        assertThat(underTest.getEventId()).isEqualTo(EVENT_ID);
+    }
+
+    @Test
+    void getEventDescription() {
+        assertThat(underTest.getEventDescription()).isEqualTo(EVENT_DESCRIPTION);
+    }
+
+    @Test
+    void getEventSummary() {
+        assertThat(underTest.getEventSummary()).isEqualTo(EVENT_SUMMARY);
+    }
+}
