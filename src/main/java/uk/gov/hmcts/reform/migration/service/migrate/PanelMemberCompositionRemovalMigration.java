@@ -1,9 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
-
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,6 +7,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
+
+import java.util.List;
+
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 
 @Service
 @Slf4j

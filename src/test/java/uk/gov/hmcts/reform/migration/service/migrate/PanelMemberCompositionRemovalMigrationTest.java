@@ -1,5 +1,13 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.PanelMemberComposition;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
@@ -8,13 +16,6 @@ import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositi
 import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
-
-import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.PanelMemberComposition;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 class PanelMemberCompositionRemovalMigrationTest {
     private PanelMemberCompositionRemovalMigration underTest;
