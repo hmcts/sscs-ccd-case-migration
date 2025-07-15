@@ -16,8 +16,8 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 @Service
 @Slf4j
 public class PanelMemberCompositionRemovalMigration extends CaseMigrationProcessor {
-    static final String EVENT_ID = "clearPanelMemberComposition";
-    static final String EVENT_SUMMARY = "Cleared panel member composition";
+    static final String EVENT_ID = "migrateCase";
+    static final String EVENT_SUMMARY = "Clear panel member composition";
     static final String EVENT_DESCRIPTION = "Cleared panel member composition";
     private final String encodedDataString;
 
@@ -36,9 +36,15 @@ public class PanelMemberCompositionRemovalMigration extends CaseMigrationProcess
         var data = caseDetails.getData();
         if (nonNull(data)) {
             String caseId = caseDetails.getId().toString();
-            if (data.containsKey("panelMemberComposition")) {
+            var caseData = convertToSscsCaseData(caseDetails.getData());
+            if (nonNull(caseData.getPanelMemberComposition()) && !caseData.getPanelMemberComposition().isEmpty()) {
                 log.info("Setting Panel Member Composition to null for case id {}", caseId);
                 data.put("panelMemberComposition", null);
+            } else {
+                log.info("Skipping case for clearPanelMemberComposition migration. Case id: {} "
+                             + "Reason: PMC is null or empty", caseId);
+                throw new RuntimeException("Skipping case for clearPanelMemberComposition migration. "
+                                               + "Reason: PMC is null or empty");
             }
         }
         return new UpdateCcdCaseService.UpdateResult(getEventSummary(), getEventDescription());

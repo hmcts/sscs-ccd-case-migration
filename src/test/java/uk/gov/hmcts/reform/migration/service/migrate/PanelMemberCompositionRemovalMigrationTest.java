@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
 import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_DESCRIPTION;
@@ -36,7 +37,6 @@ class PanelMemberCompositionRemovalMigrationTest {
 
     @Test
     void shouldMigrate() {
-        // PCM not null, FQPM or medical member is set
         var caseData = buildCaseData();
         caseData.setPanelMemberComposition(PanelMemberComposition.builder()
                                                .panelCompositionDisabilityAndFqMember(List.of("50"))
@@ -47,6 +47,16 @@ class PanelMemberCompositionRemovalMigrationTest {
         underTest.migrate(caseDetails);
 
         assertThat(caseDetails.getData().get("panelMemberComposition")).isNull();
+    }
+
+    @Test
+    void shouldThrowException() {
+        var caseData = buildCaseData();
+        caseData.setPanelMemberComposition(PanelMemberComposition.builder().build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().data(data).id(1234L).build();
+
+        assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
 
     @Test
