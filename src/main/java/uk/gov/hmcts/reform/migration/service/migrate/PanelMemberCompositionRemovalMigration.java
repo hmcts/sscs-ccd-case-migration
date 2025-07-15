@@ -42,9 +42,9 @@ public class PanelMemberCompositionRemovalMigration extends CaseMigrationProcess
                 data.put("panelMemberComposition", null);
             } else {
                 log.info("Skipping case for clearPanelMemberComposition migration. Case id: {} "
-                             + "Reason: PMC is null or empty", caseId);
+                             + "Reason: Panel member composition is null or empty", caseId);
                 throw new RuntimeException("Skipping case for clearPanelMemberComposition migration. "
-                                               + "Reason: PMC is null or empty");
+                                               + "Reason: Panel member composition is null or empty");
             }
         }
         return new UpdateCcdCaseService.UpdateResult(getEventSummary(), getEventDescription());
