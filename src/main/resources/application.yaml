@@ -69,7 +69,9 @@ migration:
   processingVenue:
     enabled: ${VENUE_MIGRATION_ENABLED:false}
     encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
-
+  adjournmentFlag:
+    enabled: ${ADJOURNMENT_FLAG_MIGRATION_ENABLED:false}
+    encoded-string: ${ADJOURNMENT_FLAG_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
   processing.limit: ${MIGRATION_CASE_LIMIT:500}
