@@ -40,17 +40,19 @@ public class AdjournmentFlagMigration extends CaseMigrationProcessor {
         if (nonNull(data)) {
             String caseId = caseDetails.getId().toString();
             var caseData = convertToSscsCaseData(caseDetails.getData());
-                if (nonNull(caseData) && nonNull(caseData.getAdjournment())) {
-                    if (nonNull(caseData.getAdjournment().getAdjournmentInProgress()) && YesNo.isYes(caseData.getAdjournment().getAdjournmentInProgress())) {
-                        log.info("Setting AdjournmentInProgress to No for case id {}", caseId);
-                        data.put("adjournmentInProgress", "No");
-                    } else {
-                        log.info("Skipping case for adjournmentInProgressMigration migration. Case id: {} "
-                                     + "Reason: AdjournmentInProgress is No or null", caseId);
-                        throw new RuntimeException("Skipping case for adjournmentInProgressMigration migration. "
-                                                       + "Reason: AdjournmentInProgress is No or null");
-                    }
+            if (nonNull(caseData) && nonNull(caseData.getAdjournment())) {
+                if (nonNull(caseData.getAdjournment().getAdjournmentInProgress())
+                    && YesNo.isYes(caseData.getAdjournment().getAdjournmentInProgress())) {
+                    log.info("Setting AdjournmentInProgress to No for case id {}", caseId);
+                    data.put("adjournmentInProgress", "No");
+                } else {
+                    log.info(
+                        "Skipping case for adjournmentInProgressMigration migration. Case id: {} "
+                            + "Reason: AdjournmentInProgress is No or null", caseId);
+                    throw new RuntimeException("Skipping case for adjournmentInProgressMigration migration. "
+                                                   + "Reason: AdjournmentInProgress is No or null");
                 }
+            }
         }
         return new UpdateCcdCaseService.UpdateResult(getEventSummary(), getEventDescription());
     }
