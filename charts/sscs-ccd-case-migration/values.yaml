@@ -38,6 +38,8 @@ job:
           alias: DEFAULT_PANEL_COMPOSITION_ENCODED_STRING
         - name: encoded-string-processing-venue
           alias: VENUE_MIGRATION_ENCODED_STRING
+        - name: encoded-string-pcm-migration
+          alias: PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED
 
   environment:
     IDAM_CLIENT_ID: sscs
