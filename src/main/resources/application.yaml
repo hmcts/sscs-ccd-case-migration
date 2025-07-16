@@ -71,7 +71,7 @@ migration:
     encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   panelMemberCompositionMigration:
     enabled: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED:false}
-    encoded-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+    encoded-data-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
