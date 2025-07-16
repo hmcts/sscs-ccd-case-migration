@@ -69,6 +69,9 @@ migration:
   processingVenue:
     enabled: ${VENUE_MIGRATION_ENABLED:false}
     encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  adjournmentFlag:
+    enabled: ${ADJOURNMENT_FLAG_MIGRATION_ENABLED:false}
+    encoded-data-string: ${ADJOURNMENT_FLAG_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   panelMemberCompositionMigration:
     enabled: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED:false}
     encoded-data-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
