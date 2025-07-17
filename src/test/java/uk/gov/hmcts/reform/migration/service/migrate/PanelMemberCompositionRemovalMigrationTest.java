@@ -12,9 +12,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
-import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.CLEAR_PMC_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.CLEAR_PMC_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.PanelMemberCompositionRemovalMigration.CLEAR_PMC_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
@@ -61,16 +61,16 @@ class PanelMemberCompositionRemovalMigrationTest {
 
     @Test
     void shouldGetEventId() {
-        assertThat(underTest.getEventId()).isEqualTo(EVENT_ID);
+        assertThat(underTest.getEventId()).isEqualTo(CLEAR_PMC_ID);
     }
 
     @Test
     void getEventDescription() {
-        assertThat(underTest.getEventDescription()).isEqualTo(EVENT_DESCRIPTION);
+        assertThat(underTest.getEventDescription()).isEqualTo(CLEAR_PMC_DESCRIPTION);
     }
 
     @Test
     void getEventSummary() {
-        assertThat(underTest.getEventSummary()).isEqualTo(EVENT_SUMMARY);
+        assertThat(underTest.getEventSummary()).isEqualTo(CLEAR_PMC_SUMMARY);
     }
 }

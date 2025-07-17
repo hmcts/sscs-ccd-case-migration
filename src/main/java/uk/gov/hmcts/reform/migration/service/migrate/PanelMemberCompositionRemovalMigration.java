@@ -16,19 +16,19 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 @Service
 @Slf4j
 public class PanelMemberCompositionRemovalMigration extends CaseMigrationProcessor {
-    static final String EVENT_ID = "migrateCase";
-    static final String EVENT_SUMMARY = "Clear panel member composition";
-    static final String EVENT_DESCRIPTION = "Cleared panel member composition";
-    private final String encodedDataString;
+    static final String CLEAR_PMC_ID = "migrateCase";
+    static final String CLEAR_PMC_SUMMARY = "Clear panel member composition";
+    static final String CLEAR_PMC_DESCRIPTION = "Cleared panel member composition";
+    private final String clearPcmEncodedDataString;
 
     public PanelMemberCompositionRemovalMigration(
-        @Value("${migration.panelMemberCompositionMigration.encoded-data-string}") String encodedDataString) {
-        this.encodedDataString = encodedDataString;
+        @Value("${migration.panelMemberCompositionMigration.encoded-data-string}") String clearPcmEncodedDataString) {
+        this.clearPcmEncodedDataString = clearPcmEncodedDataString;
     }
 
     @Override
     public List<SscsCaseDetails> fetchCasesToMigrate() {
-        return findCases(encodedDataString);
+        return findCases(clearPcmEncodedDataString);
     }
 
     @Override
@@ -50,17 +50,18 @@ public class PanelMemberCompositionRemovalMigration extends CaseMigrationProcess
         return new UpdateCcdCaseService.UpdateResult(getEventSummary(), getEventDescription());
     }
 
+    @Override
     public String getEventId() {
-        return EVENT_ID;
+        return CLEAR_PMC_ID;
     }
 
     @Override
     public String getEventDescription() {
-        return EVENT_DESCRIPTION;
+        return CLEAR_PMC_DESCRIPTION;
     }
 
     @Override
     public String getEventSummary() {
-        return EVENT_SUMMARY;
+        return CLEAR_PMC_SUMMARY;
     }
 }
