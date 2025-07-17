@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
@@ -15,6 +16,7 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 
 @Service
 @Slf4j
+@ConditionalOnProperty(value = "migration.panelMemberCompositionMigration.enabled", havingValue = "true")
 public class PanelMemberCompositionRemovalMigration extends CaseMigrationProcessor {
     static final String CLEAR_PMC_ID = "migrateCase";
     static final String CLEAR_PMC_SUMMARY = "Clear panel member composition";
