@@ -72,6 +72,10 @@ migration:
   adjournmentFlag:
     enabled: ${ADJOURNMENT_FLAG_MIGRATION_ENABLED:false}
     encoded-data-string: ${ADJOURNMENT_FLAG_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  panelMemberCompositionMigration:
+    enabled: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED:false}
+    encoded-data-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
   processing.limit: ${MIGRATION_CASE_LIMIT:500}
