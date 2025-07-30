@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
@@ -20,7 +21,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 
 @Service
@@ -63,7 +67,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                     var hearingRoute = caseDetails.getData().getSchedulingAndListingFields().getHearingRoute();
                     var panelComposition = caseDetails.getData().getPanelMemberComposition();
                     return READY_TO_LIST.toString().equals(caseDetails.getState())
-                        && HearingRoute.LIST_ASSIST.equals(hearingRoute)
+                        && LIST_ASSIST.equals(hearingRoute)
                         && (isNull(panelComposition) || panelComposition.isEmpty());
                 }).toList();
         }
@@ -72,8 +76,26 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
         if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
-
             String caseId = caseDetails.getId().toString();
+            var data = caseDetails.getData();
+            if (nonNull(data)) {
+                var caseData = convertToSscsCaseData(caseDetails.getData());
+                if (nonNull(caseData.getPanelMemberComposition()) && !caseData.getPanelMemberComposition().isEmpty()) {
+                    String failureMsg = String.format("Skipping Case (%s) for migration because panelMemberComposition is not null",
+                                                      caseDetails.getId());
+                    log.error(failureMsg);
+                    throw new RuntimeException(failureMsg);
+
+                }
+                HearingRoute hearingRoute = ofNullable(caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
+                if (!LIST_ASSIST.equals(hearingRoute)) {
+                    String failureMsg = String.format("Skipping Case (%s) for migration because hearingRoute is not list assist",
+                                                      caseDetails.getId());
+                    log.error(failureMsg);
+                    throw new RuntimeException(failureMsg);
+
+                }
+            }
             log.info(getEventSummary() + " for Case: {}", caseId);
 
             Optional<CaseHearing> hearingInAwaitingListingListAssistState =

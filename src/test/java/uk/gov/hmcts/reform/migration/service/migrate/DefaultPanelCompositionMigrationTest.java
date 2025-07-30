@@ -97,6 +97,7 @@ class DefaultPanelCompositionMigrationTest {
     @Test
     void shouldReturnMigratedCaseData() {
         var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(HearingRoute.LIST_ASSIST).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
 
@@ -116,6 +117,7 @@ class DefaultPanelCompositionMigrationTest {
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
                 .amendReasons(amendReasons)
+                .hearingRoute(HearingRoute.LIST_ASSIST)
                 .build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
@@ -139,8 +141,32 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @Test
+    void shouldNotMigrateCaseIfNotListAssist() {
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(HearingRoute.GAPS).build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().id(1L).state(READY_TO_LIST.toString()).data(data).build();
+
+        Exception exception = assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+        assertThat(exception.getMessage()).containsAnyOf("hearingRoute is not list assist");
+    }
+
+    @Test
+    void shouldNotMigrateCaseIfPanelMemberCompositionIsNotNull() {
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(HearingRoute.LIST_ASSIST).build());
+        caseData.setPanelMemberComposition(PanelMemberComposition.builder().panelCompositionJudge("84").build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().id(1L).state(READY_TO_LIST.toString()).data(data).build();
+
+        Exception exception = assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+        assertThat(exception.getMessage()).containsAnyOf("panelMemberComposition is not null");
+    }
+
+    @Test
     void shouldNotMigrateCaseifNotInAwaitingListingOrUpdateRequestedState() {
         var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(HearingRoute.LIST_ASSIST).build());
         var data = buildCaseDataMap(caseData);
         var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
 
