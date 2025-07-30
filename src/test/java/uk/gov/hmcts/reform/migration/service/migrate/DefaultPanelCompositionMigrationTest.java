@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.migration.query.DefaultPanelCompositionQuery;
 import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
+import uk.gov.hmcts.reform.sscs.ccd.domain.PanelMemberComposition;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -68,13 +69,18 @@ class DefaultPanelCompositionMigrationTest {
         var caseB = buildCaseWith("readyToList", HearingRoute.GAPS);
         var caseC = buildCaseWith("draft", HearingRoute.LIST_ASSIST);
         var caseD = buildCaseWith("validAppeal", HearingRoute.LIST_ASSIST);
-        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD);
+        var caseE = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
+        caseE.getData().setPanelMemberComposition(new PanelMemberComposition());
+        var caseF = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
+        caseF.getData().setPanelMemberComposition(new PanelMemberComposition(List.of("84")));
+
+        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD, caseE, caseF);
         when(repository.findCases(searchQuery, true)).thenReturn(caseList);
 
         List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
 
-        assertThat(migrationCases).hasSize(1);
-        assertThat(migrationCases).contains(caseA);
+        assertThat(migrationCases).hasSize(2);
+        assertThat(migrationCases).containsOnly(caseA, caseE);
     }
 
     @Test

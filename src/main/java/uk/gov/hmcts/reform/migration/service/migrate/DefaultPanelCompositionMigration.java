@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 
@@ -58,10 +59,13 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         } else {
             return repository.findCases(searchQuery, true)
                 .stream()
-                .filter(caseDetails -> READY_TO_LIST.toString().equals(caseDetails.getState())
-                    && caseDetails.getData().getSchedulingAndListingFields().getHearingRoute()
-                    .equals(HearingRoute.LIST_ASSIST))
-                .toList();
+                .filter(caseDetails -> {
+                    var hearingRoute = caseDetails.getData().getSchedulingAndListingFields().getHearingRoute();
+                    var panelComposition = caseDetails.getData().getPanelMemberComposition();
+                    return READY_TO_LIST.toString().equals(caseDetails.getState())
+                        && HearingRoute.LIST_ASSIST.equals(hearingRoute)
+                        && (isNull(panelComposition) || panelComposition.isEmpty());
+                }).toList();
         }
     }
 
