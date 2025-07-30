@@ -17,9 +17,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -32,19 +32,34 @@ public class HearingOutcomeService {
     }
 
     public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data) {
-        log.info("Creating hearing outcome with hearingID {}", hmcHearing.getHearingId().toString());
+        log.info("Creating hearing outcome with hearingID {} using case outcome", hmcHearing.getHearingId());
+        return createHearingOutcome(hmcHearing, data, "caseOutcome");
+    }
 
-        var hearingDaySchedule = isNull(hmcHearing.getHearingDaySchedule())
-            ? HearingDaySchedule.builder().build()
-            : hmcHearing.getHearingDaySchedule().stream().findFirst().orElse(HearingDaySchedule.builder().build());
+    public List<HearingOutcome> mapHmcHearingToHearingOutcomeUsingOutcome(CaseHearing hmcHearing, Map<String, Object> data) {
+        log.info("Creating hearing outcome with hearingID {} using outcome", hmcHearing.getHearingId());
+        return createHearingOutcome(hmcHearing, data, "outcome");
+    }
 
-        var hearingChannel = isNull(hmcHearing.getHearingChannels()) ? null : hmcHearing.getHearingChannels()
-            .stream().findFirst()
+    private List<HearingOutcome> createHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data, String outcomeKey) {
+
+        var hearingDaySchedule = Optional.ofNullable(hmcHearing.getHearingDaySchedule())
+            .flatMap(schedules -> schedules.stream().findFirst())
+            .orElseGet(() -> HearingDaySchedule.builder().build());
+
+        var hearingChannel = Optional.ofNullable(hmcHearing.getHearingChannels())
+            .flatMap(channels -> channels.stream().findFirst())
             .orElse(null);
 
-        var caseOutcome = nonNull(data.get("caseOutcome")) ? data.get("caseOutcome").toString() : null;
-        var didPoAttend =
-            nonNull(data.get("didPoAttend")) ? YesNo.valueOf(data.get("didPoAttend").toString().toUpperCase()) : null;
+        var caseOutcome = Optional.ofNullable(data.get(outcomeKey))
+            .map(Object::toString)
+            .orElse(null);
+
+        var didPoAttend = Optional.ofNullable(data.get("didPoAttend"))
+            .map(Object::toString)
+            .map(String::toUpperCase)
+            .map(YesNo::valueOf)
+            .orElse(null);
 
         HearingOutcomeDetails hearingOutcomeDetails = HearingOutcomeDetails.builder()
             .completedHearingId(hmcHearing.getHearingId().toString())
