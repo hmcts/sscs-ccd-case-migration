@@ -76,27 +76,26 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     public UpdateResult migrate(CaseDetails caseDetails) {
         if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
             String caseId = caseDetails.getId().toString();
-            var data = caseDetails.getData();
-            if (nonNull(data)) {
-                var caseData = convertToSscsCaseData(caseDetails.getData());
-                if (nonNull(caseData.getPanelMemberComposition()) && !caseData.getPanelMemberComposition().isEmpty()) {
-                    String failureMsg = String.format(
-                        "Skipping Case (%s) for migration because panelMemberComposition is not null",
-                        caseDetails.getId());
-                    log.error(failureMsg);
-                    throw new RuntimeException(failureMsg);
-                }
+            var caseData = convertToSscsCaseData(caseDetails.getData());
+            if (nonNull(caseData.getPanelMemberComposition()) && !caseData.getPanelMemberComposition().isEmpty()) {
+                String failureMsg = String.format(
+                    "Skipping Case (%s) for migration because panelMemberComposition is not null",
+                    caseDetails.getId()
+                );
+                log.error(failureMsg);
+                throw new RuntimeException(failureMsg);
+            }
 
-                HearingRoute hearingRoute = ofNullable(
-                    caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
-                if (!LIST_ASSIST.equals(hearingRoute)) {
-                    String failureMsg = String.format(
-                        "Skipping Case (%s) for migration because hearingRoute is not list assist",
-                        caseDetails.getId());
-                    log.error(failureMsg);
-                    throw new RuntimeException(failureMsg);
+            HearingRoute hearingRoute = ofNullable(
+                caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
+            if (!LIST_ASSIST.equals(hearingRoute)) {
+                String failureMsg = String.format(
+                    "Skipping Case (%s) for migration because hearingRoute is not list assist",
+                    caseDetails.getId()
+                );
+                log.error(failureMsg);
+                throw new RuntimeException(failureMsg);
 
-                }
             }
             log.info(getEventSummary() + " for Case: {}", caseId);
 
