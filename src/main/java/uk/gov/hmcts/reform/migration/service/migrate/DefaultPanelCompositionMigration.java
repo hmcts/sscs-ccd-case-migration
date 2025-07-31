@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
@@ -77,15 +76,6 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
             String caseId = caseDetails.getId().toString();
             var caseData = convertToSscsCaseData(caseDetails.getData());
-            if (nonNull(caseData.getPanelMemberComposition()) && !caseData.getPanelMemberComposition().isEmpty()) {
-                String failureMsg = String.format(
-                    "Skipping Case (%s) for migration because panelMemberComposition is not null",
-                    caseDetails.getId()
-                );
-                log.error(failureMsg);
-                throw new RuntimeException(failureMsg);
-            }
-
             HearingRoute hearingRoute = ofNullable(
                 caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
             if (!LIST_ASSIST.equals(hearingRoute)) {
