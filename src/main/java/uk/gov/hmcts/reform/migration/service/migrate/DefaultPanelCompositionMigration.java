@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.migration.repository.ElasticSearchRepository;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.AmendReason;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
@@ -81,16 +80,19 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
             if (nonNull(data)) {
                 var caseData = convertToSscsCaseData(caseDetails.getData());
                 if (nonNull(caseData.getPanelMemberComposition()) && !caseData.getPanelMemberComposition().isEmpty()) {
-                    String failureMsg = String.format("Skipping Case (%s) for migration because panelMemberComposition is not null",
-                                                      caseDetails.getId());
+                    String failureMsg = String.format(
+                        "Skipping Case (%s) for migration because panelMemberComposition is not null",
+                        caseDetails.getId());
                     log.error(failureMsg);
                     throw new RuntimeException(failureMsg);
-
                 }
-                HearingRoute hearingRoute = ofNullable(caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
+
+                HearingRoute hearingRoute = ofNullable(
+                    caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
                 if (!LIST_ASSIST.equals(hearingRoute)) {
-                    String failureMsg = String.format("Skipping Case (%s) for migration because hearingRoute is not list assist",
-                                                      caseDetails.getId());
+                    String failureMsg = String.format(
+                        "Skipping Case (%s) for migration because hearingRoute is not list assist",
+                        caseDetails.getId());
                     log.error(failureMsg);
                     throw new RuntimeException(failureMsg);
 
