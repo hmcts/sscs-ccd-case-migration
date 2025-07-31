@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.migration.hmc;
 
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.retry.annotation.Retryable;
@@ -11,6 +9,8 @@ import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
 import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.sscs.idam.IdamService;
 import uk.gov.hmcts.reform.sscs.idam.IdamTokens;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor

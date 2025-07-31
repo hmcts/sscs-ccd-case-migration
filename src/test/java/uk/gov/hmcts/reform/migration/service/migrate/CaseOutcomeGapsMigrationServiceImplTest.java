@@ -87,13 +87,13 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration. Hearing Route is not gaps");
+            .hasMessageContaining("Skipping case for Case outcome migration. Hearing Route is not gaps");
     }
 
     @Test
     void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() {
         assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration, "
+            .hasMessageContaining("Skipping case for Case outcome migration, "
                                       + "Hearing outcome already exists or Case outcome is empty");
     }
 }

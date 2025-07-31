@@ -60,10 +60,10 @@ public class HearingOutcomeServiceTest {
                 .build()
         ).build();
 
-        var hearingOutcomes =
-            hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, buildCaseDataMap(caseData));
+        var hearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(
+            hmcHearing, buildCaseDataMap(caseData), "caseOutcome");
 
-        assertEquals(expectedHearingOutcome, hearingOutcomes.get(0));
+        assertEquals(expectedHearingOutcome, hearingOutcomes.getFirst());
     }
 
     @Test
@@ -101,9 +101,9 @@ public class HearingOutcomeServiceTest {
                 .build()
         ).build();
 
-        var hearingOutcomes =
-            hearingOutcomeService.mapHmcHearingToHearingOutcome(hmcHearing, buildCaseDataMap(caseData));
+        var hearingOutcomes = hearingOutcomeService.mapHmcHearingToHearingOutcome(
+            hmcHearing, buildCaseDataMap(caseData), "caseOutcome");
 
-        assertEquals(expectedHearingOutcome, hearingOutcomes.get(0));
+        assertEquals(expectedHearingOutcome, hearingOutcomes.getFirst());
     }
 }

@@ -25,6 +25,7 @@ public class CompletedHearingsOutcomesMigration extends CaseOutcomeMigration {
         this.hmcHearingsApiService = hmcHearingsApiService;
     }
 
+    @Override
     List<CaseHearing> getHearingsFromHmc(String caseId) {
         return hmcHearingsApiService.getCompletedHearings(caseId);
     }

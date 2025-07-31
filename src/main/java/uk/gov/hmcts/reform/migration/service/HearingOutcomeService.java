@@ -31,18 +31,9 @@ public class HearingOutcomeService {
         this.venueService = venueService;
     }
 
-    public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data) {
-        log.info("Creating hearing outcome with hearingID {} using case outcome", hmcHearing.getHearingId());
-        return createHearingOutcome(hmcHearing, data, "caseOutcome");
-    }
-
-    public List<HearingOutcome> mapHmcHearingToHearingOutcomeUsingOutcome(CaseHearing hmcHearing, Map<String, Object> data) {
-        log.info("Creating hearing outcome with hearingID {} using outcome", hmcHearing.getHearingId());
-        return createHearingOutcome(hmcHearing, data, "outcome");
-    }
-
-    private List<HearingOutcome> createHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data, String outcomeKey) {
-
+    public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data,
+                                                              String outcomeKey) {
+        log.info("Creating hearing outcome with hearingID {} using {}", hmcHearing.getHearingId(), outcomeKey);
         var hearingDaySchedule = Optional.ofNullable(hmcHearing.getHearingDaySchedule())
             .flatMap(schedules -> schedules.stream().findFirst())
             .orElseGet(() -> HearingDaySchedule.builder().build());
@@ -53,6 +44,7 @@ public class HearingOutcomeService {
 
         var caseOutcome = Optional.ofNullable(data.get(outcomeKey))
             .map(Object::toString)
+            .map(value -> outcomeKey.equals("outcome") ? mapOutcomeToCaseOutcome(value) : value)
             .orElse(null);
 
         var didPoAttend = Optional.ofNullable(data.get("didPoAttend"))
@@ -105,5 +97,19 @@ public class HearingOutcomeService {
         }
         ZonedDateTime utcZone = utcLocalDateTime.atZone(ZoneId.of("UTC"));
         return utcZone.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
+    }
+
+    private String mapOutcomeToCaseOutcome(String outcome) {
+        log.info("Mapping outcome {} to case outcome", outcome);
+        return switch (outcome) {
+            case "referenceRevisedFavourAppellant" -> "21";
+            case "referenceRevisedAgainstAppellant" -> "22";
+            case "decisionUpheld" -> "9";
+            case "decisionRevisedAgainstAppellant" -> "8";
+            case "decisionReserved" -> "63";
+            case "decisionInFavourOfAppellant" -> "10";
+            case "disablementIncreasedNoBenefitAwarded" -> "39";
+            default -> throw new IllegalStateException("No match found for outcome value: " + outcome);
+        };
     }
 }
