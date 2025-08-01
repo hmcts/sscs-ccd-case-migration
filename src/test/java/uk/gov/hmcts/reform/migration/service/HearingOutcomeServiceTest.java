@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.sscs.service.VenueService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -123,7 +124,7 @@ public class HearingOutcomeServiceTest {
         "disablementIncreasedNoBenefitAwarded, 39"
     })
     @DisplayName("Should create a Hearing Outcome and map the correct Outcome value to Case Outcome value")
-    void shouldReturnNewHearingOutcomeWithCorrectOutcomeMApping(String outcome, String caseOutcome) {
+    void shouldReturnNewHearingOutcomeWithCorrectOutcomeMapping(String outcome, String caseOutcome) {
         when(venueService.getVenueDetailsForActiveVenueByEpimsId(eq("epimsId")))
             .thenReturn(VenueDetails.builder()
                             .venAddressLine1("Windsor Castle")
@@ -159,5 +160,24 @@ public class HearingOutcomeServiceTest {
             hmcHearing, buildCaseDataMap(caseData), "outcome");
 
         assertEquals(expectedHearingOutcome, hearingOutcomes.getFirst());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when Outcome value cannot be mapped to Case outcome")
+    void shouldThrowWhenOutcomeNotMapped() {
+        var hmcHearing = CaseHearing.builder()
+            .hearingChannels(List.of(HearingChannel.FACE_TO_FACE))
+            .hearingDaySchedule(
+                List.of(HearingDaySchedule.builder()
+                            .hearingStartDateTime(LocalDateTime.parse("2024-06-30T10:00:00"))
+                            .hearingEndDateTime(LocalDateTime.parse("2024-06-30T11:00:00"))
+                            .hearingVenueEpimsId("epimsId").build()))
+            .hearingId(123456789L).build();
+        var caseData = SscsCaseData.builder()
+            .outcome("outcome")
+            .build();
+        assertThatThrownBy(() -> hearingOutcomeService.mapHmcHearingToHearingOutcome(
+            hmcHearing, buildCaseDataMap(caseData), "outcome"))
+            .hasMessageContaining("No match found for outcome value");
     }
 }
