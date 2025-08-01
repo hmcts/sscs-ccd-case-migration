@@ -109,6 +109,9 @@ public class HearingOutcomeService {
             case "decisionReserved" -> "63";
             case "decisionInFavourOfAppellant" -> "10";
             case "disablementIncreasedNoBenefitAwarded" -> "39";
+            // case "struckOut" -> "";
+            // case "nonCompliantAppealStruckout" -> "";
+            // case "reinstated" -> "";
             default -> throw new IllegalStateException("No match found for outcome value: " + outcome);
         };
     }
