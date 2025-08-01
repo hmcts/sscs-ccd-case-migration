@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
@@ -52,5 +54,10 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
     @Override
     public String getEventSummary() {
         return REMOVE_GAPS_OUTCOME_TAB_SUMMARY;
+    }
+
+    @Override
+    List<CaseHearing> getHearingsFromHmc(String caseId) {
+        return List.of();
     }
 }

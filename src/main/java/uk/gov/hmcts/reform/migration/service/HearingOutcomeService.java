@@ -17,9 +17,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -31,20 +31,27 @@ public class HearingOutcomeService {
         this.venueService = venueService;
     }
 
-    public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data) {
-        log.info("Creating hearing outcome with hearingID {}", hmcHearing.getHearingId().toString());
+    public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data,
+                                                              String outcomeKey) {
+        log.info("Creating hearing outcome with hearingID {} using {}", hmcHearing.getHearingId(), outcomeKey);
+        var hearingDaySchedule = Optional.ofNullable(hmcHearing.getHearingDaySchedule())
+            .flatMap(schedules -> schedules.stream().findFirst())
+            .orElseGet(() -> HearingDaySchedule.builder().build());
 
-        var hearingDaySchedule = isNull(hmcHearing.getHearingDaySchedule())
-            ? HearingDaySchedule.builder().build()
-            : hmcHearing.getHearingDaySchedule().stream().findFirst().orElse(HearingDaySchedule.builder().build());
-
-        var hearingChannel = isNull(hmcHearing.getHearingChannels()) ? null : hmcHearing.getHearingChannels()
-            .stream().findFirst()
+        var hearingChannel = Optional.ofNullable(hmcHearing.getHearingChannels())
+            .flatMap(channels -> channels.stream().findFirst())
             .orElse(null);
 
-        var caseOutcome = nonNull(data.get("caseOutcome")) ? data.get("caseOutcome").toString() : null;
-        var didPoAttend =
-            nonNull(data.get("didPoAttend")) ? YesNo.valueOf(data.get("didPoAttend").toString().toUpperCase()) : null;
+        var caseOutcome = Optional.ofNullable(data.get(outcomeKey))
+            .map(Object::toString)
+            .map(value -> outcomeKey.equals("outcome") ? mapOutcomeToCaseOutcome(value) : value)
+            .orElse(null);
+
+        var didPoAttend = Optional.ofNullable(data.get("didPoAttend"))
+            .map(Object::toString)
+            .map(String::toUpperCase)
+            .map(YesNo::valueOf)
+            .orElse(null);
 
         HearingOutcomeDetails hearingOutcomeDetails = HearingOutcomeDetails.builder()
             .completedHearingId(hmcHearing.getHearingId().toString())
@@ -90,5 +97,22 @@ public class HearingOutcomeService {
         }
         ZonedDateTime utcZone = utcLocalDateTime.atZone(ZoneId.of("UTC"));
         return utcZone.withZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime();
+    }
+
+    private String mapOutcomeToCaseOutcome(String outcome) {
+        log.info("Mapping outcome {} to case outcome", outcome);
+        return switch (outcome) {
+            case "referenceRevisedFavourAppellant" -> "21";
+            case "referenceRevisedAgainstAppellant" -> "22";
+            case "decisionUpheld" -> "9";
+            case "decisionRevisedAgainstAppellant" -> "8";
+            case "decisionReserved" -> "63";
+            case "decisionInFavourOfAppellant" -> "10";
+            case "disablementIncreasedNoBenefitAwarded" -> "39";
+            // case "struckOut" -> "";
+            // case "nonCompliantAppealStruckout" -> "";
+            // case "reinstated" -> "";
+            default -> throw new IllegalStateException("No match found for outcome value: " + outcome);
+        };
     }
 }

@@ -128,7 +128,7 @@ public class NonListedHearingsOutcomesMigrationTest {
             .pipSscsCaseData(SscsPipCaseData.builder().build())
             .finalDecisionCaseData(SscsFinalDecisionCaseData.builder().build())
             .build());
-        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(data)))
+        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(data), eq("caseOutcome")))
             .thenReturn(List.of(hearingOutcome));
         caseDetails.setData(data);
 
@@ -195,6 +195,6 @@ public class NonListedHearingsOutcomesMigrationTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration, Zero or More than one hearing found");
+            .hasMessageContaining("Skipping case for Case outcome migration, Zero or More than one hearing found");
     }
 }

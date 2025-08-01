@@ -150,7 +150,7 @@ public class MultipleHearingsOutcomeMigrationTest {
         Map<String, Object> data = objectMapper.convertValue(caseData, Map.class);
 
         when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
-        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(any(), any()))
+        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(any(), any(), any()))
             .thenReturn(List.of(mappedHearingOutcome));
 
         multipleHearingsOutcomeMigration.setHearingOutcome(data, reference);
