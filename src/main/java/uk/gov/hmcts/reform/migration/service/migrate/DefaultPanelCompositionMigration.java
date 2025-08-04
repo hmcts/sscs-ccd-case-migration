@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
@@ -31,8 +32,9 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
 public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     static final String UPDATE_LISTING_REQUIREMENTS_ID = "updateListingRequirements";
-    static final String UPDATE_LISTING_REQUIREMENTS_SUMMARY = "Migration: Set default Panel Composition";
-    static final String UPDATE_LISTING_REQUIREMENTS_DESCRIPTION = "Migration: Set default Panel Composition";
+    static final String UPDATE_LISTING_REQUIREMENTS_SUMMARY = "Automated update to listing requirements";
+    static final String UPDATE_LISTING_REQUIREMENTS_DESCRIPTION = "Panel Member Composition updated and sent "
+        + "to ListAssist";
 
     private final DefaultPanelCompositionQuery searchQuery;
     private final ElasticSearchRepository repository;
@@ -71,9 +73,18 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                 .filter(caseDetails -> {
                     var hearingRoute = caseDetails.getData().getSchedulingAndListingFields().getHearingRoute();
                     var panelComposition = caseDetails.getData().getPanelMemberComposition();
-                    return READY_TO_LIST.toString().equals(caseDetails.getState())
+                    boolean caseValid = READY_TO_LIST.toString().equals(caseDetails.getState())
                         && LIST_ASSIST.equals(hearingRoute)
                         && (isNull(panelComposition) || panelComposition.isEmpty());
+                    if (!caseValid) {
+                        String errorMessage = !READY_TO_LIST.toString().equals(caseDetails.getState())
+                            ? "due to incorrect state"
+                            : !LIST_ASSIST.equals(hearingRoute) ? "due to incorrect hearing route"
+                            : "due to invalid PanelMemberComposition";
+                        log.error("Skipping Case {} for migration {} State: {} PanelMemberComposition: {}",
+                                  caseDetails.getId(), errorMessage, caseDetails.getState(), panelComposition);
+                    }
+                    return caseValid;
                 }).toList();
         }
     }
@@ -95,9 +106,10 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
             }
             log.info(getEventSummary() + " for Case: {}", caseId);
 
-            Optional<CaseHearing> hearingInAwaitingListingListAssistState =
+            List<CaseHearing> hearingsList =
                 hmcHearingsApiService.getHearingsRequest(caseId, null)
-                .getCaseHearings()
+                .getCaseHearings();
+            Optional<CaseHearing> hearingInAwaitingListingListAssistState = hearingsList
                 .stream()
                 .filter(hearing -> List.of(HmcStatus.AWAITING_LISTING, HmcStatus.UPDATE_REQUESTED,
                                            HmcStatus.UPDATE_SUBMITTED).contains(hearing.getHmcStatus()))
@@ -114,9 +126,13 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
                 return new UpdateResult(getEventSummary(), getEventDescription());
             } else {
-                String failureMsg = String.format("Skipping Case (%s) for migration because hmc status is not "
-                                                      + "Awaiting Listing, Update Requested or Update Submitted",
-                                                  caseId);
+                String statuses = hearingsList.stream()
+                    .map(CaseHearing::getHmcStatus)
+                    .map(HmcStatus::getLabel)
+                    .collect(Collectors.joining(", "));
+                String failureMsg = String.format(
+                    "Skipping Case (%s) for migration because hmc status is not Awaiting Listing, Update Requested "
+                       + "or Update Submitted. HMC Status: (%s)", caseId, statuses);
                 log.error(failureMsg);
                 throw new RuntimeException(failureMsg);
             }
