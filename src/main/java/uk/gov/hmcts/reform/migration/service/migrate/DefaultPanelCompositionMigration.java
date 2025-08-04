@@ -124,9 +124,9 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                     .map(CaseHearing::getHmcStatus)
                     .map(HmcStatus::getLabel)
                     .collect(Collectors.joining(", "));
-                String failureMsg = String.format("Skipping Case (%s) for migration because hmc status is not "
-                                                      + "Awaiting Listing, Update Requested or Update Submitted. HMC Status: (%s)",
-                                                  caseId, statuses);
+                String failureMsg = String.format(
+                    "Skipping Case (%s) for migration because hmc status is not Awaiting Listing, Update Requested "
+                       + "or Update Submitted. HMC Status: (%s)", caseId, statuses);
                 log.error(failureMsg);
                 throw new RuntimeException(failureMsg);
             }
