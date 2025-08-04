@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
@@ -100,10 +99,9 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
             }
             log.info(getEventSummary() + " for Case: {}", caseId);
 
-            List<CaseHearing> hearingsList =
+            Optional<CaseHearing> hearingInAwaitingListingListAssistState =
                 hmcHearingsApiService.getHearingsRequest(caseId, null)
-                .getCaseHearings();
-            Optional<CaseHearing> hearingInAwaitingListingListAssistState = hearingsList
+                .getCaseHearings()
                 .stream()
                 .filter(hearing -> List.of(HmcStatus.AWAITING_LISTING, HmcStatus.UPDATE_REQUESTED,
                                            HmcStatus.UPDATE_SUBMITTED).contains(hearing.getHmcStatus()))
@@ -120,13 +118,9 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
                 return new UpdateResult(getEventSummary(), getEventDescription());
             } else {
-                String statuses = hearingsList.stream()
-                    .map(CaseHearing::getHmcStatus)
-                    .map(HmcStatus::getLabel)
-                    .collect(Collectors.joining(", "));
-                String failureMsg = String.format(
-                    "Skipping Case (%s) for migration because hmc status is not Awaiting Listing, Update Requested "
-                       + "or Update Submitted. HMC Status: (%s)", caseId, statuses);
+                String failureMsg = String.format("Skipping Case (%s) for migration because hmc status is not "
+                                                      + "Awaiting Listing, Update Requested or Update Submitted",
+                                                  caseId);
                 log.error(failureMsg);
                 throw new RuntimeException(failureMsg);
             }
