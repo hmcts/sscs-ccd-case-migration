@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute.LIST_ASSIST;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.READY_TO_LIST;
@@ -50,7 +49,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                                             boolean usePreFetchedCaseList,
                                             @Value("${migration.defaultPanelComposition.encoded-data-string}")
                                             String encodedDataString,
-                                            @Value("${migration.defaultPanelComposition.encoded-data-string}")
+                                            @Value("${migration.defaultPanelComposition.exclusion-list-encoded-string}")
                                             String exclusionListEncodedString) {
         this.searchQuery = searchQuery;
         this.repository = repository;
