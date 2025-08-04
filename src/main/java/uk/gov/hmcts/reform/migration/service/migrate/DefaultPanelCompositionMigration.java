@@ -83,8 +83,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         if (caseDetails.getState().equals(READY_TO_LIST.toString())) {
             String caseId = caseDetails.getId().toString();
             var caseData = convertToSscsCaseData(caseDetails.getData());
-            HearingRoute hearingRoute = ofNullable(
-                caseData.getSchedulingAndListingFields().getHearingRoute()).orElse(null);
+            HearingRoute hearingRoute = caseData.getSchedulingAndListingFields().getHearingRoute();
             if (!LIST_ASSIST.equals(hearingRoute)) {
                 String failureMsg = String.format(
                     "Skipping Case (%s) for migration because hearingRoute is not list assist",
