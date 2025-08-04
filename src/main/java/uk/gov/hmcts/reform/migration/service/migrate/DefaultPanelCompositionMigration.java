@@ -69,8 +69,10 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                         && LIST_ASSIST.equals(hearingRoute)
                         && (isNull(panelComposition) || panelComposition.isEmpty());
                     if (!caseValid) {
-                        String errorMessage = !READY_TO_LIST.toString().equals(caseDetails.getState()) ? "due to incorrect state"
-                            : !LIST_ASSIST.equals(hearingRoute) ? "due to incorrect hearing route" : "due to invalid PanelMemberComposition";
+                        String errorMessage = !READY_TO_LIST.toString().equals(caseDetails.getState())
+                            ? "due to incorrect state"
+                            : !LIST_ASSIST.equals(hearingRoute) ? "due to incorrect hearing route"
+                            : "due to invalid PanelMemberComposition";
                         log.error("Skipping Case {} for migration {}", caseDetails.getId(), errorMessage);
                     }
                     return caseValid;
