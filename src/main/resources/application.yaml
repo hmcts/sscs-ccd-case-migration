@@ -45,6 +45,7 @@ migration:
     enabled: ${DEFAULT_PANEL_COMPOSITION_ENABLED:false}
     use-pre-fetched-case-list: ${ULR_USE_PRE_FETCHED_CASE_LIST:false}
     encoded-data-string: ${DEFAULT_PANEL_COMPOSITION_ENCODED_STRING:==dummy++encoded--string==}
+    exclusion-list-encoded-string: ${DEFAULT_PANEL_COMPOSITION_EXCLUDE_ENCODED_STRING:==dummy++encoded--string==}
   updateListingReqsMissingAmendReason:
     enabled: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON:false}
     encoded-data-string: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON_ENCODED_STRING:==dummy++encoded--string==}

@@ -60,7 +60,7 @@ class DefaultPanelCompositionMigrationTest {
     @BeforeEach
     void setUp() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService, false, "dummy-string");
+            new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService, false, "dummy-string", "");
     }
 
     @Test
@@ -74,8 +74,8 @@ class DefaultPanelCompositionMigrationTest {
         var caseF = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
         caseF.getData().setPanelMemberComposition(new PanelMemberComposition(List.of("84")));
 
-        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD, caseE, caseF);
-        when(repository.findCases(searchQuery, true)).thenReturn(caseList);
+        when(repository.findCases(searchQuery, true))
+            .thenReturn(List.of(caseA, caseB, caseC, caseD, caseE, caseF));
 
         List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
 
@@ -84,9 +84,25 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @Test
+    void shouldFetchCasesExceptThoseInExclusionList() {
+        var caseA = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
+        var caseB = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
+        caseB.setId(ENCODED_CASE_ID);
+        when(repository.findCases(searchQuery, true)).thenReturn(List.of(caseA, caseB));
+
+        underTest = new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService, false,
+                                                         "dummy-string", ENCODED_STRING);
+        List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
+
+        assertThat(migrationCases).hasSize(1);
+        assertThat(migrationCases).containsOnly(caseA);
+    }
+
+    @Test
     void shouldFetchCasesToMigrateFromEncodedDataString() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService,true, ENCODED_STRING);
+            new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService,true,
+                                                 ENCODED_STRING, "");
 
         var casesToMigrate = underTest.fetchCasesToMigrate();
 

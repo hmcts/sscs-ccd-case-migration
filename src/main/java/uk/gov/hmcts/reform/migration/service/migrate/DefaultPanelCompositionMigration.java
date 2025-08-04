@@ -38,6 +38,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
     private final ElasticSearchRepository repository;
     private final HmcHearingsApiService hmcHearingsApiService;
     private final String encodedDataString;
+    private final String exclusionListEncodedString;
     private final boolean usePreFetchedCaseList;
 
     public DefaultPanelCompositionMigration(DefaultPanelCompositionQuery searchQuery,
@@ -46,11 +47,14 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                                             @Value("${migration.defaultPanelComposition.use-pre-fetched-case-list}")
                                             boolean usePreFetchedCaseList,
                                             @Value("${migration.defaultPanelComposition.encoded-data-string}")
-                                            String encodedDataString) {
+                                            String encodedDataString,
+                                            @Value("${migration.defaultPanelComposition.encoded-data-string}")
+                                            String exclusionListEncodedString) {
         this.searchQuery = searchQuery;
         this.repository = repository;
         this.hmcHearingsApiService = hmcHearingsApiService;
         this.encodedDataString = encodedDataString;
+        this.exclusionListEncodedString = exclusionListEncodedString;
         this.usePreFetchedCaseList = usePreFetchedCaseList;
     }
 
@@ -59,8 +63,11 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
         if (usePreFetchedCaseList) {
             return findCases(encodedDataString);
         } else {
+            List<Long> exclusionList = findCases(exclusionListEncodedString).stream()
+                .map(SscsCaseDetails::getId).toList();
             return repository.findCases(searchQuery, true)
                 .stream()
+                .filter(sscsCaseDetails -> !exclusionList.contains(sscsCaseDetails.getId()))
                 .filter(caseDetails -> {
                     var hearingRoute = caseDetails.getData().getSchedulingAndListingFields().getHearingRoute();
                     var panelComposition = caseDetails.getData().getPanelMemberComposition();
