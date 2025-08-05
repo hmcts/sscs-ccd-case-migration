@@ -45,11 +45,11 @@ import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 class DefaultPanelCompositionMigrationTest {
 
     @Mock
-    private DefaultPanelCompositionQuery searchQuery;
+    private DefaultPanelCompositionQuery query;
     @Mock
     private ElasticSearchRepository repository;
     @Mock
-    private HmcHearingsApiService hmcHearingsApiService;
+    private HmcHearingsApiService hearingsApi;
 
     private DefaultPanelCompositionMigration underTest;
     private final CaseHearing caseHearing1 = CaseHearing.builder().hearingId(parseLong("1234"))
@@ -60,7 +60,7 @@ class DefaultPanelCompositionMigrationTest {
     @BeforeEach
     void setUp() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService, false, "dummy-string");
+            new DefaultPanelCompositionMigration(query, repository, hearingsApi, false, "xxx", "dummy-string");
     }
 
     @Test
@@ -74,8 +74,8 @@ class DefaultPanelCompositionMigrationTest {
         var caseF = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
         caseF.getData().setPanelMemberComposition(new PanelMemberComposition(List.of("84")));
 
-        List<SscsCaseDetails> caseList = List.of(caseA, caseB, caseC, caseD, caseE, caseF);
-        when(repository.findCases(searchQuery, true)).thenReturn(caseList);
+        when(repository.findCases(query, true))
+            .thenReturn(List.of(caseA, caseB, caseC, caseD, caseE, caseF));
 
         List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
 
@@ -84,9 +84,27 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @Test
+    void shouldFetchCasesExceptThoseInExclusionList() {
+        var caseA = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
+        var caseB = buildCaseWith("readyToList", HearingRoute.LIST_ASSIST);
+        caseB.setId(ENCODED_CASE_ID);
+        when(repository.findCases(query, true)).thenReturn(List.of(caseA, caseB));
+
+        underTest = new DefaultPanelCompositionMigration(
+            query, repository, hearingsApi, false,
+            "dummy-string", ENCODED_STRING);
+        List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
+
+        assertThat(migrationCases).hasSize(1);
+        assertThat(migrationCases).containsOnly(caseA);
+    }
+
+    @Test
     void shouldFetchCasesToMigrateFromEncodedDataString() {
         underTest =
-            new DefaultPanelCompositionMigration(searchQuery, repository, hmcHearingsApiService,true, ENCODED_STRING);
+            new DefaultPanelCompositionMigration(
+                query, repository, hearingsApi, true,
+                ENCODED_STRING, "");
 
         var casesToMigrate = underTest.fetchCasesToMigrate();
 
@@ -104,7 +122,7 @@ class DefaultPanelCompositionMigrationTest {
 
         HearingsGetResponse response =
             HearingsGetResponse.builder().caseHearings(List.of(caseHearing1, caseHearing2)).build();
-        when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
+        when(hearingsApi.getHearingsRequest(anyString(), any())).thenReturn(response);
 
         underTest.migrate(caseDetails);
 
@@ -124,7 +142,7 @@ class DefaultPanelCompositionMigrationTest {
         var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
         HearingsGetResponse response =
             HearingsGetResponse.builder().caseHearings(List.of(caseHearing1, caseHearing2)).build();
-        when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
+        when(hearingsApi.getHearingsRequest(anyString(), any())).thenReturn(response);
 
         underTest.migrate(caseDetails);
 
@@ -163,7 +181,7 @@ class DefaultPanelCompositionMigrationTest {
 
         HearingsGetResponse response =
             HearingsGetResponse.builder().caseHearings(List.of(caseHearing2)).build();
-        when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
+        when(hearingsApi.getHearingsRequest(anyString(), any())).thenReturn(response);
 
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
