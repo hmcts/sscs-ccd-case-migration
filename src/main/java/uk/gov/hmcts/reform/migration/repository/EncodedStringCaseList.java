@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Base64;
 import java.util.HashMap;
@@ -64,7 +63,7 @@ public class EncodedStringCaseList {
                 .readValue(outputStream.toByteArray(), new TypeReference<List<Map<String, String>>>() {});
             log.info("Number of cases to be migrated: ({})", caseList.size());
             return caseList.stream();
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.info("Failed to load cases from encoded string {}", b64Compressed);
         }
         return Stream.empty();

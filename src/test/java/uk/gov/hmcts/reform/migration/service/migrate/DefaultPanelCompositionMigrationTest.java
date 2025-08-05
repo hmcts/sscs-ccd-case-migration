@@ -60,7 +60,7 @@ class DefaultPanelCompositionMigrationTest {
     @BeforeEach
     void setUp() {
         underTest =
-            new DefaultPanelCompositionMigration(query, repository, hearingsApi, false, "xxx", "");
+            new DefaultPanelCompositionMigration(query, repository, hearingsApi, false, "xxx", "dummy-string");
     }
 
     @Test
