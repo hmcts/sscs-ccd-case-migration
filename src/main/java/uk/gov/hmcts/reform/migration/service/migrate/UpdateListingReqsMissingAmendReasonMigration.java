@@ -25,7 +25,7 @@ public class UpdateListingReqsMissingAmendReasonMigration extends DefaultPanelCo
         @Value("${migration.updateListingReqsMissingAmendReason.encoded-data-string}")
         String encodedDataString
     ) {
-        super(searchQuery, repository, hmcHearingsApiService,true,  encodedDataString);
+        super(searchQuery, repository, hmcHearingsApiService,true,  encodedDataString, "");
     }
 
     @Override

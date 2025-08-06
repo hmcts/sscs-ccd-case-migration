@@ -20,14 +20,7 @@ public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
                       { "bool": { "must_not": { "exists": { "field": "data.panelMemberComposition.panelCompositionJudge" } } } },
                       { "bool": { "must_not": { "exists": { "field": "data.panelMemberComposition.panelCompositionMemberMedical1" } } } },
                       { "bool": { "must_not": { "exists": { "field": "data.panelMemberComposition.panelCompositionMemberMedical2" } } } },
-                      {
-                        "bool": {
-                          "should": [
-                            { "bool": { "must_not": { "exists": { "field": "data.panelMemberComposition.panelCompositionDisabilityAndFqMember" } } } },
-                            { "script": { "script": "doc['data.panelMemberComposition.panelCompositionDisabilityAndFqMember'].size() == 0" } }
-                          ]
-                        }
-                      }
+                      { "bool": { "must_not": { "exists": { "field": "data.panelMemberComposition.panelCompositionDisabilityAndFqMember" } } } }
                     ]
                   }
                 }
@@ -36,7 +29,7 @@ public class DefaultPanelCompositionQuery extends ElasticSearchQuery {
           },
           "_source": [ "data.hearingRoute" ],
           "size": %s,
-          "sort": [ { "reference.keyword": "asc" } ]
+          "sort": [ { "reference.keyword": "desc" } ]
         """;
 
     @Override
