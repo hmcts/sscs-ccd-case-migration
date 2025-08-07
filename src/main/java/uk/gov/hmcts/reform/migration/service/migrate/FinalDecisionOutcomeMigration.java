@@ -52,7 +52,7 @@ public class FinalDecisionOutcomeMigration extends CaseOutcomeMigration {
 
     @Override
     public void resetOutcomeFields(Map<String, Object> data, String caseId) {
-        log.info("{} found with value {} and set to null for case id {}", getClass().getSimpleName(),
+        log.info("{} found with value {} and set to null for case id {}", getOutcomeFieldName(),
                  data.get(getOutcomeFieldName()), caseId);
         data.put(getOutcomeFieldName(), null);
     }
