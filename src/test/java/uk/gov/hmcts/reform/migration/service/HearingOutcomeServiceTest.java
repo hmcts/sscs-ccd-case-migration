@@ -5,7 +5,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,6 +12,7 @@ import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
+import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcomeMap;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
@@ -113,18 +113,9 @@ public class HearingOutcomeServiceTest {
         assertEquals(expectedHearingOutcome, hearingOutcomes.getFirst());
     }
 
-    @ParameterizedTest
-    @CsvSource({
-        "referenceRevisedFavourAppellant, 21",
-        "referenceRevisedAgainstAppellant, 22",
-        "decisionUpheld, 9",
-        "decisionRevisedAgainstAppellant, 8",
-        "decisionReserved, 63",
-        "decisionInFavourOfAppellant, 10",
-        "disablementIncreasedNoBenefitAwarded, 39"
-    })
+    @Test
     @DisplayName("Should create a Hearing Outcome and map the correct Outcome value to Case Outcome value")
-    void shouldReturnNewHearingOutcomeWithCorrectOutcomeMapping(String outcome, String caseOutcome) {
+    void shouldReturnNewHearingOutcomeWithCorrectOutcomeMapping() {
         when(venueService.getVenueDetailsForActiveVenueByEpimsId(eq("epimsId")))
             .thenReturn(VenueDetails.builder()
                             .venAddressLine1("Windsor Castle")
@@ -140,14 +131,14 @@ public class HearingOutcomeServiceTest {
                             .hearingVenueEpimsId("epimsId").build()))
             .hearingId(123456789L).build();
         var caseData = SscsCaseData.builder()
-            .outcome(outcome)
+            .outcome(CaseOutcomeMap.DECISION_UPHELD.getOutcomeKey())
             .build();
         var expectedHearingOutcome = HearingOutcome.builder().value(
             HearingOutcomeDetails.builder()
                 .completedHearingId("123456789")
                 .hearingStartDateTime(LocalDateTime.parse("2024-06-30T11:00:00"))
                 .hearingEndDateTime(LocalDateTime.parse("2024-06-30T12:00:00"))
-                .hearingOutcomeId(caseOutcome)
+                .hearingOutcomeId(CaseOutcomeMap.DECISION_UPHELD.getCaseOutcomeCode())
                 .hearingChannelId(HearingChannel.FACE_TO_FACE)
                 .venue(Venue.builder().address(
                     Address.builder().line1("Windsor Castle").town("Windsor").build()
