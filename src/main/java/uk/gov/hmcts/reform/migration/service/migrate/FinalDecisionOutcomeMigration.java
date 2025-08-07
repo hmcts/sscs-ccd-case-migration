@@ -13,17 +13,18 @@ import java.util.Map;
 
 @Service
 @Slf4j
-@ConditionalOnProperty(value = "migration.outcomeMigration.enabled", havingValue = "true")
-public class JudgeOutcomeMigration extends CaseOutcomeMigration {
+@ConditionalOnProperty(value = "migration.finalDecisionOutcomeMigration.enabled", havingValue = "true")
+public class FinalDecisionOutcomeMigration extends CaseOutcomeMigration {
 
     static final String OUTCOME_MIGRATION_SUMMARY = "Migrate Outcome to Hearing Outcome";
     static final String OUTCOME_MIGRATION_DESCRIPTION = "Link Outcome to completed Hearing";
+    public static final String OUTCOME = "outcome";
 
     private final HmcHearingsApiService hmcHearingsApiService;
 
-    public JudgeOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
-                                 HearingOutcomeService hearingOutcomeService,
-                                 @Value("${migration.outcomeMigration.encoded-string}")
+    public FinalDecisionOutcomeMigration(HmcHearingsApiService hmcHearingsApiService,
+                                         HearingOutcomeService hearingOutcomeService,
+                                         @Value("${migration.finalDecisionOutcomeMigration.encoded-string}")
                                  String outcomeEncodedDataString) {
         super(hearingOutcomeService, outcomeEncodedDataString);
         this.hmcHearingsApiService = hmcHearingsApiService;
@@ -45,18 +46,13 @@ public class JudgeOutcomeMigration extends CaseOutcomeMigration {
     }
 
     @Override
-    public String getMigrationName() {
-        return "Outcome";
-    }
-
-    @Override
     public String getOutcomeFieldName() {
-        return "outcome";
+        return OUTCOME;
     }
 
     @Override
-    public void resetSourceCaseFields(Map<String, Object> data, String caseId) {
-        log.info("{} found with value {} and set to null for case id {}", getMigrationName(),
+    public void resetOutcomeFields(Map<String, Object> data, String caseId) {
+        log.info("{} found with value {} and set to null for case id {}", getClass().getSimpleName(),
                  data.get(getOutcomeFieldName()), caseId);
         data.put(getOutcomeFieldName(), null);
     }

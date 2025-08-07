@@ -22,6 +22,7 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
     static final String CASE_OUTCOME_MIGRATION_ID = "caseOutcomeMigration";
     static final String CASE_OUTCOME_MIGRATION_SUMMARY = "Hearing outcome linked to hearing date";
     static final String CASE_OUTCOME_MIGRATION_DESCRIPTION = "";
+    public static final String CASE_OUTCOME = "caseOutcome";
 
     private final HearingOutcomeService hearingOutcomeService;
     protected final String encodedDataString;
@@ -42,22 +43,23 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
             if (!hearingRoute.equalsIgnoreCase(getMigrationRoute())) {
                 String reason = "Hearing Route is not " + getMigrationRoute();
                 log.info("Skipping case for {} migration | Case ID: {} | Reason: {}",
-                         getMigrationName(), caseId, reason);
-                throw new RuntimeException("Skipping case for " + getMigrationName() + " migration. " + reason);
+                         getClass().getSimpleName(), caseId, reason);
+                throw new RuntimeException("Skipping case for " + getClass().getSimpleName() + " migration. " + reason);
             }
 
             if (skipMigration(data)) {
-                String reason = "Hearing outcome already exists or " + getMigrationName() + " is empty";
+                String reason = "Hearing outcome already exists or " + getOutcomeFieldName() + " is empty";
                 log.info("Skipping case for {} migration | Case ID: {} | {}: {} | Reason: {}",
-                         getMigrationName(), caseId, getOutcomeFieldName(), data.get(getOutcomeFieldName()), reason
+                         getClass().getSimpleName(), caseId, getOutcomeFieldName(),
+                         data.get(getOutcomeFieldName()), reason
                 );
-                throw new RuntimeException("Skipping case for " + getMigrationName() + " migration, " + reason);
+                throw new RuntimeException("Skipping case for " + getClass().getSimpleName() + " migration, " + reason);
             }
 
             setHearingOutcome(data, caseId);
-            resetSourceCaseFields(data, caseId);
+            resetOutcomeFields(data, caseId);
 
-            log.info("Completed migration for {} migration. Case id: {}", getMigrationName(), caseId);
+            log.info("Completed migration for {} migration. Case id: {}", getClass().getSimpleName(), caseId);
         }
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
@@ -102,26 +104,22 @@ public abstract class CaseOutcomeMigration extends CaseMigrationProcessor {
         if (hmcHearings.size() != 1) {
             String reason = "Zero or More than one hearing found";
             log.info("Skipping case for {} migration|Case id: {}|No of hearings: {}|Reason: {}",
-                     getMigrationName(), caseId, hmcHearings.size(), reason
+                     getClass().getSimpleName(), caseId, hmcHearings.size(), reason
             );
-            throw new RuntimeException("Skipping case for " + getMigrationName() + " migration, " + reason);
+            throw new RuntimeException("Skipping case for " + getClass().getSimpleName() + " migration, " + reason);
         }
         return hmcHearings.getFirst();
     }
 
     abstract List<CaseHearing> getHearingsFromHmc(String caseId);
 
-    public String getMigrationName() {
-        return "Case outcome";
-    }
-
     public String getOutcomeFieldName() {
-        return "caseOutcome";
+        return CASE_OUTCOME;
     }
 
-    public void resetSourceCaseFields(Map<String, Object> data, String caseId) {
+    public void resetOutcomeFields(Map<String, Object> data, String caseId) {
         log.info("{} found with value {} and set to null for case id {}",
-                 getMigrationName(), data.get(getOutcomeFieldName()), caseId);
+                 getOutcomeFieldName(), data.get(getOutcomeFieldName()), caseId);
         data.put(getOutcomeFieldName(), null);
 
         log.info("did Po Attend found with value {} and set to null for case id {}", data.get("didPoAttend"), caseId);

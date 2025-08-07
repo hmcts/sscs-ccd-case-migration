@@ -113,7 +113,7 @@ tasks.register('smoke', Test) {
 
 checkstyle {
   maxWarnings = 0
-  toolVersion = '9.3'
+  toolVersion = '11.0.0'
   getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
@@ -208,7 +208,7 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
 
-  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '6.3.8'
+  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '0fb0f03'
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBoot.class.package.implementationVersion
   testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.6.0'

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
+import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcomeMap;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Venue;
@@ -32,19 +33,19 @@ public class HearingOutcomeService {
     }
 
     public List<HearingOutcome> mapHmcHearingToHearingOutcome(CaseHearing hmcHearing, Map<String, Object> data,
-                                                              String outcomeKey) {
-        log.info("Creating hearing outcome with hearingID {} using {}", hmcHearing.getHearingId(), outcomeKey);
+                                                              String outcomeField) {
+        log.info("Creating hearing outcome with hearingID {} using {}", hmcHearing.getHearingId(), outcomeField);
         var hearingDaySchedule = Optional.ofNullable(hmcHearing.getHearingDaySchedule())
             .flatMap(schedules -> schedules.stream().findFirst())
-            .orElseGet(() -> HearingDaySchedule.builder().build());
+            .orElse(HearingDaySchedule.builder().build());
 
         var hearingChannel = Optional.ofNullable(hmcHearing.getHearingChannels())
             .flatMap(channels -> channels.stream().findFirst())
             .orElse(null);
 
-        var caseOutcome = Optional.ofNullable(data.get(outcomeKey))
+        var caseOutcome = Optional.ofNullable(data.get(outcomeField))
             .map(Object::toString)
-            .map(value -> outcomeKey.equals("outcome") ? mapOutcomeToCaseOutcome(value) : value)
+            .map(value -> outcomeField.equals("outcome") ? mapOutcomeToCaseOutcome(value) : value)
             .orElse(null);
 
         var didPoAttend = Optional.ofNullable(data.get("didPoAttend"))
@@ -101,18 +102,7 @@ public class HearingOutcomeService {
 
     private String mapOutcomeToCaseOutcome(String outcome) {
         log.info("Mapping outcome {} to case outcome", outcome);
-        return switch (outcome) {
-            case "referenceRevisedFavourAppellant" -> "21";
-            case "referenceRevisedAgainstAppellant" -> "22";
-            case "decisionUpheld" -> "9";
-            case "decisionRevisedAgainstAppellant" -> "8";
-            case "decisionReserved" -> "63";
-            case "decisionInFavourOfAppellant" -> "10";
-            case "disablementIncreasedNoBenefitAwarded" -> "39";
-            // case "struckOut" -> "";
-            // case "nonCompliantAppealStruckout" -> "";
-            // case "reinstated" -> "";
-            default -> throw new IllegalStateException("No match found for outcome value: " + outcome);
-        };
+        return Optional.ofNullable(CaseOutcomeMap.getCaseOutcomeByOutcome(outcome))
+            .orElseThrow(() -> new IllegalStateException("No match found for outcome value: " + outcome));
     }
 }

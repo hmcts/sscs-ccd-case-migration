@@ -160,7 +160,7 @@ public class NonListedHearingsOutcomesMigrationTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Case outcome is empty");
+            .hasMessageContaining("caseOutcome is empty");
     }
 
     @Test
@@ -195,6 +195,7 @@ public class NonListedHearingsOutcomesMigrationTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for Case outcome migration, Zero or More than one hearing found");
+            .hasMessageContaining("Skipping case for NonListedHearingsOutcomesMigration migration, "
+                                      + "Zero or More than one hearing found");
     }
 }

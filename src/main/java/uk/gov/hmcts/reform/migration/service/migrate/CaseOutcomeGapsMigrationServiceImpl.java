@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +59,6 @@ public class CaseOutcomeGapsMigrationServiceImpl extends CaseOutcomeMigration {
 
     @Override
     List<CaseHearing> getHearingsFromHmc(String caseId) {
-        return List.of();
+        return Collections.emptyList();
     }
 }
