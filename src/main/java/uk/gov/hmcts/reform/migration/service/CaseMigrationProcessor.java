@@ -47,7 +47,7 @@ public abstract class CaseMigrationProcessor implements DataMigrationService {
     public void migrateCases() {
         log.info("Data migration of cases started");
 
-        ForkJoinPool threadPool = new ForkJoinPool(25);
+        ForkJoinPool threadPool = new ForkJoinPool(10);
         threadPool.submit(
             () -> tryFetchingCases()
                 .parallelStream()
