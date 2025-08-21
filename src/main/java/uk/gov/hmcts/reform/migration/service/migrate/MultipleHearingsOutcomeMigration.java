@@ -76,7 +76,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
             .orElse(new ArrayList<>());
 
         List<HearingOutcome> mappedHearingOutcomes =
-            hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data);
+            hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data, getOutcomeFieldName());
         existingHearingOutcomes.addAll(mappedHearingOutcomes);
         data.put("hearingOutcomes", existingHearingOutcomes);
     }

@@ -9,8 +9,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
-import uk.gov.hmcts.reform.domain.hmc.HearingsGetResponse;
-import uk.gov.hmcts.reform.domain.hmc.HmcStatus;
 import uk.gov.hmcts.reform.migration.hmc.HmcHearingsApiService;
 import uk.gov.hmcts.reform.migration.service.HearingOutcomeService;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcome;
@@ -125,8 +123,8 @@ public class CompletedHearingsOutcomesMigrationTest {
             )
             .hearingChannels(List.of(HearingChannel.FACE_TO_FACE))
             .build();
-        when(hmcHearingsApiService.getHearingsRequest(eq(caseDetails.getId().toString()),eq(HmcStatus.COMPLETED)))
-            .thenReturn(HearingsGetResponse.builder().caseHearings(List.of(caseHearing)).build());
+        when(hmcHearingsApiService.getCompletedHearings(eq(caseDetails.getId().toString())))
+            .thenReturn(List.of(caseHearing));
 
         HearingOutcome hearingOutcome = HearingOutcome.builder()
             .value(HearingOutcomeDetails.builder()
@@ -140,7 +138,8 @@ public class CompletedHearingsOutcomesMigrationTest {
                        .hearingEndDateTime(end)
                        .build())
             .build();
-        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(eq(caseHearing), eq(buildCaseDataMap(caseData))))
+        when(hearingOutcomeService.mapHmcHearingToHearingOutcome(
+            eq(caseHearing), eq(buildCaseDataMap(caseData)), eq("caseOutcome")))
             .thenReturn(List.of(hearingOutcome));
 
         caseOutcomeMigrationService.migrate(caseDetails);
@@ -172,7 +171,7 @@ public class CompletedHearingsOutcomesMigrationTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration. "
+            .hasMessageContaining("Skipping case for CompletedHearingsOutcomesMigration migration. "
                                       + "Hearing Route is not listAssist");
     }
 
@@ -183,7 +182,7 @@ public class CompletedHearingsOutcomesMigrationTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Case outcome is empty");
+            .hasMessageContaining("caseOutcome is empty");
     }
 
     @Test
@@ -192,11 +191,11 @@ public class CompletedHearingsOutcomesMigrationTest {
             .caseOutcome(CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build())
             .schedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(LIST_ASSIST).build())
             .build();
-        when(hmcHearingsApiService.getHearingsRequest(any(),any()))
-            .thenReturn(HearingsGetResponse.builder().caseHearings(List.of(
+        when(hmcHearingsApiService.getCompletedHearings(any()))
+            .thenReturn(List.of(
                 CaseHearing.builder().hearingId(1L).build(),
                 CaseHearing.builder().hearingId(2L).build()
-            )).build());
+            ));
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
@@ -209,11 +208,12 @@ public class CompletedHearingsOutcomesMigrationTest {
             .caseOutcome(CaseOutcome.builder().caseOutcome(hearingOutcomeId).didPoAttend(YesNo.YES).build())
             .schedulingAndListingFields(SchedulingAndListingFields.builder().hearingRoute(LIST_ASSIST).build())
             .build();
-        when(hmcHearingsApiService.getHearingsRequest(any(),any()))
-            .thenReturn(HearingsGetResponse.builder().caseHearings(List.of()).build());
+        when(hmcHearingsApiService.getCompletedHearings(any()))
+            .thenReturn(List.of());
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration, Zero or More than one hearing found");
+            .hasMessageContaining("Skipping case for CompletedHearingsOutcomesMigration migration, "
+                                      + "Zero or More than one hearing found");
     }
 }
