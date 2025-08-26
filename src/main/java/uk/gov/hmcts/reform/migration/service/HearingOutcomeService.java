@@ -2,10 +2,10 @@ package uk.gov.hmcts.reform.migration.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.domain.common.CaseOutcomeMap;
 import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.domain.hmc.HearingDaySchedule;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Address;
-import uk.gov.hmcts.reform.sscs.ccd.domain.CaseOutcomeMap;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcome;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOutcomeDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Venue;
