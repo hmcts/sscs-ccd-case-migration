@@ -76,9 +76,6 @@ migration:
   panelMemberCompositionMigration:
     enabled: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED:false}
     encoded-data-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
-  outcomeMigration:
-    enabled: ${OUTCOME_MIGRATION_ENABLED:false}
-    encoded-string: ${OUTCOME_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   finalDecisionOutcomeMigration:
     enabled: ${FINAL_DECISION_OUTCOME_MIGRATION_ENABLED:false}
     encoded-string: ${FINAL_DECISION_OUTCOME_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
