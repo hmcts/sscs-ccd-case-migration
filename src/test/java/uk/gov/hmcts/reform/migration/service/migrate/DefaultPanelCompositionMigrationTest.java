@@ -20,11 +20,11 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.PanelMemberComposition;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.reference.data.model.DefaultPanelComposition;
+import uk.gov.hmcts.reform.sscs.reference.data.service.PanelCompositionService;
 
 import java.util.List;
 import java.util.stream.Stream;
-import uk.gov.hmcts.reform.sscs.reference.data.model.DefaultPanelComposition;
-import uk.gov.hmcts.reform.sscs.reference.data.service.PanelCompositionService;
 
 import static java.lang.Long.parseLong;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,8 +65,9 @@ class DefaultPanelCompositionMigrationTest {
 
     @BeforeEach
     void setUp() {
-        underTest =
-            new DefaultPanelCompositionMigration(query, repository, hearingsApi, panelCompositionService, false, "xxx", "dummy-string");
+        underTest = new DefaultPanelCompositionMigration(
+            query, repository, hearingsApi, panelCompositionService, false, "dummy-sting", "dummy-string"
+        );
     }
 
     @Test
