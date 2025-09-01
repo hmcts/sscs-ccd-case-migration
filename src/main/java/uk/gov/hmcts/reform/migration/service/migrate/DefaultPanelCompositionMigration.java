@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
+import uk.gov.hmcts.reform.sscs.reference.data.service.PanelCompositionService;
 
 import java.util.List;
-import uk.gov.hmcts.reform.sscs.reference.data.service.PanelCompositionService;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
@@ -139,7 +139,7 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                 .contains(hearing.getHmcStatus()))
             .findAny().orElse(null);
 
-        if(nonNull(hearingAwaitingListing)) {
+        if (nonNull(hearingAwaitingListing)) {
             log.info("{} for Case: {} with hearing ID: {} and hmc status: {}", getEventSummary(), caseId,
                      hearingAwaitingListing.getHearingId(), hearingAwaitingListing.getHmcStatus());
         } else {
