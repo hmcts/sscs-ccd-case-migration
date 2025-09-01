@@ -112,20 +112,20 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
 
     private void skipNonReadyToList(CaseDetails caseDetails) {
         if (!READY_TO_LIST.toString().equals(caseDetails.getState())) {
-            skipCase("State has changed (%s)", caseDetails.getId().toString(), caseDetails.getState());
+            skipCase("State has changed (%s)", caseDetails.getState());
         }
     }
 
     private void skipEmptyJohTiers(SscsCaseData caseData) {
         if (panelCompositionService.getDefaultPanelComposition(caseData).getJohTiers().isEmpty()) {
-            skipCase("DefaultPanelComposition has no JOH tiers ", caseData.getCcdCaseId());
+            skipCase("DefaultPanelComposition has no JOH tiers");
         }
     }
 
     private void skipNonListAssist(SscsCaseData caseData) {
         HearingRoute hearingRoute = caseData.getSchedulingAndListingFields().getHearingRoute();
         if (!LIST_ASSIST.equals(hearingRoute)) {
-            skipCase("hearingRoute is not list assist", caseData.getCcdCaseId());
+            skipCase("hearingRoute is not list assist");
         }
     }
 
@@ -144,12 +144,12 @@ public class DefaultPanelCompositionMigration extends CaseMigrationProcessor {
                      hearingAwaitingListing.getHearingId(), hearingAwaitingListing.getHmcStatus());
         } else {
             skipCase("HMC status is not valid for ULR. HMC Status:(%s)",
-                     caseId, hearingsList.stream().map(CaseHearing::getHmcStatus).toList());
+                     hearingsList.stream().map(CaseHearing::getHmcStatus).toList());
         }
     }
 
     private void skipCase(String rootCause, Object... msgArgs) {
-        String failureMsg = format("Skipping Case (%s) for migration because " + rootCause, msgArgs);
+        String failureMsg = format("Skipping Case for migration because " + rootCause, msgArgs);
         log.error(failureMsg);
         throw new RuntimeException(failureMsg);
     }
