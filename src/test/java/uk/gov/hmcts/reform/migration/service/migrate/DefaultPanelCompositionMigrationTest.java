@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.PanelMemberComposition;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.reference.data.model.DefaultPanelComposition;
+import uk.gov.hmcts.reform.sscs.reference.data.service.PanelCompositionService;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -50,17 +52,22 @@ class DefaultPanelCompositionMigrationTest {
     private ElasticSearchRepository repository;
     @Mock
     private HmcHearingsApiService hearingsApi;
+    @Mock
+    private PanelCompositionService panelCompositionService;
 
     private DefaultPanelCompositionMigration underTest;
     private final CaseHearing caseHearing1 = CaseHearing.builder().hearingId(parseLong("1234"))
         .hmcStatus(HmcStatus.AWAITING_LISTING).build();
     private final CaseHearing caseHearing2 = CaseHearing.builder().hearingId(parseLong("4321"))
         .hmcStatus(HmcStatus.CANCELLED).build();
+    private final DefaultPanelComposition defaultPanelComp = new DefaultPanelComposition();
+
 
     @BeforeEach
     void setUp() {
-        underTest =
-            new DefaultPanelCompositionMigration(query, repository, hearingsApi, false, "xxx", "dummy-string");
+        underTest = new DefaultPanelCompositionMigration(
+            query, repository, hearingsApi, panelCompositionService, false, "dummy-sting", "dummy-string"
+        );
     }
 
     @Test
@@ -91,7 +98,7 @@ class DefaultPanelCompositionMigrationTest {
         when(repository.findCases(query, true)).thenReturn(List.of(caseA, caseB));
 
         underTest = new DefaultPanelCompositionMigration(
-            query, repository, hearingsApi, false,
+            query, repository, hearingsApi, panelCompositionService, false,
             "dummy-string", ENCODED_STRING);
         List<SscsCaseDetails> migrationCases = underTest.fetchCasesToMigrate();
 
@@ -103,7 +110,7 @@ class DefaultPanelCompositionMigrationTest {
     void shouldFetchCasesToMigrateFromEncodedDataString() {
         underTest =
             new DefaultPanelCompositionMigration(
-                query, repository, hearingsApi, true,
+                query, repository, hearingsApi, panelCompositionService, true,
                 ENCODED_STRING, "");
 
         var casesToMigrate = underTest.fetchCasesToMigrate();
@@ -114,6 +121,8 @@ class DefaultPanelCompositionMigrationTest {
 
     @Test
     void shouldReturnMigratedCaseData() {
+        defaultPanelComp.setJohTiers(List.of("84"));
+        when(panelCompositionService.getDefaultPanelComposition(any())).thenReturn(defaultPanelComp);
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder().hearingRoute(HearingRoute.LIST_ASSIST).build());
@@ -132,6 +141,8 @@ class DefaultPanelCompositionMigrationTest {
     @ParameterizedTest
     @MethodSource("amendReasonListProvider")
     void shouldSetAmendReasonsToAdminRequest(List<AmendReason> amendReasons) {
+        defaultPanelComp.setJohTiers(List.of("84"));
+        when(panelCompositionService.getDefaultPanelComposition(any())).thenReturn(defaultPanelComp);
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder()
@@ -154,7 +165,7 @@ class DefaultPanelCompositionMigrationTest {
     void shouldNotMigrateCaseIfNotReadyToList() {
         var caseData = buildCaseData();
         var data = buildCaseDataMap(caseData);
-        var caseDetails = CaseDetails.builder().state(HEARING.toString()).data(data).build();
+        var caseDetails = CaseDetails.builder().id(1234L).state(HEARING.toString()).data(data).build();
 
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
@@ -172,7 +183,21 @@ class DefaultPanelCompositionMigrationTest {
     }
 
     @Test
+    void shouldNotMigrateCaseifNoJohTiersPresent() {
+        when(panelCompositionService.getDefaultPanelComposition(any())).thenReturn(defaultPanelComp);
+        var caseData = buildCaseData();
+        caseData.setSchedulingAndListingFields(
+            SchedulingAndListingFields.builder().hearingRoute(HearingRoute.LIST_ASSIST).build());
+        var data = buildCaseDataMap(caseData);
+        var caseDetails = CaseDetails.builder().id(1234L).state(READY_TO_LIST.toString()).data(data).build();
+
+        assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+    }
+
+    @Test
     void shouldNotMigrateCaseifNotInAwaitingListingOrUpdateRequestedState() {
+        defaultPanelComp.setJohTiers(List.of("84"));
+        when(panelCompositionService.getDefaultPanelComposition(any())).thenReturn(defaultPanelComp);
         var caseData = buildCaseData();
         caseData.setSchedulingAndListingFields(
             SchedulingAndListingFields.builder().hearingRoute(HearingRoute.LIST_ASSIST).build());
