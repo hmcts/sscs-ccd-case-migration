@@ -6,10 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.domain.hmc.CaseHearing;
 import uk.gov.hmcts.reform.sscs.ccd.domain.HearingRoute;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SchedulingAndListingFields;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -87,13 +90,21 @@ public class CaseOutcomeGapsMigrationServiceImplTest {
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration. Hearing Route is not gaps");
+            .hasMessageContaining("Skipping case for CaseOutcomeGapsMigrationServiceImpl migration. "
+                                      + "Hearing Route is not gaps");
     }
 
     @Test
     void shouldThrowErrorWhenMigrateCalledForGapsCaseWithNoCaseOutcome() {
         assertThatThrownBy(() -> caseOutcomeGapsMigrationService.migrate(caseDetails))
-            .hasMessageContaining("Skipping case for case outcome migration, "
-                                      + "Hearing outcome already exists or Case outcome is empty");
+            .hasMessageContaining("Skipping case for CaseOutcomeGapsMigrationServiceImpl migration, "
+                                      + "Hearing outcome already exists or caseOutcome is empty");
+    }
+
+    @Test
+    void shouldReturnEmptyHearingList() {
+        List<CaseHearing> result = caseOutcomeGapsMigrationService.getHearingsFromHmc("someCaseId");
+
+        assertThat(result).isEmpty();
     }
 }
