@@ -28,6 +28,8 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.map
 @ConditionalOnProperty(value = "migration.multipleHearingsOutcomes.enabled", havingValue = "true")
 public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
+    static final String OUTCOME_MIGRATION_MULTIPLE_HEARINGS_SUMMARY = "Migrate Outcome to Hearing Outcome";
+    static final String OUTCOME_MIGRATION_MULTIPLE_HEARINGS_DESCRIPTION = "Link Outcome to completed Hearing";
     private final HmcHearingsApiService hmcHearingsApiService;
     private final HearingOutcomeService hearingOutcomeService;
     private final ObjectMapper objectMapper;
@@ -79,5 +81,15 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
             hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data, getOutcomeFieldName());
         existingHearingOutcomes.addAll(mappedHearingOutcomes);
         data.put("hearingOutcomes", existingHearingOutcomes);
+    }
+
+    @Override
+    public String getEventDescription() {
+        return OUTCOME_MIGRATION_MULTIPLE_HEARINGS_DESCRIPTION;
+    }
+
+    @Override
+    public String getEventSummary() {
+        return OUTCOME_MIGRATION_MULTIPLE_HEARINGS_SUMMARY;
     }
 }
