@@ -73,7 +73,6 @@ public class MultipleHearingsOutcomeMigrationTest {
     void shouldSkipMigrationWhenCaseOutcomeIsNull() {
         SscsCaseData caseData = SscsCaseData.builder()
             .ccdCaseId(reference)
-            .caseOutcome(CaseOutcome.builder().build())
             .build();
 
         Map<String, Object> data = objectMapper.convertValue(caseData, Map.class);
@@ -106,10 +105,7 @@ public class MultipleHearingsOutcomeMigrationTest {
     void shouldNotSkipMigrationWhenCaseOutcomeExistsAndHearingNotUsed() {
         SscsCaseData caseData = SscsCaseData.builder()
             .ccdCaseId(reference)
-            .caseOutcome(CaseOutcome.builder()
-                             .caseOutcome("11")
-                             .didPoAttend(YesNo.YES)
-                             .build())
+            .outcome("outcome")
             .hearingOutcomes(List.of(
                 HearingOutcome.builder()
                     .value(HearingOutcomeDetails.builder()
@@ -129,10 +125,7 @@ public class MultipleHearingsOutcomeMigrationTest {
         HearingsGetResponse response = HearingsGetResponse.builder().caseHearings(List.of(caseHearing)).build();
         SscsCaseData caseData = SscsCaseData.builder()
             .ccdCaseId(reference)
-            .caseOutcome(CaseOutcome.builder()
-                             .caseOutcome("11")
-                             .didPoAttend(YesNo.YES)
-                             .build())
+            .outcome("outcome")
             .hearingOutcomes(List.of(
                 HearingOutcome.builder()
                     .value(HearingOutcomeDetails.builder()
