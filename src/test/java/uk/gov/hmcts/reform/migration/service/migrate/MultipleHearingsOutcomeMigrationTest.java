@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,6 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.migration.service.migrate.FinalDecisionOutcomeMigration.OUTCOME_MIGRATION_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.FinalDecisionOutcomeMigration.OUTCOME_MIGRATION_SUMMARY;
 
 
 @Slf4j
@@ -151,5 +154,12 @@ public class MultipleHearingsOutcomeMigrationTest {
         SscsCaseData updatedData = objectMapper.convertValue(data, SscsCaseData.class);
         assertThat(updatedData.getHearingOutcomes().size()).isEqualTo(2);
         assertThat(updatedData.getHearingOutcomes()).containsOnlyOnce(mappedHearingOutcome);
+    }
+
+    @Test
+    @DisplayName("Event details should be correct")
+    void shouldReturnCorrectEventDetails() {
+        assertThat(multipleHearingsOutcomeMigration.getEventDescription()).isEqualTo(OUTCOME_MIGRATION_DESCRIPTION);
+        assertThat(multipleHearingsOutcomeMigration.getEventSummary()).isEqualTo(OUTCOME_MIGRATION_SUMMARY);
     }
 }
