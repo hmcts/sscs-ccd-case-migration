@@ -30,6 +30,8 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
 
     static final String OUTCOME_MIGRATION_MULTIPLE_HEARINGS_SUMMARY = "Migrate Outcome to Hearing Outcome";
     static final String OUTCOME_MIGRATION_MULTIPLE_HEARINGS_DESCRIPTION = "Link Outcome to completed Hearing";
+    public static final String OUTCOME = "outcome";
+
     private final HmcHearingsApiService hmcHearingsApiService;
     private final HearingOutcomeService hearingOutcomeService;
     private final ObjectMapper objectMapper;
@@ -68,7 +70,7 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
             .map(HearingOutcomeDetails::getCompletedHearingId)
             .anyMatch(caseRefToHearingIdMap::containsValue);
 
-        return isNull(sscsCaseData.getCaseOutcome().getCaseOutcome()) || isSelectedHearingUsed;
+        return isNull(data.get(getOutcomeFieldName())) || isSelectedHearingUsed;
     }
 
     @Override
@@ -81,6 +83,11 @@ public class MultipleHearingsOutcomeMigration extends CaseOutcomeMigration {
             hearingOutcomeService.mapHmcHearingToHearingOutcome(getHmcHearing(caseId), data, getOutcomeFieldName());
         existingHearingOutcomes.addAll(mappedHearingOutcomes);
         data.put("hearingOutcomes", existingHearingOutcomes);
+    }
+
+    @Override
+    public String getOutcomeFieldName() {
+        return OUTCOME;
     }
 
     @Override
