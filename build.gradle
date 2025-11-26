@@ -224,7 +224,7 @@ dependencies {
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.2.0'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.9'
-  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '6.3.13'
+  implementation group: 'com.github.hmcts', name: 'sscs-common', version: '239772c'
 
   implementation group: 'org.json', name: 'json', version: '20240303'
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.6'
