@@ -53,6 +53,7 @@ public class VenueHearingMigrationServiceTest {
         assertThat(migrationCases).hasSize(1);
         assertThat(migrationCases).contains(migrationCase);
     }
+
     @Test
     void shouldUpdateVenue() {
         var caseData = new HashMap<>(Map.of("processingVenue", (Object)"Poole"));
