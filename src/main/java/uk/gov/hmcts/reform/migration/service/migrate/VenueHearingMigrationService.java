@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.robotics.RoboticsJsonMapper;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
