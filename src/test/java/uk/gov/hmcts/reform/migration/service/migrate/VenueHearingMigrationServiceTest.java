@@ -91,7 +91,7 @@ public class VenueHearingMigrationServiceTest {
 
     @Test
     void shouldReturnEventId() {
-        assertThat(underTest.getEventId()).isEqualTo("venueHearingMigration");
+        assertThat(underTest.getEventId()).isEqualTo("updateListingRequirements");
     }
 
 }

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.AWAITING_LISTING;
 import static uk.gov.hmcts.reform.domain.hmc.HmcStatus.UPDATE_REQUESTED;
@@ -57,8 +58,9 @@ public class VenueHearingMigrationService extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
         String caseId = caseDetails.getId().toString();
-        Optional<String> venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()));
-        if (venue.isEmpty()) {
+        String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
+            .orElse(null);
+        if (isNull(venue)) {
             log.error(format(FAILURE_MSG, caseId));
             return new UpdateResult(getEventSummary(), format(FAILURE_MSG, caseId));
         }
