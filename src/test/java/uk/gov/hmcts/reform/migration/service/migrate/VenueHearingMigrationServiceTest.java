@@ -89,4 +89,9 @@ public class VenueHearingMigrationServiceTest {
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
 
+    @Test
+    void shouldReturnEventId() {
+        assertThat(underTest.getEventId()).isEqualTo("venueHearingMigration");
+    }
+
 }

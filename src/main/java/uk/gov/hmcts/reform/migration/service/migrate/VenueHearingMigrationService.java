@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.robotics.RoboticsJsonMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
@@ -55,15 +56,14 @@ public class VenueHearingMigrationService extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
-            .orElseThrow(() -> {
-                String failureMsg = format(FAILURE_MSG, caseDetails.getId());
-                log.error(failureMsg);
-                return new RuntimeException(failureMsg);
-            });
+        String caseId = caseDetails.getId().toString();
+        Optional<String> venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()));
+        if (venue.isEmpty()) {
+            log.error(format(FAILURE_MSG, caseId));
+            return new UpdateResult(getEventSummary(), format(FAILURE_MSG, caseId));
+        }
         caseDetails.getData().put(PROCESSING_VENUE_FIELD, venue);
         log.info("Setting processing venue to ({})", venue);
-        String caseId = caseDetails.getId().toString();
         List<CaseHearing> hearingsList =
             hmcHearingsApiService.getHearingsRequest(caseId, null).getCaseHearings();
 
