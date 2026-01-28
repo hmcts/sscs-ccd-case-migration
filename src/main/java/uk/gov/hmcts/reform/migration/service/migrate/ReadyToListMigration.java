@@ -113,7 +113,7 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
         return READY_TO_LIST_MIGRATION_EVENT_SUMMARY;
     }
 
-    private String getEncodedString() {
+    protected String getEncodedString() {
         int time = LocalTime.now(clock).getHour();
         return switch (time) {
             case 6 ->  encodedDataStringA;
