@@ -93,7 +93,7 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
         } else {
             String failureMsg = format(FAILURE_MSG, caseDetails.getId(), caseDetails.getState());
             log.error(failureMsg);
-            throw new RuntimeException(failureMsg);
+            throw new IllegalStateException(failureMsg);
         }
 
     }
@@ -126,7 +126,7 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
             case 13 -> encodedDataStringH;
             case 14 -> encodedDataStringI;
             case 15 -> encodedDataStringJ;
-            default -> throw new RuntimeException("Migration job not configured to run at " + time);
+            default -> throw new IllegalStateException("Migration job not configured to run at " + time);
         };
     }
 }

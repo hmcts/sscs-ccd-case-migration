@@ -70,7 +70,7 @@ class ReadyToListMigrationTest {
             .data(data)
             .build();
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+        RuntimeException ex = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
 
         assertThat(ex.getMessage()).contains("Skipping Case");
         assertThat(ex.getMessage()).contains("incorrect state");
@@ -118,7 +118,7 @@ class ReadyToListMigrationTest {
         Clock fixedClock = Clock.fixed(Instant.parse("2024-01-01T05:00:00Z"), LONDON);
         ReflectionTestUtils.setField(migration, "clock", fixedClock);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, migration::getEncodedString);
+        RuntimeException ex = assertThrows(IllegalStateException.class, migration::getEncodedString);
         assertThat(ex.getMessage()).contains("Migration job not configured to run at 5");
     }
 
