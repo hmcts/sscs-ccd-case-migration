@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
+import java.time.Clock;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -39,6 +40,9 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
     private final String encodedDataStringH;
     private final String encodedDataStringI;
     private final String encodedDataStringJ;
+
+    private Clock clock = Clock.system(ZoneId.of("Europe/London"));
+
 
 
     public ReadyToListMigration(@Value("${migration.readytolist.encoded-string-a}")
@@ -110,7 +114,7 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
     }
 
     private String getEncodedString() {
-        int time = LocalTime.now(ZoneId.of("Europe/London")).getHour();
+        int time = LocalTime.now(clock).getHour();
         return switch (time) {
             case 6 ->  encodedDataStringA;
             case 7 ->  encodedDataStringB;
