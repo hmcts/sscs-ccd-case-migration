@@ -79,6 +79,13 @@ migration:
   finalDecisionOutcomeMigration:
     enabled: ${FINAL_DECISION_OUTCOME_MIGRATION_ENABLED:false}
     encoded-string: ${FINAL_DECISION_OUTCOME_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  readyToList:
+    enabled: ${READY_TO_LIST_MIGRATION_ENABLED:false}
+    encoded-string-a: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_A:==dummy++encoded--string==}
+    encoded-string-b: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_B:==dummy++encoded--string==}
+    encoded-string-c: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_C:==dummy++encoded--string==}
+    encoded-string-d: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_D:==dummy++encoded--string==}
+    encoded-string-e: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_E:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
