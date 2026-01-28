@@ -34,6 +34,11 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
     private final String encodedDataStringC;
     private final String encodedDataStringD;
     private final String encodedDataStringE;
+    private final String encodedDataStringF;
+    private final String encodedDataStringG;
+    private final String encodedDataStringH;
+    private final String encodedDataStringI;
+    private final String encodedDataStringJ;
 
 
     public ReadyToListMigration(@Value("${migration.readytolist.encoded-string-a}")
@@ -45,12 +50,28 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
                                 @Value("${migration.readyToList.encoded-string-d}")
                                  String encodedDataStringD,
                                 @Value("${migration.readyToList.encoded-string-e}")
-                                 String encodedDataStringE) {
+                                 String encodedDataStringE,
+                                @Value("${migration.readyToList.encoded-string-f}")
+                                 String encodedDataStringF,
+                                @Value("${migration.readyToList.encoded-string-g}")
+                                 String encodedDataStringG,
+                                @Value("${migration.readyToList.encoded-string-h}")
+                                 String encodedDataStringH,
+                                @Value("${migration.readyToList.encoded-string-i}")
+                                 String encodedDataStringI,
+                                @Value("${migration.readyToList.encoded-string-j}")
+                                 String encodedDataStringJ
+    ) {
         this.encodedDataStringA = encodedDataStringA;
         this.encodedDataStringB = encodedDataStringB;
         this.encodedDataStringC = encodedDataStringC;
         this.encodedDataStringD = encodedDataStringD;
         this.encodedDataStringE = encodedDataStringE;
+        this.encodedDataStringF = encodedDataStringF;
+        this.encodedDataStringG = encodedDataStringG;
+        this.encodedDataStringH = encodedDataStringH;
+        this.encodedDataStringI = encodedDataStringI;
+        this.encodedDataStringJ = encodedDataStringJ;
     }
 
     @Override
@@ -91,11 +112,16 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
     private String getEncodedString() {
         int time = LocalTime.now(ZoneId.of("Europe/London")).getHour();
         return switch (time) {
-            case 22 ->  encodedDataStringA;
-            case 23 ->  encodedDataStringB;
-            case 0 -> encodedDataStringC;
-            case 1 -> encodedDataStringD;
-            case 2 -> encodedDataStringE;
+            case 6 ->  encodedDataStringA;
+            case 7 ->  encodedDataStringB;
+            case 8 -> encodedDataStringC;
+            case 9 -> encodedDataStringD;
+            case 10 -> encodedDataStringE;
+            case 11 -> encodedDataStringF;
+            case 12 -> encodedDataStringG;
+            case 13 -> encodedDataStringH;
+            case 14 -> encodedDataStringI;
+            case 15 -> encodedDataStringJ;
             default -> throw new RuntimeException("Migration job not configured to run at " + time);
         };
     }

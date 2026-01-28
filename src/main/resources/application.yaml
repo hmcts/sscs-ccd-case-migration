@@ -86,6 +86,11 @@ migration:
     encoded-string-c: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_C:==dummy++encoded--string==}
     encoded-string-d: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_D:==dummy++encoded--string==}
     encoded-string-e: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_E:==dummy++encoded--string==}
+    encoded-string-f: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_F:==dummy++encoded--string==}
+    encoded-string-g: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_G:==dummy++encoded--string==}
+    encoded-string-h: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_H:==dummy++encoded--string==}
+    encoded-string-i: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_I:==dummy++encoded--string==}
+    encoded-string-j: ${READY_TO_LIST_MIGRATION_ENCODED_STRING_J:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}

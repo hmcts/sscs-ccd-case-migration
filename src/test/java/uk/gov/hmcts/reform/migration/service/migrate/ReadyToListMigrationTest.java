@@ -1,0 +1,87 @@
+package uk.gov.hmcts.reform.migration.service.migrate;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+
+import java.util.HashMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.gov.hmcts.reform.migration.service.migrate.ReadyToListMigration.CALLBACK_WARNING_FIELD;
+import static uk.gov.hmcts.reform.migration.service.migrate.ReadyToListMigration.READY_TO_LIST_MIGRATION_EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.ReadyToListMigration.READY_TO_LIST_MIGRATION_EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.ReadyToListMigration.READY_TO_LIST_MIGRATION_EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.RESPONSE_RECEIVED;
+
+@ExtendWith(MockitoExtension.class)
+class ReadyToListMigrationTest {
+
+    private ReadyToListMigration underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new ReadyToListMigration(
+            "encodedA",
+            "encodedB",
+            "encodedC",
+            "encodedD",
+            "encodedE",
+            "encodedF",
+            "encodedG",
+            "encodedH",
+            "encodedI",
+            "encodedJ"
+        );
+    }
+
+    @Test
+    void shouldSetIgnoreCallbackWarningsWhenStateIsResponseReceived() {
+        var data = new HashMap<String, Object>();
+        var caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .state(RESPONSE_RECEIVED.toString())
+            .data(data)
+            .build();
+
+        var result = underTest.migrate(caseDetails);
+
+        assertThat(caseDetails.getData().get(CALLBACK_WARNING_FIELD)).isEqualTo("Yes");
+        assertThat(result.summary()).isEqualTo(READY_TO_LIST_MIGRATION_EVENT_SUMMARY);
+        assertThat(result.description()).isEqualTo(READY_TO_LIST_MIGRATION_EVENT_DESCRIPTION);
+    }
+
+    @Test
+    void shouldThrowWhenStateIsNotResponseReceived() {
+        var data = new HashMap<String, Object>();
+        var caseDetails = CaseDetails.builder()
+            .id(1234L)
+            .state("someOtherState")
+            .data(data)
+            .build();
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+
+        assertThat(ex.getMessage()).contains("Skipping Case");
+        assertThat(ex.getMessage()).contains("incorrect state");
+        assertThat(ex.getMessage()).contains("someOtherState");
+        assertThat(caseDetails.getData()).doesNotContainKey(CALLBACK_WARNING_FIELD);
+    }
+
+    @Test
+    void shouldReturnEventId() {
+        assertThat(underTest.getEventId()).isEqualTo(READY_TO_LIST_MIGRATION_EVENT_ID);
+    }
+
+    @Test
+    void shouldReturnEventSummary() {
+        assertThat(underTest.getEventSummary()).isEqualTo(READY_TO_LIST_MIGRATION_EVENT_SUMMARY);
+    }
+
+    @Test
+    void shouldReturnEventDescription() {
+        assertThat(underTest.getEventDescription()).isEqualTo(READY_TO_LIST_MIGRATION_EVENT_DESCRIPTION);
+    }
+}
