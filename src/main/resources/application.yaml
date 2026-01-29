@@ -81,16 +81,7 @@ migration:
     encoded-string: ${FINAL_DECISION_OUTCOME_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   readyToList:
     enabled: ${READY_TO_LIST_MIGRATION_ENABLED:false}
-    encoded-cases-a: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_A:==dummy++encoded--string==}
-    encoded-cases-b: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_B:==dummy++encoded--string==}
-    encoded-cases-c: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_C:==dummy++encoded--string==}
-    encoded-cases-d: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_D:==dummy++encoded--string==}
-    encoded-cases-e: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_E:==dummy++encoded--string==}
-    encoded-cases-f: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_F:==dummy++encoded--string==}
-    encoded-cases-g: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_G:==dummy++encoded--string==}
-    encoded-cases-h: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_H:==dummy++encoded--string==}
-    encoded-cases-i: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_I:==dummy++encoded--string==}
-    encoded-cases-j: ${READY_TO_LIST_MIGRATION_ENCODED_CASES_J:==dummy++encoded--string==}
+    encoded-data-string: ${READY_TO_LIST_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
