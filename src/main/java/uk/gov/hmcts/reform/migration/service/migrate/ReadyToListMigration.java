@@ -37,9 +37,9 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
 
 
 
-    public ReadyToListMigration(@Value("${migration.readytolist.encoded-case-a}")
+    public ReadyToListMigration(@Value("${migration.readytolist.encoded-cases-a}")
                                  String encodedCasesBatch1,
-                                @Value("${migration.readytolist.encoded-case-b}")
+                                @Value("${migration.readytolist.encoded-cases-b}")
                                  String encodedCasesBatch2,
                                 @Value("${migration.readytolist.encoded-cases-c}")
                                  String encodedCasesBatch3,
