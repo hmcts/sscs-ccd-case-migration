@@ -3,16 +3,10 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvFileSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,8 +24,6 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.RESPONSE_RECEIVED;
 class ReadyToListMigrationTest {
 
     private ReadyToListMigration underTest;
-    private static final ZoneId LONDON = ZoneId.of("Europe/London");
-
 
     @BeforeEach
     void setUp() {
@@ -96,7 +88,5 @@ class ReadyToListMigrationTest {
         assertThat(migrationCases).hasSize(1);
         assertThat(migrationCases).contains(migrationCase);
     }
-
-
 
 }
