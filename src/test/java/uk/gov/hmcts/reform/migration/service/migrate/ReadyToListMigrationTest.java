@@ -110,7 +110,7 @@ class ReadyToListMigrationTest {
     }
 
     @Test
-    void fetchCasesToMigrate_shouldThrowOutsideConfiguredHours() {
+    void getEncodedString_shouldThrowOutsideConfiguredHours() {
         ReadyToListMigration migration = new ReadyToListMigration(
             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"
         );

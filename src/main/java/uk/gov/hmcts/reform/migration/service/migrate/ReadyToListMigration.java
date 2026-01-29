@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -30,52 +31,37 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
     static final String CALLBACK_WARNING_FIELD = "ignoreCallbackWarnings";
     static final String FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
 
-    private final String encodedDataStringA;
-    private final String encodedDataStringB;
-    private final String encodedDataStringC;
-    private final String encodedDataStringD;
-    private final String encodedDataStringE;
-    private final String encodedDataStringF;
-    private final String encodedDataStringG;
-    private final String encodedDataStringH;
-    private final String encodedDataStringI;
-    private final String encodedDataStringJ;
+    final Map<Integer, String> secretsMap;
 
     private Clock clock = Clock.system(ZoneId.of("Europe/London"));
 
 
 
-    public ReadyToListMigration(@Value("${migration.readytolist.encoded-string-a}")
-                                 String encodedDataStringA,
-                                @Value("${migration.readytolist.encoded-string-b}")
-                                 String encodedDataStringB,
-                                @Value("${migration.readytolist.encoded-string-c}")
-                                 String encodedDataStringC,
-                                @Value("${migration.readyToList.encoded-string-d}")
-                                 String encodedDataStringD,
-                                @Value("${migration.readyToList.encoded-string-e}")
-                                 String encodedDataStringE,
-                                @Value("${migration.readyToList.encoded-string-f}")
-                                 String encodedDataStringF,
-                                @Value("${migration.readyToList.encoded-string-g}")
-                                 String encodedDataStringG,
-                                @Value("${migration.readyToList.encoded-string-h}")
-                                 String encodedDataStringH,
-                                @Value("${migration.readyToList.encoded-string-i}")
-                                 String encodedDataStringI,
-                                @Value("${migration.readyToList.encoded-string-j}")
-                                 String encodedDataStringJ
+    public ReadyToListMigration(@Value("${migration.readytolist.encoded-case-a}")
+                                 String encodedCasesBatch1,
+                                @Value("${migration.readytolist.encoded-case-b}")
+                                 String encodedCasesBatch2,
+                                @Value("${migration.readytolist.encoded-cases-c}")
+                                 String encodedCasesBatch3,
+                                @Value("${migration.readyToList.encoded-cases-d}")
+                                 String encodedCasesBatch4,
+                                @Value("${migration.readyToList.encoded-cases-e}")
+                                 String encodedCasesBatch5,
+                                @Value("${migration.readyToList.encoded-cases-f}")
+                                 String encodedCasesBatch6,
+                                @Value("${migration.readyToList.encoded-cases-g}")
+                                 String encodedCasesBatch7,
+                                @Value("${migration.readyToList.encoded-cases-h}")
+                                 String encodedCasesBatch8,
+                                @Value("${migration.readyToList.encoded-cases-i}")
+                                 String encodedCasesBatch9,
+                                @Value("${migration.readyToList.encoded-cases-j}")
+                                 String encodedCasesBatch10
     ) {
-        this.encodedDataStringA = encodedDataStringA;
-        this.encodedDataStringB = encodedDataStringB;
-        this.encodedDataStringC = encodedDataStringC;
-        this.encodedDataStringD = encodedDataStringD;
-        this.encodedDataStringE = encodedDataStringE;
-        this.encodedDataStringF = encodedDataStringF;
-        this.encodedDataStringG = encodedDataStringG;
-        this.encodedDataStringH = encodedDataStringH;
-        this.encodedDataStringI = encodedDataStringI;
-        this.encodedDataStringJ = encodedDataStringJ;
+        secretsMap = Map.of(6, encodedCasesBatch1, 7, encodedCasesBatch2, 8, encodedCasesBatch3,
+                            9, encodedCasesBatch4, 10, encodedCasesBatch5, 11, encodedCasesBatch6,
+                            12, encodedCasesBatch7, 13, encodedCasesBatch8, 14, encodedCasesBatch9,
+                            15, encodedCasesBatch10);
     }
 
     @Override
@@ -91,9 +77,9 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
             return new UpdateResult(getEventSummary(), getEventDescription());
 
         } else {
-            String failureMsg = format(FAILURE_MSG, caseDetails.getId(), caseDetails.getState());
-            log.error(failureMsg);
-            throw new IllegalStateException(failureMsg);
+            String skipMsg = format(FAILURE_MSG, caseDetails.getId(), caseDetails.getState());
+            log.error(skipMsg);
+            throw new IllegalStateException(skipMsg);
         }
 
     }
@@ -115,18 +101,10 @@ public class ReadyToListMigration extends CaseMigrationProcessor {
 
     protected String getEncodedString() {
         int time = LocalTime.now(clock).getHour();
-        return switch (time) {
-            case 6 ->  encodedDataStringA;
-            case 7 ->  encodedDataStringB;
-            case 8 -> encodedDataStringC;
-            case 9 -> encodedDataStringD;
-            case 10 -> encodedDataStringE;
-            case 11 -> encodedDataStringF;
-            case 12 -> encodedDataStringG;
-            case 13 -> encodedDataStringH;
-            case 14 -> encodedDataStringI;
-            case 15 -> encodedDataStringJ;
-            default -> throw new IllegalStateException("Migration job not configured to run at " + time);
-        };
+        if (secretsMap.containsKey(time)) {
+            return secretsMap.get(time);
+        } else {
+            throw new IllegalStateException("Migration job not configured to run at " + time);
+        }
     }
 }
