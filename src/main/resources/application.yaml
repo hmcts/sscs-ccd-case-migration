@@ -82,6 +82,9 @@ migration:
   finalDecisionOutcomeMigration:
     enabled: ${FINAL_DECISION_OUTCOME_MIGRATION_ENABLED:false}
     encoded-string: ${FINAL_DECISION_OUTCOME_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  readyToList:
+    enabled: ${READY_TO_LIST_MIGRATION_ENABLED:false}
+    encoded-data-string: ${READY_TO_LIST_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
