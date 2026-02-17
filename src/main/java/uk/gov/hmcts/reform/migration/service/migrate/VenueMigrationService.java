@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 public class VenueMigrationService extends CaseMigrationProcessor {
 
     static final String VENUE_MIGRATION_EVENT_ID = "migrateCase";
-    static final String VENUE_MIGRATION_EVENT_SUMMARY = "Migrate to update processing venue for Child support cases";
+    static final String VENUE_MIGRATION_EVENT_SUMMARY = "Processing venue (Poole to Bournemouth) migration";
     static final String VENUE_MIGRATION_EVENT_DESCRIPTION = "";
     static final String PROCESSING_VENUE_FIELD = "processingVenue";
     static final String FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
