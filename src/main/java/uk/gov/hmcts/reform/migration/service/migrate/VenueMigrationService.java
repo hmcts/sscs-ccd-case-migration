@@ -57,7 +57,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
             String skipMsg = format("Skipping Case %s for migration because it is in state %s", caseDetails.getId(),
                                     caseDetails.getState());
             log.info(skipMsg);
-            throw new RuntimeException(skipMsg);
+            throw new IllegalStateException(skipMsg);
         }
 
         String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
