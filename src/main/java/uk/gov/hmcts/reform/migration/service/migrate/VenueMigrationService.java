@@ -51,14 +51,8 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
 
-        // remove condition after 30/03/2026 (after Fox Court (S) to London Tribunals migration is complete)
-        // to allow processing of cases in all states
-        if (nonNull(caseDetails.getState()) && STATES_TO_SKIP.contains(caseDetails.getState())) {
-            String skipMsg = format("Skipping Case %s for migration because it is in state %s", caseDetails.getId(),
-                                    caseDetails.getState());
-            log.info(skipMsg);
-            throw new IllegalStateException(skipMsg);
-        }
+        // remove method validateCaseState after 30/03/2026 (after Fox Court to London Tribunals migration is complete)
+        validateCaseState(caseDetails);
 
         String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
             .orElseThrow(() -> {
@@ -70,6 +64,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
         log.info("Setting processing venue to ({})", venue);
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
+
 
     @Override
     public String getEventId() {
@@ -84,5 +79,14 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     @Override
     public String getEventSummary() {
         return VENUE_MIGRATION_EVENT_SUMMARY;
+    }
+
+    private void validateCaseState(CaseDetails caseDetails) {
+        if (nonNull(caseDetails.getState()) && STATES_TO_SKIP.contains(caseDetails.getState())) {
+            String skipMsg = format("Skipping Case %s for migration because it is in state %s", caseDetails.getId(),
+                                    caseDetails.getState());
+            log.info(skipMsg);
+            throw new IllegalStateException(skipMsg);
+        }
     }
 }
