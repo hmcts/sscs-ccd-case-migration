@@ -65,7 +65,6 @@ public class VenueMigrationService extends CaseMigrationProcessor {
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
-
     @Override
     public String getEventId() {
         return VENUE_MIGRATION_EVENT_ID;
