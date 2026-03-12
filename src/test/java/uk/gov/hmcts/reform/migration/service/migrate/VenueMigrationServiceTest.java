@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -66,6 +68,15 @@ class VenueMigrationServiceTest {
         var sscsCaseData = SscsCaseData.builder().processingVenue("Bradford").build();
         when(roboticsJsonMapper.findVenueName(eq(sscsCaseData))).thenReturn(Optional.empty());
 
+        assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+    }
+
+    // remove test for skipping states after 30/03/2026 (after Fox Court (S) to London Tribunals migration is complete)
+    @ParameterizedTest
+    @ValueSource(strings = {"dormantAppealState", "draftArchived", "hearing", "voidState", "withUt"})
+    void shouldSkipCaseInDormantAppealState(String state) {
+        var caseData = new HashMap<>(Map.of("processingVenue", (Object) "Bradford"));
+        var caseDetails = CaseDetails.builder().data(caseData).state(state).id(1234L).build();
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
 

@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.State;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 import uk.gov.hmcts.reform.sscs.robotics.RoboticsJsonMapper;
 
 import java.util.List;
 
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 
 @Service
@@ -21,10 +23,14 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 public class VenueMigrationService extends CaseMigrationProcessor {
 
     static final String VENUE_MIGRATION_EVENT_ID = "migrateCase";
-    static final String VENUE_MIGRATION_EVENT_SUMMARY = "Processing venue (Poole to Bournemouth) migration";
+    static final String VENUE_MIGRATION_EVENT_SUMMARY =
+        "Processing venue (Fox Court (S) to London Tribunals) migration";
     static final String VENUE_MIGRATION_EVENT_DESCRIPTION = "";
     static final String PROCESSING_VENUE_FIELD = "processingVenue";
     static final String FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
+    static final List<String> STATES_TO_SKIP = List.of(State.DORMANT_APPEAL_STATE.getId(), State.DRAFT_ARCHIVED.getId(),
+                                                       State.HEARING.getId(), State.VOID_STATE.getId(),
+                                                       State.WITH_UT.getId());
 
     private final String encodedDataString;
     private final RoboticsJsonMapper roboticsJsonMapper;
@@ -44,6 +50,16 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
+
+        // remove condition after 30/03/2026 (after Fox Court (S) to London Tribunals migration is complete)
+        // to allow processing of cases in all states
+        if (nonNull(caseDetails.getState()) && STATES_TO_SKIP.contains(caseDetails.getState())) {
+            String skipMsg = format("Skipping Case %s for migration because it is in state %s", caseDetails.getId(),
+                                    caseDetails.getState());
+            log.info(skipMsg);
+            throw new RuntimeException(skipMsg);
+        }
+
         String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
             .orElseThrow(() -> {
                 String failureMsg = format(FAILURE_MSG, caseDetails.getId());
