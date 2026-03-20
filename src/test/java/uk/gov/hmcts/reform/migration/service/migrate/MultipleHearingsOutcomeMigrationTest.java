@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +79,10 @@ public class MultipleHearingsOutcomeMigrationTest {
             .ccdCaseId(reference)
             .build();
 
-        Map<String, Object> data = objectMapper.convertValue(caseData, Map.class);
+        Map<String, Object> data = objectMapper.convertValue(
+            caseData, new TypeReference<Map<String, Object>>() {
+            }
+        );
 
         assertThat(multipleHearingsOutcomeMigration.skipMigration(data)).isTrue();
     }
@@ -99,7 +103,10 @@ public class MultipleHearingsOutcomeMigrationTest {
                     .build()))
             .build();
 
-        Map<String, Object> data = objectMapper.convertValue(caseData, Map.class);
+        Map<String, Object> data = objectMapper.convertValue(
+            caseData, new TypeReference<Map<String, Object>>() {
+            }
+        );
 
         assertThat(multipleHearingsOutcomeMigration.skipMigration(data)).isTrue();
     }
@@ -117,7 +124,10 @@ public class MultipleHearingsOutcomeMigrationTest {
                     .build()))
             .build();
 
-        Map<String, Object> data = objectMapper.convertValue(caseData, Map.class);
+        Map<String, Object> data = objectMapper.convertValue(
+            caseData, new TypeReference<Map<String, Object>>() {
+            }
+        );
 
         assertThat(multipleHearingsOutcomeMigration.skipMigration(data)).isFalse();
     }
@@ -143,7 +153,10 @@ public class MultipleHearingsOutcomeMigrationTest {
                        .build())
             .build();
 
-        Map<String, Object> data = objectMapper.convertValue(caseData, Map.class);
+        Map<String, Object> data = objectMapper.convertValue(
+            caseData, new TypeReference<Map<String, Object>>() {
+            }
+        );
 
         when(hmcHearingsApiService.getHearingsRequest(anyString(), any())).thenReturn(response);
         when(hearingOutcomeService.mapHmcHearingToHearingOutcome(any(), any(), any()))

@@ -227,6 +227,7 @@ dependencies {
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitJupiterVersion
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitJupiterVersion
   testRuntimeOnly group: 'org.junit.vintage', name: 'junit-vintage-engine', version: junitVintageVersion
+  testImplementation(platform("org.junit:junit-bom:6.0.0-RC1"))
   testImplementation group:'org.mockito', name: 'mockito-junit-jupiter', version: '5.19.0'
   testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: powermockVersion
   testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: powermockVersion
@@ -275,7 +276,7 @@ configurations.configureEach {
 test {
   timeout = Duration.ofMinutes(30)
   environment("AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY", "some-key")
-  systemProperty 'java.locale.providers', 'COMPAT'
+  systemProperty('java.locale.providers', 'COMPAT')
 
   useJUnitPlatform()
 
