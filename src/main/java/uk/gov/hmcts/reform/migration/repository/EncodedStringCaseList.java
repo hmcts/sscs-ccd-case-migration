@@ -24,6 +24,7 @@ public class EncodedStringCaseList {
     private static final String JURISDICTION = "SSCS";
     private static final String ID_COLUMN = "reference";
     private static final String HEARING_ID_COLUMN = "hearingID";
+    private static final String HEARING_DATETIME_COLUMN = "hearingDateTime";
 
     private EncodedStringCaseList() {
     }
@@ -42,6 +43,27 @@ public class EncodedStringCaseList {
             .map(row -> entry(
                 Optional.ofNullable(row.get(ID_COLUMN)).orElse("").trim(),
                 Optional.ofNullable(row.get(HEARING_ID_COLUMN)).orElse("").trim()))
+            .forEach(entry -> {
+                String reference = entry.getKey();
+                if (resultMap.containsKey(reference)) {
+                    log.info("Case reference {} is a duplicate. Removing hearing id to skip migration.", reference);
+                    resultMap.put(reference, "");
+                } else {
+                    resultMap.put(reference, entry.getValue());
+                }
+            });
+
+        return resultMap;
+    }
+
+    public static Map<String, String> mapCaseRefToHearingIdAndDate(String encodedDataString) {
+        Map<String, String> resultMap = new HashMap<>();
+
+        decompressAndB64Decode(encodedDataString)
+            .map(row -> entry(
+                Optional.ofNullable(row.get(ID_COLUMN)).orElse("").trim(),
+                Optional.ofNullable(row.get(HEARING_ID_COLUMN)).orElse("").trim()
+                    + "|" + Optional.ofNullable(row.get(HEARING_DATETIME_COLUMN)).orElse("").trim()))
             .forEach(entry -> {
                 String reference = entry.getKey();
                 if (resultMap.containsKey(reference)) {
