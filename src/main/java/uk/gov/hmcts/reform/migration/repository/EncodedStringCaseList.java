@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.migration.repository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.reform.domain.common.CaseLoaderHearingDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
 import java.io.ByteArrayOutputStream;
@@ -23,8 +24,11 @@ public class EncodedStringCaseList {
 
     private static final String JURISDICTION = "SSCS";
     private static final String ID_COLUMN = "reference";
-    private static final String HEARING_ID_COLUMN = "hearingID";
-    private static final String HEARING_DATETIME_COLUMN = "hearingDateTime";
+    private static final String HEARING_ID_COLUMN = "hearingid";
+    private static final String HEARING_DATE_COLUMN = "hearingdate";
+    private static final String HEARING_TIME_COLUMN = "hearingtime";
+    private static final String HEARING_ADJOURNED_COLUMN = "adjourned";
+    private static final String VENUE_ID_COLUMN = "venueid";
 
     private EncodedStringCaseList() {
     }
@@ -56,21 +60,30 @@ public class EncodedStringCaseList {
         return resultMap;
     }
 
-    public static Map<String, String> mapCaseRefToHearingIdAndDate(String encodedDataString) {
-        Map<String, String> resultMap = new HashMap<>();
+    public static Map<String, CaseLoaderHearingDetails> mapCaseRefToCaseLoaderHearingDetails(String encodedDataString) {
+        Map<String, CaseLoaderHearingDetails> resultMap = new HashMap<>();
 
         decompressAndB64Decode(encodedDataString)
             .map(row -> entry(
                 Optional.ofNullable(row.get(ID_COLUMN)).orElse("").trim(),
-                Optional.ofNullable(row.get(HEARING_ID_COLUMN)).orElse("").trim()
-                    + "|" + Optional.ofNullable(row.get(HEARING_DATETIME_COLUMN)).orElse("").trim()))
+                CaseLoaderHearingDetails.builder()
+                    .venueId(Optional.ofNullable(row.get(VENUE_ID_COLUMN)).orElse("").trim())
+                    .hearingId(Optional.ofNullable(row.get(HEARING_ID_COLUMN)).orElse("").trim())
+                    .hearingDate(Optional.ofNullable(row.get(HEARING_DATE_COLUMN)).orElse("").trim())
+                    .hearingTime(Optional.ofNullable(row.get(HEARING_TIME_COLUMN)).orElse("").trim())
+                    .hearingAdjourned(Optional.ofNullable(row.get(HEARING_ADJOURNED_COLUMN)).orElse("").trim())
+                    .build()
+            ))
             .forEach(entry -> {
                 String reference = entry.getKey();
+                CaseLoaderHearingDetails hearingDetails = entry.getValue();
+                log.info("Processing case reference {}: hearing details {}", reference, hearingDetails);
                 if (resultMap.containsKey(reference)) {
                     log.info("Case reference {} is a duplicate. Removing hearing id to skip migration.", reference);
-                    resultMap.put(reference, "");
+                    resultMap.put(reference, CaseLoaderHearingDetails.builder().build());
+                    log.info("Existing hearing details for reference {}: {}", reference, resultMap.get(reference));
                 } else {
-                    resultMap.put(reference, entry.getValue());
+                    resultMap.put(reference, hearingDetails);
                 }
             });
 
