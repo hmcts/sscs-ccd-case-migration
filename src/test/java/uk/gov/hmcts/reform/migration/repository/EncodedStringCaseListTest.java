@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.domain.common.CaseLoaderHearingDetails;
 import static java.lang.String.valueOf;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.mapCaseRefToCaseLoaderHearingDetails;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.mapCaseRefToHearingId;
 
 public class EncodedStringCaseListTest {
@@ -15,7 +16,7 @@ public class EncodedStringCaseListTest {
     public static final String ENCODED_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VaqNBQC1oglo";
     private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VdJRykhNLMrMS89"
         + "MAUkbGRsbmZiYKtXGAgDaSA+Z";
-    private static final String ENCODED_HEARING_DETAILS_STRING = "eJxFjUsKAjEQRK8ivXag04mJM2cQV+7ERTCtRjCBfIRh8O4mIgz"
+    private static final String ENCODED_CASE_LOADER_HEARING_DETAILS_STRING = "eJxFjUsKAjEQRK8ivXag04mJM2cQV+7ERTCtRjCBfIRh8O4mIgz"
         + "0qt6r6vMCiW+cOFwZJhCGRi2FIrM3KMwOtmDdM9YU2DV8jC14sE0+3J0tvUFIekA1oGnozaGy76YgPa5u8a/fupgQ263g70pJSvVnudhSc8s"
         + "2ia2bT/Hgc4HP5QucrzBA";
     private static final String INVALID_ENCODED_DATA_STRING = "xxxxxxxxxxxxxxx";
@@ -41,7 +42,8 @@ public class EncodedStringCaseListTest {
 
     @Test
     void givenValidEncodedStringWithCaseloaderHearingDetails_thenReturnListOfCasesAndHearingDetailsMap() {
-        var result = EncodedStringCaseList.mapCaseRefToCaseLoaderHearingDetails(ENCODED_HEARING_DETAILS_STRING);
+        var result = mapCaseRefToCaseLoaderHearingDetails(
+            ENCODED_CASE_LOADER_HEARING_DETAILS_STRING);
 
         assertThat(result).isNotNull();
         assertThat(result.isEmpty()).isFalse();
@@ -65,6 +67,14 @@ public class EncodedStringCaseListTest {
     @Test
     void givenInvalidEncodedString_thenReturnEmptyListAndMap() {
         var result = mapCaseRefToHearingId(INVALID_ENCODED_DATA_STRING);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isEmpty()).isTrue();
+    }
+
+    @Test
+    void givenInvalidEncodedString_thenReturnEmptyCaseLoaderHearingDetails() {
+        var result = mapCaseRefToCaseLoaderHearingDetails(INVALID_ENCODED_DATA_STRING);
 
         assertThat(result).isNotNull();
         assertThat(result.isEmpty()).isTrue();

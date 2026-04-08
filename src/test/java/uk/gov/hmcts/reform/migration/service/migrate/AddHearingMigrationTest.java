@@ -22,9 +22,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.migration.service.migrate.AddHearingMigration.EVENT_DESCRIPTION;
-import static uk.gov.hmcts.reform.migration.service.migrate.AddHearingMigration.EVENT_ID;
-import static uk.gov.hmcts.reform.migration.service.migrate.AddHearingMigration.EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.migration.service.migrate.AddHearingMigration.ADD_HEARING_EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.AddHearingMigration.ADD_HEARING_EVENT_ID;
+import static uk.gov.hmcts.reform.migration.service.migrate.AddHearingMigration.ADD_HEARING_EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,10 +80,10 @@ public class AddHearingMigrationTest {
 
     @Test
     void shouldReturnCorrectEventDetails() {
-        assertThat(EVENT_ID).isEqualTo(addHearingMigration.getEventId());
-        assertThat(EVENT_SUMMARY)
+        assertThat(ADD_HEARING_EVENT_ID).isEqualTo(addHearingMigration.getEventId());
+        assertThat(ADD_HEARING_EVENT_SUMMARY)
             .isEqualTo(addHearingMigration.getEventDescription());
-        assertThat(EVENT_DESCRIPTION).isEqualTo(addHearingMigration.getEventSummary());
+        assertThat(ADD_HEARING_EVENT_DESCRIPTION).isEqualTo(addHearingMigration.getEventSummary());
     }
 
     @Test

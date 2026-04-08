@@ -32,9 +32,9 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.map
 @ConditionalOnProperty(value = "migration.addHearingMigration.enabled", havingValue = "true")
 public class AddHearingMigration extends CaseMigrationProcessor {
 
-    static final String EVENT_ID = "addHearing";
-    static final String EVENT_SUMMARY = "";
-    static final String EVENT_DESCRIPTION = "";
+    static final String ADD_HEARING_EVENT_ID = "addHearing";
+    static final String ADD_HEARING_EVENT_SUMMARY = "";
+    static final String ADD_HEARING_EVENT_DESCRIPTION = "";
     private final ObjectMapper objectMapper;
     private final VenueService venueService;
 
@@ -66,7 +66,6 @@ public class AddHearingMigration extends CaseMigrationProcessor {
             }
 
             String selectedHearingId = caseLoaderHearingDetails.getHearingId();
-
 
             List<Hearing> caseDataHearings = sscsCaseData.getHearings();
             if (isNull(caseDataHearings)) {
@@ -122,16 +121,16 @@ public class AddHearingMigration extends CaseMigrationProcessor {
 
     @Override
     public String getEventId() {
-        return EVENT_ID;
+        return ADD_HEARING_EVENT_ID;
     }
 
     @Override
     public String getEventDescription() {
-        return EVENT_DESCRIPTION;
+        return ADD_HEARING_EVENT_DESCRIPTION;
     }
 
     @Override
     public String getEventSummary() {
-        return EVENT_SUMMARY;
+        return ADD_HEARING_EVENT_SUMMARY;
     }
 }

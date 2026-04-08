@@ -76,14 +76,13 @@ public class EncodedStringCaseList {
             ))
             .forEach(entry -> {
                 String reference = entry.getKey();
-                CaseLoaderHearingDetails hearingDetails = entry.getValue();
-                log.info("Processing case reference {}: hearing details {}", reference, hearingDetails);
+                CaseLoaderHearingDetails caseLoaderHearingDetails = entry.getValue();
                 if (resultMap.containsKey(reference)) {
-                    log.info("Case reference {} is a duplicate. Removing hearing id to skip migration.", reference);
+                    log.info("Case reference {} is a duplicate, building empty CaseLoaderHearingDetails to "
+                                 + "skip migration.", reference);
                     resultMap.put(reference, CaseLoaderHearingDetails.builder().build());
-                    log.info("Existing hearing details for reference {}: {}", reference, resultMap.get(reference));
                 } else {
-                    resultMap.put(reference, hearingDetails);
+                    resultMap.put(reference, caseLoaderHearingDetails);
                 }
             });
 
