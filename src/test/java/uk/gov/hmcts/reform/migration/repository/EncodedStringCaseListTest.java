@@ -16,9 +16,9 @@ public class EncodedStringCaseListTest {
     public static final String ENCODED_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VaqNBQC1oglo";
     private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslIyNDeyNDM2NDEytzA3MDQ3VdJRykhNLMrMS89"
         + "MAUkbGRsbmZiYKtXGAgDaSA+Z";
-    private static final String ENCODED_CASE_LOADER_HEARING_DETAILS_STRING = "eJxFjUsKAjEQRK8ivXag04mJM2cQV+7ERTCtRjCBfIRh8O4mIgz"
-        + "0qt6r6vMCiW+cOFwZJhCGRi2FIrM3KMwOtmDdM9YU2DV8jC14sE0+3J0tvUFIekA1oGnozaGy76YgPa5u8a/fupgQ263g70pJSvVnudhSc8s"
-        + "2ia2bT/Hgc4HP5QucrzBA";
+    private static final String ENCODED_CASE_LOADER_HEARING_DETAILS_STRING = "eJxFjUsKAjEQRK8ivXag04mJM2cQV+7ERTCtRjCBf"
+        + "IRh8O4mIgz0qt6r6vMCiW+cOFwZJhCGRi2FIrM3KMwOtmDdM9YU2DV8jC14sE0+3J0tvUFIekA1oGnozaGy76YgPa5u8a/fupgQ263g70pJS"
+        + "vVnudhSc8s2ia2bT/Hgc4HP5QucrzBA";
     private static final String INVALID_ENCODED_DATA_STRING = "xxxxxxxxxxxxxxx";
 
     @Test
