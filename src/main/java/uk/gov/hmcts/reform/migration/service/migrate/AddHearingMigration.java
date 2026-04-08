@@ -37,6 +37,7 @@ public class AddHearingMigration extends CaseMigrationProcessor {
     static final String ADD_HEARING_EVENT_DESCRIPTION = "";
     private final ObjectMapper objectMapper;
     private final VenueService venueService;
+    private final Map<String, CaseLoaderHearingDetails> caseRefToCaseLoaderHearingDetailsMap;
 
     private final String encodedDataString;
 
@@ -45,6 +46,7 @@ public class AddHearingMigration extends CaseMigrationProcessor {
         this.encodedDataString = encodedDataString;
         this.objectMapper = new ObjectMapper().findAndRegisterModules();
         this.venueService = venueService;
+        this.caseRefToCaseLoaderHearingDetailsMap = mapCaseRefToCaseLoaderHearingDetails(encodedDataString);
     }
 
     @Override
@@ -54,8 +56,7 @@ public class AddHearingMigration extends CaseMigrationProcessor {
         if (nonNull(data)) {
             String caseId = caseDetails.getId().toString();
             SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
-            CaseLoaderHearingDetails caseLoaderHearingDetails =
-                mapCaseRefToCaseLoaderHearingDetails(encodedDataString).get(caseId);
+            CaseLoaderHearingDetails caseLoaderHearingDetails = caseRefToCaseLoaderHearingDetailsMap.get(caseId);
 
             log.info("CaseLoaderHearingDetails for case id {}: {}", caseId, caseLoaderHearingDetails);
 
