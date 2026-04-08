@@ -33,8 +33,8 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.map
 public class AddHearingMigration extends CaseMigrationProcessor {
 
     static final String ADD_HEARING_EVENT_ID = "addHearing";
-    static final String ADD_HEARING_EVENT_SUMMARY = "";
-    static final String ADD_HEARING_EVENT_DESCRIPTION = "";
+    static final String ADD_HEARING_EVENT_SUMMARY = "London Tribunals migration";
+    static final String ADD_HEARING_EVENT_DESCRIPTION = "London Tribunals migration";
     private final ObjectMapper objectMapper;
     private final VenueService venueService;
     private final Map<String, CaseLoaderHearingDetails> caseRefToCaseLoaderHearingDetailsMap;
