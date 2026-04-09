@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.map
 @ConditionalOnProperty(value = "migration.addHearingMigration.enabled", havingValue = "true")
 public class AddHearingMigration extends CaseMigrationProcessor {
 
-    static final String ADD_HEARING_EVENT_ID = "addHearing";
+    static final String ADD_HEARING_EVENT_ID = "migrateCase";
     static final String ADD_HEARING_EVENT_SUMMARY = "London Tribunals migration";
     static final String ADD_HEARING_EVENT_DESCRIPTION = "London Tribunals migration";
     private final ObjectMapper objectMapper;
