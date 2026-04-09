@@ -35,8 +35,8 @@ import static uk.gov.hmcts.reform.migration.service.migrate.FinalDecisionOutcome
 @ExtendWith(MockitoExtension.class)
 public class MultipleHearingsOutcomeMigrationTest {
 
-    private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslKysLC0NDBQ0lHKSE0sysxL93QBChoaGZ"
-        + "so1cYCACSuDIc=";
+    private static final String ENCODED_HEARING_STRING = "eJyLrlYqSk1LLUrNS05VslKysLC0NDBQ0lHKSE0sysxLz0wBChoaGZso1c"
+        + "YCACeODMc=";
     private final String reference = "889900";
     private final String hearingId = "1234";
 

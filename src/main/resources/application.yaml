@@ -67,6 +67,9 @@ migration:
   hmctsDwpStateMigration:
     enabled: ${HMCTS_DWP_STATE_MIGRATION_ENABLED:false}
     encoded-data-string: ${HMCTS_DWP_STATE_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  addHearingMigration:
+    enabled: ${ADD_HEARING_MIGRATION_ENABLED:false}
+    encoded-data-string: ${ADD_HEARING_ENCODED_DATA_STRING:==dummy++encoded--string==}
   processingVenue:
     enabled: ${VENUE_MIGRATION_ENABLED:false}
     encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
