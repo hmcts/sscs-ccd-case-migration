@@ -24,8 +24,8 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     static final String VENUE_MIGRATION_EVENT_ID = "migrateCase";
     static final String VENUE_MIGRATION_EVENT_SUMMARY =
-        "Processing venue (Fox Court (S) to London Tribunals) migration";
-    static final String VENUE_MIGRATION_EVENT_DESCRIPTION = "";
+        "London Tribunals Migration";
+    static final String VENUE_MIGRATION_EVENT_DESCRIPTION = "London Tribunals Migration";
     static final String PROCESSING_VENUE_FIELD = "processingVenue";
     static final String FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
     static final List<String> STATES_TO_SKIP = List.of(State.DORMANT_APPEAL_STATE.getId(), State.DRAFT_ARCHIVED.getId(),
