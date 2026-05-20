@@ -27,10 +27,13 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     static final String VENUE_MIGRATION_EVENT_DESCRIPTION = "Glasgow Migration";
     static final String PROCESSING_VENUE_FIELD = "processingVenue";
     static final String VENUE_TO_MIGRATE = "Stirling";
+    static final List<String> STATES_TO_SKIP = List.of(State.DORMANT_APPEAL_STATE.getId(), State.DRAFT_ARCHIVED.getId(),
+                                                       State.HEARING.getId(), State.VOID_STATE.getId(),
+                                                       State.WITH_UT.getId());
     static final String FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
-    static final String INVALID_PROCESSING_VENUE_FAILURE_MSG = "Skipping Case %s for migration because the processing venue is not %s";
+    static final String INVALID_PROCESSING_VENUE_FAILURE_MSG = "Skipping Case %s for migration because the processing "
+        + "venue is not %s";
     static final String INVALID_STATE_FAILURE_MSG = "Skipping Case %s for migration because it is in state %s";
-    static final List<String> STATES_TO_SKIP = List.of();
 
     private final String encodedDataString;
     private final RoboticsJsonMapper roboticsJsonMapper;
@@ -80,12 +83,20 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     }
 
     private void validateCase(CaseDetails caseDetails) {
-        if (nonNull(caseDetails.getData().get(PROCESSING_VENUE_FIELD)) && !caseDetails.getData().get(PROCESSING_VENUE_FIELD).equals(VENUE_TO_MIGRATE)) {
+        validateCaseProcessingVenue(caseDetails);
+        validateCaseState(caseDetails);
+    }
+
+    private void validateCaseProcessingVenue(CaseDetails caseDetails) {
+        if (nonNull(caseDetails.getData().get(PROCESSING_VENUE_FIELD))
+            && !caseDetails.getData().get(PROCESSING_VENUE_FIELD).equals(VENUE_TO_MIGRATE)) {
             String skipMsg = format(INVALID_PROCESSING_VENUE_FAILURE_MSG, caseDetails.getId(),VENUE_TO_MIGRATE);
             log.info(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
+    }
 
+    private void validateCaseState(CaseDetails caseDetails) {
         if (nonNull(caseDetails.getState()) && STATES_TO_SKIP.contains(caseDetails.getState())) {
             String skipMsg = format(INVALID_STATE_FAILURE_MSG, caseDetails.getId(),
                                     caseDetails.getState());

@@ -80,10 +80,10 @@ class VenueMigrationServiceTest {
         var caseData = new HashMap<>(Map.of("processingVenue", (Object) "invalidVenue"));
         var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
         var exception = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
-        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_PROCESSING_VENUE_FAILURE_MSG, 1234L, VENUE_TO_MIGRATE));
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_PROCESSING_VENUE_FAILURE_MSG, 1234L,
+                                                                   VENUE_TO_MIGRATE));
     }
 
-    @Disabled("Disabled as we are not currently skipping any states")
     @ParameterizedTest
     @MethodSource("getStatesToSkip")
     void shouldSkipCaseInInvalidState(String state) {
