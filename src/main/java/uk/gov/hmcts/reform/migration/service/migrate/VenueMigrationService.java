@@ -30,7 +30,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     static final List<String> STATES_TO_SKIP = List.of(State.DORMANT_APPEAL_STATE.getId(), State.DRAFT_ARCHIVED.getId(),
                                                        State.HEARING.getId(), State.VOID_STATE.getId(),
                                                        State.WITH_UT.getId());
-    static final String FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
+    static final String NULL_VENUE_FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
     static final String INVALID_PROCESSING_VENUE_FAILURE_MSG = "Skipping Case %s for migration because the processing "
         + "venue is not %s";
     static final String INVALID_STATE_FAILURE_MSG = "Skipping Case %s for migration because it is in state %s";
@@ -58,7 +58,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
         String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
             .orElseThrow(() -> {
-                String failureMsg = format(FAILURE_MSG, caseDetails.getId());
+                String failureMsg = format(NULL_VENUE_FAILURE_MSG, caseDetails.getId());
                 log.error(failureMsg);
                 return new RuntimeException(failureMsg);
             });

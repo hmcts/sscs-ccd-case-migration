@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
-import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.FAILURE_MSG;
+import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.NULL_VENUE_FAILURE_MSG;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.INVALID_PROCESSING_VENUE_FAILURE_MSG;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.INVALID_STATE_FAILURE_MSG;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.STATES_TO_SKIP;
@@ -71,7 +71,7 @@ class VenueMigrationServiceTest {
         var caseData = new HashMap<>(Map.of("processingVenue", (Object)VENUE_TO_MIGRATE));
         var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
         var exception = assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
-        assertThat(exception.getMessage()).isEqualTo(String.format(FAILURE_MSG, 1234L));
+        assertThat(exception.getMessage()).isEqualTo(String.format(NULL_VENUE_FAILURE_MSG, 1234L));
     }
 
     @Test
