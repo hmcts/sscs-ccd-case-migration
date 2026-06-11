@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 public class AwaitingConfidentialityReqMigrationTest {
 
     private AwaitingConfidentialityReqMigration awaitingConfidentialityReqMigration;
-    private  final static String ENCODED_STRING = "ENCODED_STRING";
+    private static final String ENCODED_STRING = "ENCODED_STRING";
     private CaseDetails caseDetails;
     private SscsCaseData caseData;
 
@@ -29,7 +29,7 @@ public class AwaitingConfidentialityReqMigrationTest {
     @BeforeEach
     public void setUp() {
         awaitingConfidentialityReqMigration = new AwaitingConfidentialityReqMigration(ENCODED_STRING);
-        caseData = buildCaseData("test", "childSupport", "Child Support" );
+        caseData = buildCaseData("test", "childSupport", "Child Support");
         caseDetails = CaseDetails.builder().id(123L).data(buildCaseDataMap(caseData)).build();
     }
 
@@ -47,30 +47,39 @@ public class AwaitingConfidentialityReqMigrationTest {
     @Test
     void shouldNotMigrateChildSupportCaseWithoutOtherParty() {
         caseDetails.setState("incompleteApplication");
-        var result = assertThrows(IllegalStateException.class, () -> awaitingConfidentialityReqMigration.migrate(caseDetails));
-        assertThat(result.getMessage()).isEqualTo("Skipping Case (123) for migration due to invalid other party data");
+        var result = assertThrows(IllegalStateException.class,
+                                  () -> awaitingConfidentialityReqMigration.migrate(caseDetails));
+
+        assertThat(result.getMessage())
+            .isEqualTo("Skipping Case (123) for migration due to invalid other party data");
     }
 
     @Test
     void shouldNotMigrateChildSupportCaseWithInvalidState() {
         caseDetails.setState("validAppeal");
-        var result = assertThrows(IllegalStateException.class, () -> awaitingConfidentialityReqMigration.migrate(caseDetails));
-        assertThat(result.getMessage()).isEqualTo("Skipping Case (123) for migration due to incorrect state: (validAppeal)");
+        var result = assertThrows(IllegalStateException.class,
+                                  () -> awaitingConfidentialityReqMigration.migrate(caseDetails));
+
+        assertThat(result.getMessage())
+            .isEqualTo("Skipping Case (123) for migration due to incorrect state: (validAppeal)");
     }
 
     @Test
     void shouldReturnEventId() {
-        assertThat(awaitingConfidentialityReqMigration.getEventId()).isEqualTo(AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_ID);
+        assertThat(awaitingConfidentialityReqMigration.getEventId())
+            .isEqualTo(AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_ID);
     }
 
     @Test
     void shouldReturnEventSummary() {
-        assertThat(awaitingConfidentialityReqMigration.getEventSummary()).isEqualTo(AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_SUMMARY);
+        assertThat(awaitingConfidentialityReqMigration.getEventSummary())
+            .isEqualTo(AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_SUMMARY);
     }
 
     @Test
     void shouldReturnEventDescription() {
-        assertThat(awaitingConfidentialityReqMigration.getEventDescription()).isEqualTo(AWAITING_CONFIDENTIALITY_EVENT_DESCRIPTION);
+        assertThat(awaitingConfidentialityReqMigration.getEventDescription())
+            .isEqualTo(AWAITING_CONFIDENTIALITY_EVENT_DESCRIPTION);
     }
 
 }
