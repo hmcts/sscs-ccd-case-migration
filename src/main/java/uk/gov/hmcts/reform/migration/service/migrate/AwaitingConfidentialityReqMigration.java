@@ -25,7 +25,7 @@ public class AwaitingConfidentialityReqMigration extends CaseMigrationProcessor 
 
     static final String AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_ID = "adminSendToAwaitConfidentialityRequirements";
     static final String AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_SUMMARY
-        = "Move case state to Awaiting Confidentiality Requirements";
+        = "Case state moved to Awaiting confidentiality requirements";
     static final String AWAITING_CONFIDENTIALITY_EVENT_DESCRIPTION = "";
     static final String STATE_FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
     static final String OTHER_PARTY_FAILURE_MSG = "Skipping Case (%s) for migration due to invalid other party data";
