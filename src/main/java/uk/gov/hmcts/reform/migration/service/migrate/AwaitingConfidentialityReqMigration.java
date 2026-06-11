@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,6 +10,8 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
+import java.util.List;
+import java.util.Objects;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -24,7 +24,8 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.INCOMPLETE_APPLICATION;
 public class AwaitingConfidentialityReqMigration extends CaseMigrationProcessor {
 
     static final String AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_ID = "adminSendToAwaitConfidentialityRequirements";
-    static final String AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_SUMMARY = "Move case state to Awaiting Confidentiality Requirements";
+    static final String AWAITING_CONFIDENTIALITY_MIGRATION_EVENT_SUMMARY
+        = "Move case state to Awaiting Confidentiality Requirements";
     static final String AWAITING_CONFIDENTIALITY_EVENT_DESCRIPTION = "";
     static final String STATE_FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
     static final String OTHER_PARTY_FAILURE_MSG = "Skipping Case (%s) for migration due to invalid other party data";
