@@ -198,6 +198,7 @@ ext {
   jacksonVersion = '2.20.0'
   set('log4j2.version', '2.26.0')
   set('commons-lang3.version', '3.20.0')
+  set('spring-framework.version', '6.2.19')
 }
 
 dependencyManagement {
