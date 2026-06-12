@@ -88,6 +88,9 @@ migration:
   readyToList:
     enabled: ${READY_TO_LIST_MIGRATION_ENABLED:false}
     encoded-data-string: ${READY_TO_LIST_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  awaitingConfidentialityReq:
+    enabled: ${AWAITING_CONFIDENTIALITY_REQ_MIGRATION_ENABLED:false}
+    encoded-data-string: ${AWAITING_CONFIDENTIALITY_REQ_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
