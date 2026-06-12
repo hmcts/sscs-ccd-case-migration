@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
 import uk.gov.hmcts.reform.sscs.ccd.domain.CcdValue;
 import uk.gov.hmcts.reform.sscs.ccd.domain.OtherParty;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
@@ -62,6 +63,20 @@ public class AwaitingConfidentialityReqMigrationTest {
 
         assertThat(result.getMessage())
             .isEqualTo("Skipping Case (123) for migration due to incorrect state: (validAppeal)");
+    }
+
+    @Test
+    void shouldNotMigrateNonChildSupportCase() {
+
+        caseData.getAppeal().setBenefitType(BenefitType.builder()
+                                                .code("PIP").description("Personal Independence Payment").build());
+        caseDetails.setData(buildCaseDataMap(caseData));
+        caseDetails.setState("incompleteApplication");
+        var result = assertThrows(IllegalStateException.class,
+                                  () -> awaitingConfidentialityReqMigration.migrate(caseDetails));
+
+        assertThat(result.getMessage())
+            .isEqualTo("Skipping Case (123) for migration due to incorrect benefit type: (PIP)");
     }
 
     @Test
