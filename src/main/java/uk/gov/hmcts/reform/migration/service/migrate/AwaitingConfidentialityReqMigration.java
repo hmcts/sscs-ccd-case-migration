@@ -53,7 +53,8 @@ public class AwaitingConfidentialityReqMigration extends CaseMigrationProcessor 
         }
         SscsCaseData sscsCaseData = convertToSscsCaseData(caseDetails.getData());
         if (!sscsCaseData.isBenefitType(Benefit.CHILD_SUPPORT)) {
-            String skipMsg = format(BENEFIT_FAILURE_MSG, caseDetails.getId(), sscsCaseData.getBenefitType().orElse(null));
+            String skipMsg = format(BENEFIT_FAILURE_MSG, caseDetails.getId(),
+                                    sscsCaseData.getBenefitType().orElse(null));
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
