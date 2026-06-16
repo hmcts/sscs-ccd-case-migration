@@ -208,6 +208,10 @@ dependencyManagement {
   }
 }
 
+def versions = [
+  springsecurity : '6.5.11',
+]
+
 dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -217,11 +221,11 @@ dependencies {
   implementation group: 'org.springframework.retry', name: 'spring-retry'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-bootstrap'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-resource-server'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-client'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose'
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core'
-  implementation group: 'org.springframework.security', name: 'spring-security-config'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-resource-server', version: versions.springsecurity
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-client', version: versions.springsecurity
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose', version: versions.springsecurity
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core', version: versions.springsecurity
+  implementation group: 'org.springframework.security', name: 'spring-security-config', version: versions.springsecurity
 
   implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.4'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
