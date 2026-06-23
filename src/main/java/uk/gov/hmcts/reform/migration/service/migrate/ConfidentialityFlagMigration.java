@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -114,9 +113,9 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     private Boolean updateAppeallant(Map<String, Object> data) {
         Boolean appellantUpdated = false;
         if (data.containsKey("appeal")) {
-            Map<String, Object> appeal = (HashMap<String, Object>) data.get("appeal");
+            Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
             if (appeal.containsKey("appellant")) {
-                Map<String, Object> appellant = (HashMap<String, Object>) appeal.get("appellant");
+                Map<String, Object> appellant = (Map<String, Object>) appeal.get("appellant");
                 if (appellant.containsKey("confidentialityRequired")) {
                     appellant.put("confidentialityRequirement", appellant.get("confidentialityRequired").toString());
                     appellant.remove("confidentialityRequired");
