@@ -103,8 +103,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     private Boolean updateIsConfidential(Map<String, Object> data) {
         Boolean isConfidentialUpdated = false;
         if (data.containsKey("isConfidentialCase")) {
-            data.put("confidentialityRequirement", data.get("isConfidentialCase").toString());
-            data.remove("isConfidentialCase");
+            data.put("confidentialCaseStatus", data.get("isConfidentialCase").toString());
+            data.put("isConfidentialCase", null);
             isConfidentialUpdated = true;
         }
         return isConfidentialUpdated;
