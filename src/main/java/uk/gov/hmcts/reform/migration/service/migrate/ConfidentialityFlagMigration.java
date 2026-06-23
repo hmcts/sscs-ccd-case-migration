@@ -6,20 +6,17 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.sscs.ccd.domain.CcdValue;
-import uk.gov.hmcts.reform.sscs.ccd.domain.OtherParty;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
@@ -29,7 +26,7 @@ import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
 @ConditionalOnProperty(value = "migration.confidentialityFlag.enabled", havingValue = "true")
 public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
 
-    static final String CONFIDENTIALITY_FLAG_MIGRATION_EVENT_ID = "caseMigrated";
+    static final String CONFIDENTIALITY_FLAG_MIGRATION_EVENT_ID = "migrateCase";
     static final String CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY
         = "Confidentiality fields migrated successfully";
     static final String CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION = "";
@@ -53,7 +50,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
 
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
-        if (!Objects.equals(caseDetails.getState(), VOID_STATE.toString())) {
+        if (Objects.equals(caseDetails.getState(), VOID_STATE.toString())) {
             String skipMsg = format(STATE_FAILURE_MSG, caseDetails.getId(), caseDetails.getState());
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
@@ -64,37 +61,70 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             throw new IllegalStateException(skipMsg);
 
         }
-        SscsCaseData sscsCaseData = convertToSscsCaseData(caseDetails.getData());
-        YesNo isConfidentialCase = sscsCaseData.getIsConfidentialCase();
-        YesNo appellantConfidentialityRequired = sscsCaseData.getAppeal().getAppellant().getConfidentialityRequired();
-        List<CcdValue<OtherParty>> otherPartiesConfidential =  sscsCaseData.getOtherParties().stream()
-            .filter(otherParty -> nonNull(otherParty.getValue().getConfidentialityRequired())).toList();
+        Map<String, Object> data = caseDetails.getData();
+        Boolean appellantUpdated = updateAppeallant(data);
+        Boolean isConfidentialUpdated = updateIsConfidential(data);
+        Boolean otherPartiesUpdated = updateOtherParties(data);
 
-        if (isNull(isConfidentialCase) && isNull(appellantConfidentialityRequired)
-            && otherPartiesConfidential.isEmpty()) {
+        if (!appellantUpdated && !otherPartiesUpdated && !isConfidentialUpdated) {
             String skipMsg = format(NO_CONFIDENTIALITY_MESSAGE, caseDetails.getId());
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
-
         }
 
-        if (!otherPartiesConfidential.isEmpty()) {
-            List<CcdValue<OtherParty>> otherPartiesUpdated = sscsCaseData.getOtherParties().stream().map(party -> {
-                if (nonNull(party.getValue().getConfidentialityRequired())) {
-                    party.getValue().setConfidentialityRequired(null);
-                }
-                return party;
-            }).toList();
-            sscsCaseData.setOtherParties(otherPartiesUpdated);
-        }
-        if (nonNull(isConfidentialCase)) {
-            sscsCaseData.setIsConfidentialCase(null);
-        }
-        if (nonNull(appellantConfidentialityRequired)) {
-            sscsCaseData.getAppeal().getAppellant().setConfidentialityRequired(null);
-        }
         return new UpdateResult(getEventSummary(), getEventDescription());
 
+    }
+
+    private Boolean updateOtherParties(Map<String, Object> data) {
+        Boolean updateOtherParties = false;
+        if (data.containsKey("otherParties")) {
+            ArrayList<Map<String, Object>> otherParties = (ArrayList<Map<String, Object>>) data.get("otherParties");
+            for (Map<String, Object> op : otherParties) {
+                if (updateOtherParty(op)) {
+                    updateOtherParties = true;
+                }
+            }
+        }
+        return updateOtherParties;
+    }
+
+    private Boolean updateOtherParty(Map<String, Object> op) {
+        Boolean otherPartyUpdated = false;
+        if (op.containsKey("confidentialityRequired")) {
+            op.put("confidentialityRequirement", op.get("confidentialityRequired").toString());
+            op.remove("confidentialityRequired");
+            otherPartyUpdated = true;
+        }
+
+        return otherPartyUpdated;
+
+    }
+
+    private Boolean updateIsConfidential(Map<String, Object> data) {
+        Boolean isConfidentialUpdated = false;
+        if (data.containsKey("isConfidentialCase")) {
+            data.put("confidentialityRequirement", data.get("isConfidentialCase").toString());
+            data.remove("isConfidentialCase");
+            isConfidentialUpdated = true;
+        }
+        return isConfidentialUpdated;
+    }
+
+    private Boolean updateAppeallant(Map<String, Object> data) {
+        Boolean appellantUpdated = false;
+        if (data.containsKey("appeal")) {
+            Map<String, Object> appeal = (HashMap<String, Object>) data.get("appeal");
+            if (appeal.containsKey("appellant")) {
+                Map<String, Object> appellant = (HashMap<String, Object>) appeal.get("appellant");
+                if (appellant.containsKey("confidentialityRequired")) {
+                    appellant.put("confidentialityRequirement", appellant.get("confidentialityRequired").toString());
+                    appellant.remove("confidentialityRequired");
+                    appellantUpdated = true;
+                }
+            }
+        }
+        return appellantUpdated;
     }
 
     @Override
