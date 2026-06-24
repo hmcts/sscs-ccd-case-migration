@@ -31,8 +31,10 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         = "Confidentiality fields migrated successfully";
     static final String CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION = "";
     static final String STATE_FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
-    static final String DATE_FAILURE_MESSAGE = "Skipping Case (%s) for migration due to appeal being dormant for over 6 months.";
-    static final String NO_CONFIDENTIALITY_MESSAGE = "Skipping Case (%s) for migration due to no confidentiality fields.";
+    static final String DATE_FAILURE_MESSAGE
+        = "Skipping Case (%s) for migration due to appeal being dormant for over 6 months.";
+    static final String NO_CONFIDENTIALITY_MESSAGE
+        = "Skipping Case (%s) for migration due to no confidentiality fields.";
     static final LocalDateTime dormantCutOffDate = LocalDateTime.now().minusMonths(6);
 
 
@@ -72,9 +74,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
-
         return new UpdateResult(getEventSummary(), getEventDescription());
-
     }
 
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
@@ -99,14 +99,12 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             op.remove("confidentialityRequired");
             otherPartyUpdated = true;
         }
-
         return otherPartyUpdated;
-
     }
 
     private Boolean updateIsConfidential(Map<String, Object> data, Long caseId) {
         Boolean isConfidentialUpdated = false;
-        Object isConfidentialCase= data.get("isConfidentialCase");
+        Object isConfidentialCase = data.get("isConfidentialCase");
         if (nonNull(isConfidentialCase)) {
             data.put("confidentialCaseStatus", isConfidentialCase.toString());
             data.put("isConfidentialCase", null);
