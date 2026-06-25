@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
@@ -131,18 +133,19 @@ class ConfidentialityFlagMigrationTest {
             .isEqualTo(String.format(ConfidentialityFlagMigration.NO_CONFIDENTIALITY_MESSAGE, 123L));
     }
 
-    @Test
-    void shouldThrowExceptionWhenCaseIsVoid() {
+    @ParameterizedTest
+    @ValueSource(strings = {"draftArchived", "voidState"})
+    void shouldThrowExceptionWhenCaseIsVoid(String state) {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
-            .state(VOID_STATE.toString())
+            .state(state)
             .build();
 
         var exception = assertThrows(IllegalStateException.class,
                                      () -> confidentialityFlagMigration.migrate(caseDetails));
 
         assertThat(exception.getMessage())
-            .isEqualTo(String.format(ConfidentialityFlagMigration.STATE_FAILURE_MSG, 123L, VOID_STATE.toString()));
+            .isEqualTo(String.format(ConfidentialityFlagMigration.STATE_FAILURE_MSG, 123L, state));
     }
 
     @Test

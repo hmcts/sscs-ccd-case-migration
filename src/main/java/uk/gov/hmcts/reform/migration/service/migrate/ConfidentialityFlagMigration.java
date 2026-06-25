@@ -18,6 +18,7 @@ import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT_ARCHIVED;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
 
 @Service
@@ -52,7 +53,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
         Long caseId = caseDetails.getId();
-        if (Objects.equals(caseDetails.getState(), VOID_STATE.toString())) {
+        if (Objects.equals(caseDetails.getState(), VOID_STATE.toString())
+            || Objects.equals(caseDetails.getState(), DRAFT_ARCHIVED.toString())) {
             String skipMsg = format(STATE_FAILURE_MSG, caseId, caseDetails.getState());
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
