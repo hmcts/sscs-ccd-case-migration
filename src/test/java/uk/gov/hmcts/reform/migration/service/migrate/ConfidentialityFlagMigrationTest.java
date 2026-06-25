@@ -21,7 +21,6 @@ import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagM
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_MIGRATION_EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
 
 class ConfidentialityFlagMigrationTest {
 
