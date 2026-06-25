@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -80,7 +79,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
         Boolean updateOtherParties = false;
         if (data.containsKey("otherParties")) {
-            ArrayList<Map<String, Object>> otherParties = (ArrayList<Map<String, Object>>) data.get("otherParties");
+            List<Map<String, Object>> otherParties = (List<Map<String, Object>>) data.get("otherParties");
             for (Map<String, Object> op : otherParties) {
                 if (op.containsKey("value") && updateOtherParty((Map<String, Object>) op.get("value"))) {
                     log.info("Updating other party confidentiality for case {}", caseId);
