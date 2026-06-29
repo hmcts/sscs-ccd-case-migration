@@ -91,6 +91,9 @@ migration:
   awaitingConfidentialityReq:
     enabled: ${AWAITING_CONFIDENTIALITY_REQ_MIGRATION_ENABLED:false}
     encoded-data-string: ${AWAITING_CONFIDENTIALITY_REQ_ENCODED_STRING:==dummy++encoded--string==}
+  interpreterLanguageCode:
+    enabled: ${INTERPRETER_LANGUAGE_CODE_MIGRATION_ENABLED:false}
+    encoded-data-string: ${INTERPRETER_LANGUAGE_CODE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
