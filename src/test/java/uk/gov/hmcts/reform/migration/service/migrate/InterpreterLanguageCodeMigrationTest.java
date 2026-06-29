@@ -18,12 +18,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Long.parseLong;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
 import static uk.gov.hmcts.reform.migration.service.migrate.InterpreterLanguageCodeMigration.HEARING_OPTIONS_LANG_CODE_PATH;
 import static uk.gov.hmcts.reform.migration.service.migrate.InterpreterLanguageCodeMigration.INTERPRETER_MIGRATION_EVENT_DESCRIPTION;
+import static uk.gov.hmcts.reform.migration.service.migrate.InterpreterLanguageCodeMigration.INTERPRETER_MIGRATION_EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.InterpreterLanguageCodeMigration.INTERPRETER_MIGRATION_EVENT_SUMMARY;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
@@ -31,8 +34,6 @@ import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetails
 
 @Slf4j
 class InterpreterLanguageCodeMigrationTest {
-    private static final String ENCODED_STRING = "";
-    private static final String CASE_REFERENCE = "12332445";
     private final String albanianLegacyCode = "alb";
     private final String albanianMrdCode = "sqi";
     private final String spanishMrdCode = "sqi";
@@ -59,12 +60,13 @@ class InterpreterLanguageCodeMigrationTest {
                                    .scheduleHearing("No")
                                    .languageInterpreter("Yes")
                                    .build());
-        caseDetails = CaseDetails.builder().data(buildCaseDataMap(caseData)).id(parseLong(CASE_REFERENCE)).build();
+        caseDetails = CaseDetails.builder().data(buildCaseDataMap(caseData)).id(1234L).build();
     }
 
     @Test
     @DisplayName("Event details should be correct")
     void shouldReturnCorrectEventDetails() {
+        assertEquals(INTERPRETER_MIGRATION_EVENT_ID, interpreterLanguageCodeMigration.getEventId());
         assertEquals(INTERPRETER_MIGRATION_EVENT_DESCRIPTION, interpreterLanguageCodeMigration.getEventDescription());
         assertEquals(INTERPRETER_MIGRATION_EVENT_SUMMARY, interpreterLanguageCodeMigration.getEventSummary());
     }
@@ -170,5 +172,14 @@ class InterpreterLanguageCodeMigrationTest {
         assertNull(InterpreterLanguageCodeMigration
                        .getParentField(Map.of("appeal", Map.of("hearingOptions", "Not HearingOptions")),
                                        HEARING_OPTIONS_LANG_CODE_PATH));
+    }
+
+    @Test
+    void shouldFetchCasesToMigrate() {
+        var migrationCase = SscsCaseDetails.builder().id(ENCODED_CASE_ID).jurisdiction("SSCS").build();
+        List<SscsCaseDetails> migrationCases = interpreterLanguageCodeMigration.fetchCasesToMigrate();
+
+        assertThat(migrationCases).hasSize(1);
+        assertThat(migrationCases).contains(migrationCase);
     }
 }
