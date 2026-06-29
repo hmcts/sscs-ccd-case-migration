@@ -1,10 +1,5 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
-
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -13,6 +8,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
+
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 
 @Service
 @Slf4j
@@ -103,7 +104,7 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> getParentField(Map<String , Object> root, List<String> path) {
+    public static Map<String, Object> getParentField(Map<String, Object> root, List<String> path) {
         if (root == null || path == null || path.isEmpty()) {
             log.warn("Root or path not provided to get parent field");
             return null;
@@ -133,7 +134,8 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
     public void updateLangCode(Map<String, Object> parentField, String oldLangCode, String fieldName) {
         if (parentField != null && LANGUAGE_CODE_MAP.containsKey(oldLangCode)) {
             parentField.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode));
-            log.info("Updated language code of field {} from \"{}\" to \"{}\"", fieldName, oldLangCode, parentField.get(LANG_CODE));
+            log.info("Updated language code of field {} from \"{}\" to \"{}\"",
+                     fieldName, oldLangCode, parentField.get(LANG_CODE));
         } else  {
             log.warn("Language code for field \"{}\" was NOT updated. Parent exists: {}. Current value: \"{}\"",
                      fieldName,

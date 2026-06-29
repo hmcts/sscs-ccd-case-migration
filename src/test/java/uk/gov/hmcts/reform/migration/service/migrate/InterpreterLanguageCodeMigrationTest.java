@@ -1,5 +1,23 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.DynamicList;
+import uk.gov.hmcts.reform.sscs.ccd.domain.DynamicListItem;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingInterpreter;
+import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOptions;
+import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import static java.lang.Long.parseLong;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,36 +29,19 @@ import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.convertCaseDetailsToSscsCaseDetails;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.DynamicList;
-import uk.gov.hmcts.reform.sscs.ccd.domain.DynamicListItem;
-import uk.gov.hmcts.reform.sscs.ccd.domain.HearingInterpreter;
-import uk.gov.hmcts.reform.sscs.ccd.domain.HearingOptions;
-import uk.gov.hmcts.reform.sscs.ccd.domain.OverrideFields;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
-import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
-import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
-
 @Slf4j
 class InterpreterLanguageCodeMigrationTest {
     private static final String ENCODED_STRING = "";
     private static final String CASE_REFERENCE = "12332445";
-    private final String ALBANIAN_LEGACY_CODE = "alb";
-    private final String ALBANIAN_MRD_CODE = "sqi";
-    private final String SPANISH_MRD_CODE = "sqi";
-    private final DynamicList ALBANIAN_LEGACY = new DynamicList(
-        new DynamicListItem(ALBANIAN_LEGACY_CODE, "Albanian"), Collections.emptyList());
-    private final DynamicList ALBANIAN_MRD = new DynamicList(
-        new DynamicListItem(ALBANIAN_MRD_CODE, "Albanian"), Collections.emptyList());
-    private final DynamicList SPANISH = new DynamicList(
-        new DynamicListItem(SPANISH_MRD_CODE, "Spanish"), Collections.emptyList());
+    private final String albanianLegacyCode = "alb";
+    private final String albanianMrdCode = "sqi";
+    private final String spanishMrdCode = "sqi";
+    private final DynamicList albanianLegacy = new DynamicList(
+        new DynamicListItem(albanianLegacyCode, "Albanian"), Collections.emptyList());
+    private final DynamicList albanianMrd = new DynamicList(
+        new DynamicListItem(albanianMrdCode, "Albanian"), Collections.emptyList());
+    private final DynamicList spanish = new DynamicList(
+        new DynamicListItem(spanishMrdCode, "Spanish"), Collections.emptyList());
     private InterpreterLanguageCodeMigration interpreterLanguageCodeMigration;
     private CaseDetails caseDetails;
     private SscsCaseData caseData;
@@ -51,8 +52,8 @@ class InterpreterLanguageCodeMigrationTest {
         caseData = buildCaseData();
         caseData.getAppeal()
             .setHearingOptions(HearingOptions.builder()
-                                   .languagesList(ALBANIAN_LEGACY)
-                                   .languages(ALBANIAN_LEGACY.getValue().getLabel())
+                                   .languagesList(albanianLegacy)
+                                   .languages(albanianLegacy.getValue().getLabel())
                                    .wantsSupport("No")
                                    .wantsToAttend("Yes")
                                    .scheduleHearing("No")
@@ -78,12 +79,12 @@ class InterpreterLanguageCodeMigrationTest {
 
     @Test
     @DisplayName("Should migrate to MRD language codes when legacy code is configured")
-    void shouldMigrateToMRDLanguageCodesWhenLegacyCodeIsConfigured() {
+    void shouldMigrateToMrdLanguageCodesWhenLegacyCodeIsConfigured() {
         caseData.getSchedulingAndListingFields()
             .setOverrideFields(OverrideFields.builder()
                                    .duration(75)
                                    .appellantInterpreter(HearingInterpreter.builder()
-                                                             .interpreterLanguage(ALBANIAN_LEGACY)
+                                                             .interpreterLanguage(albanianLegacy)
                                                              .isInterpreterWanted(YesNo.YES)
                                                              .build())
                                    .build());
@@ -101,9 +102,12 @@ class InterpreterLanguageCodeMigrationTest {
 
         SscsCaseDetails migratedcase = convertCaseDetailsToSscsCaseDetails(caseDetails);
 
-        assertEquals(ALBANIAN_MRD_CODE, migratedcase.getData().getAppeal().getHearingOptions().getLanguagesList().getValue().getCode());
-        assertEquals(ALBANIAN_MRD_CODE, migratedcase.getData().getSchedulingAndListingFields().getOverrideFields().getAppellantInterpreter().getInterpreterLanguage().getValue().getCode());
-        assertNull(migratedcase.getData().getSchedulingAndListingFields().getDefaultListingValues().getAppellantInterpreter().getInterpreterLanguage());
+        assertEquals(albanianMrdCode,
+                     migratedcase.getData().getAppeal().getHearingOptions().getLanguagesList().getValue().getCode());
+        assertEquals(albanianMrdCode, migratedcase.getData().getSchedulingAndListingFields().getOverrideFields()
+            .getAppellantInterpreter().getInterpreterLanguage().getValue().getCode());
+        assertNull(migratedcase.getData().getSchedulingAndListingFields().getDefaultListingValues()
+                       .getAppellantInterpreter().getInterpreterLanguage());
     }
 
     @Test
@@ -111,8 +115,8 @@ class InterpreterLanguageCodeMigrationTest {
     void shouldSkipMigrationIfNoneOfLanguagesAreLegacy() {
         caseData.getAppeal()
             .setHearingOptions(HearingOptions.builder()
-                                   .languagesList(ALBANIAN_MRD)
-                                   .languages(ALBANIAN_MRD.getValue().getLabel())
+                                   .languagesList(albanianMrd)
+                                   .languages(albanianMrd.getValue().getLabel())
                                    .wantsSupport("No")
                                    .wantsToAttend("Yes")
                                    .scheduleHearing("No")
@@ -129,21 +133,23 @@ class InterpreterLanguageCodeMigrationTest {
             .setDefaultListingValues(OverrideFields.builder()
                                          .duration(75)
                                          .appellantInterpreter(HearingInterpreter.builder()
-                                                                   .interpreterLanguage(SPANISH)
+                                                                   .interpreterLanguage(spanish)
                                                                    .isInterpreterWanted(YesNo.YES)
                                                                    .build())
                                          .build());
         caseDetails.setData(buildCaseDataMap(caseData));
 
         assertThatThrownBy(() -> interpreterLanguageCodeMigration.migrate(caseDetails))
-                    .hasMessageContaining("Skipping case for migration. Language codes are not included in configured migration codes:");
+            .hasMessageContaining("Skipping case for migration. Language codes are not included in "
+                                      + "configured migration codes:");
     }
 
     @Test
     @DisplayName("Should return parent field")
     void shouldReturnParentField() {
         Map<String, Object> caseDataMap = buildCaseDataMap(caseData);
-        assertEquals(Map.of("code", "alb", "label", "Albanian"), InterpreterLanguageCodeMigration.getParentField(caseDataMap, HEARING_OPTIONS_LANG_CODE_PATH));
+        assertEquals(Map.of("code", "alb", "label", "Albanian"),
+                     InterpreterLanguageCodeMigration.getParentField(caseDataMap, HEARING_OPTIONS_LANG_CODE_PATH));
     }
 
     @Test
@@ -162,6 +168,7 @@ class InterpreterLanguageCodeMigrationTest {
         assertNull(InterpreterLanguageCodeMigration
                        .getParentField(caseDataMap, List.of("defaultListingValues", "appellantInterpreter", "value")));
         assertNull(InterpreterLanguageCodeMigration
-                       .getParentField(Map.of("appeal", Map.of("hearingOptions", "Not HearingOptions")), HEARING_OPTIONS_LANG_CODE_PATH));
+                       .getParentField(Map.of("appeal", Map.of("hearingOptions", "Not HearingOptions")),
+                                       HEARING_OPTIONS_LANG_CODE_PATH));
     }
 }
