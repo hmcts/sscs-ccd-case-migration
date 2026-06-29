@@ -24,7 +24,7 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
     static final String INTERPRETER_MIGRATION_EVENT_DESCRIPTION = "Interpreter language code migration";
     static final String LANG_CODE = "code";
     static final List<String> HEARING_OPTIONS_LANG_CODE_PATH =
-        List.of("appeal", "hearingOptions", "languagesList", "values");
+        List.of("appeal", "hearingOptions", "languagesList", "value");
     static final List<String> OVERRIDE_FIELDS_LANG_CODE_PATH =
         List.of("overrideFields", "appellantInterpreter", "interpreterLanguage", "value");
     static final List<String> DEFAULT_LISTING_LANG_CODE_PATH =
@@ -60,19 +60,13 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
         if (nonNull(data)) {
             log.info("Preparing language codes for case {}", caseDetails.getId());
             Map<String, Object> hearingOptionsLang = getParentField(data, HEARING_OPTIONS_LANG_CODE_PATH);
-            String hearingOptionLangCode = hearingOptionsLang != null
-                ? String.valueOf(hearingOptionsLang.get(LANG_CODE))
-                : "";
+            String hearingOptionLangCode = getLangCode(hearingOptionsLang);
 
             Map<String, Object> overrideFieldLang = getParentField(data, OVERRIDE_FIELDS_LANG_CODE_PATH);
-            String overrideFieldLangCode = overrideFieldLang != null
-                ? String.valueOf(overrideFieldLang.get(LANG_CODE))
-                :  "";
+            String overrideFieldLangCode = getLangCode(overrideFieldLang);
 
             Map<String, Object> defaultListingLang = getParentField(data, DEFAULT_LISTING_LANG_CODE_PATH);
-            String defaultListingLangCode = defaultListingLang != null
-                ? String.valueOf(defaultListingLang.get(LANG_CODE))
-                : "";
+            String defaultListingLangCode = getLangCode(defaultListingLang);
 
             if (!LANGUAGE_CODE_MAP.containsKey(hearingOptionLangCode)
                 && !LANGUAGE_CODE_MAP.containsKey(overrideFieldLangCode)
@@ -108,6 +102,7 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
         return INTERPRETER_MIGRATION_EVENT_SUMMARY;
     }
 
+    @SuppressWarnings("unchecked")
     public static Map<String, Object> getParentField(Map<String , Object> root, List<String> path) {
         if (root == null || path == null || path.isEmpty()) {
             log.warn("Root or path not provided to get parent field");
@@ -140,10 +135,15 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
             parentField.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode));
             log.info("Updated language code of field {} from \"{}\" to \"{}\"", fieldName, oldLangCode, parentField.get(LANG_CODE));
         } else  {
-            log.warn("Language code for field {} was NOT updated. Field {} language code {} ", fieldName,
-                     parentField != null ? "exists, but " : "doesn't exist and",
-                     oldLangCode.isEmpty() ? "is empty" : "doesn't need to be migrated: " + oldLangCode);
+            log.warn("Language code for field \"{}\" was NOT updated. Parent exists: {}. Current value: \"{}\"",
+                     fieldName,
+                     parentField != null,
+                     oldLangCode.isEmpty() ? "EMPTY" : oldLangCode);
         }
 
+    }
+
+    public String getLangCode(Map<String, Object> parentField) {
+        return (parentField != null && parentField.get(LANG_CODE) != null) ? (String) parentField.get(LANG_CODE) : "";
     }
 }
