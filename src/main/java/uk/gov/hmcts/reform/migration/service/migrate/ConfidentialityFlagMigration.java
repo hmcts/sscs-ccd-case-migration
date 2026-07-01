@@ -67,10 +67,9 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         }
         Map<String, Object> data = caseDetails.getData();
         Boolean appellantUpdated = updateAppeallant(data, caseId);
-        Boolean isConfidentialUpdated = updateIsConfidential(data, caseId);
         Boolean otherPartiesUpdated = updateOtherParties(data, caseId);
 
-        if (!appellantUpdated && !otherPartiesUpdated && !isConfidentialUpdated) {
+        if (!appellantUpdated && !otherPartiesUpdated) {
             String skipMsg = format(NO_CONFIDENTIALITY_MESSAGE, caseDetails.getId());
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
@@ -103,18 +102,6 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         return otherPartyUpdated;
     }
 
-    private Boolean updateIsConfidential(Map<String, Object> data, Long caseId) {
-        Boolean isConfidentialUpdated = false;
-        Object isConfidentialCase = data.get("isConfidentialCase");
-        if (nonNull(isConfidentialCase)) {
-            data.put("confidentialCaseStatus", isConfidentialCase.toString());
-            data.put("isConfidentialCase", null);
-            log.info("Updating isConfidentialCase for case {}", caseId);
-
-            isConfidentialUpdated = true;
-        }
-        return isConfidentialUpdated;
-    }
 
     private Boolean updateAppeallant(Map<String, Object> data, Long caseId) {
         Boolean appellantUpdated = false;

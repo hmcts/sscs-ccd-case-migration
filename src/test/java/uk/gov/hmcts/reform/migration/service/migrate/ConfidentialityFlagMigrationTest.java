@@ -60,21 +60,6 @@ class ConfidentialityFlagMigrationTest {
         assertThat(migrationCases).contains(migrationCase);
     }
 
-    @Test
-    void shouldMigrateWhenIsConfidentialCaseIsPresent() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("isConfidentialCase", "Yes");
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(data)
-            .build();
-
-        var result = confidentialityFlagMigration.migrate(caseDetails);
-
-        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-        assertThat(data.get("confidentialCaseStatus")).isEqualTo("Yes");
-        assertThat(data.get("isConfidentialCase")).isNull();
-    }
 
     @Test
     void shouldMigrateWhenAppellantConfidentialityRequiredIsPresent() {
@@ -165,7 +150,11 @@ class ConfidentialityFlagMigrationTest {
     @Test
     void shouldMigrateWhenCaseIsDormantAndLessThan6Months() {
         Map<String, Object> data = new HashMap<>();
-        data.put("isConfidentialCase", "Yes");
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "Yes");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        data.put("appeal", appeal);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .state(DORMANT_APPEAL_STATE.toString())
