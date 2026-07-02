@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
@@ -68,13 +69,43 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         Map<String, Object> data = caseDetails.getData();
         Boolean appellantUpdated = updateAppeallant(data, caseId);
         Boolean otherPartiesUpdated = updateOtherParties(data, caseId);
+        Boolean hasMissingConfidentiality = checkForMissingConfidentiality(data);
 
-        if (!appellantUpdated && !otherPartiesUpdated) {
+        if (hasMissingConfidentiality) {
+            log.info("Setting hasUndeterminedPartyConfidentiality for case {}", caseId);
+            data.put("hasUndeterminedPartyConfidentiality", "Yes");
+        }
+
+        if (!appellantUpdated && !otherPartiesUpdated && !hasMissingConfidentiality) {
             String skipMsg = format(NO_CONFIDENTIALITY_MESSAGE, caseDetails.getId());
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
         return new UpdateResult(getEventSummary(), getEventDescription());
+    }
+
+    private Boolean checkForMissingConfidentiality(Map<String, Object> data) {
+        Boolean confidentialityMissing = false;
+        Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
+        if (nonNull(appeal)) {
+            Map<String, Object> appellant = (Map<String, Object>) appeal.get("appellant");
+            if (nonNull(appellant)) {
+                Object confidentialityRequired = appellant.get("confidentialityRequired");
+                if (isNull(confidentialityRequired)) {
+                    confidentialityMissing = true;
+                }
+            }
+        }
+        if (data.containsKey("otherParties")) {
+            List<Map<String, Object>> otherParties = (List<Map<String, Object>>) data.get("otherParties");
+            for (Map<String, Object> op : otherParties) {
+               Map<String, Object> value = (Map<String, Object>) op.get("value");
+               if (nonNull(value) && isNull(value.get("confidentialityRequired"))) {
+                   confidentialityMissing = true;
+               }
+            }
+        }
+        return confidentialityMissing;
     }
 
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
