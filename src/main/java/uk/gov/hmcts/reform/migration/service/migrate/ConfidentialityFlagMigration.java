@@ -67,7 +67,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
 
         }
         Map<String, Object> data = caseDetails.getData();
-        Boolean appellantUpdated = updateAppeallant(data, caseId);
+        Boolean appellantUpdated = updateAppellant(data, caseId);
         Boolean otherPartiesUpdated = updateOtherParties(data, caseId);
         Boolean hasMissingConfidentiality = checkForMissingConfidentiality(data);
 
@@ -92,7 +92,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             if (nonNull(appellant)) {
                 Object confidentialityRequired = appellant.get("confidentialityRequired");
                 if (isNull(confidentialityRequired)) {
-                    confidentialityMissing = true;
+                    return true;
                 }
             }
         }
@@ -101,7 +101,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             for (Map<String, Object> op : otherParties) {
                 Map<String, Object> value = (Map<String, Object>) op.get("value");
                 if (nonNull(value) && isNull(value.get("confidentialityRequired"))) {
-                    confidentialityMissing = true;
+                    return true;
                 }
             }
         }
@@ -128,13 +128,13 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         if (nonNull(confidentialityRequired)) {
             op.put("confidentialityRequirement", confidentialityRequired.toString());
             op.remove("confidentialityRequired");
-            otherPartyUpdated = true;
+            return true;
         }
         return otherPartyUpdated;
     }
 
 
-    private Boolean updateAppeallant(Map<String, Object> data, Long caseId) {
+    private Boolean updateAppellant(Map<String, Object> data, Long caseId) {
         Boolean appellantUpdated = false;
         Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
         if (nonNull(appeal)) {
@@ -145,7 +145,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
                     appellant.put("confidentialityRequirement", confidentialityRequired.toString());
                     appellant.remove("confidentialityRequired");
                     log.info("Updating Appellant confidentiality for case {}", caseId);
-                    appellantUpdated = true;
+                    return true;
                 }
             }
         }
