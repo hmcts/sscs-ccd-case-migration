@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Benefit;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
@@ -37,6 +38,11 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     static final String NO_CONFIDENTIALITY_MESSAGE
         = "Skipping Case (%s) for migration due to no confidentiality fields.";
     static final LocalDateTime dormantCutOffDate = LocalDateTime.now().minusMonths(6);
+    static final List<Benefit> BENEFITS_VALID_FOR_NEW_FIELD = List.of(
+        Benefit.CHILD_SUPPORT, Benefit.TAX_CREDIT, Benefit.GUARDIANS_ALLOWANCE, Benefit.TAX_FREE_CHILDCARE,
+        Benefit.HOME_RESPONSIBILITIES_PROTECTION, Benefit.CHILD_BENEFIT, Benefit.THIRTY_HOURS_FREE_CHILDCARE,
+        Benefit.GUARANTEED_MINIMUM_PENSION, Benefit.NATIONAL_INSURANCE_CREDITS
+    );
 
 
     private final String encodedDataString;
@@ -67,9 +73,9 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
 
         }
         Map<String, Object> data = caseDetails.getData();
+        Boolean hasMissingConfidentiality = checkForMissingConfidentiality(data);
         Boolean appellantUpdated = updateAppellant(data, caseId);
         Boolean otherPartiesUpdated = updateOtherParties(data, caseId);
-        Boolean hasMissingConfidentiality = checkForMissingConfidentiality(data);
 
         if (hasMissingConfidentiality) {
             log.info("Setting hasUndeterminedPartyConfidentiality for case {}", caseId);
@@ -85,7 +91,9 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     }
 
     private Boolean checkForMissingConfidentiality(Map<String, Object> data) {
-        Boolean confidentialityMissing = false;
+        if (!benefitValidAndHasOtherPartiesIfUc(data)) {
+            return false;
+        }
         Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
         if (nonNull(appeal)) {
             Map<String, Object> appellant = (Map<String, Object>) appeal.get("appellant");
@@ -105,7 +113,32 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
                 }
             }
         }
-        return confidentialityMissing;
+        return false;
+    }
+
+    private boolean benefitValidAndHasOtherPartiesIfUc(Map<String, Object> data) {
+        Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
+        if (isNull(appeal)) {
+            return false;
+        }
+
+        Map<String, Object> benefitType = (Map<String, Object>) appeal.get("benefitType");
+        if (isNull(benefitType)) {
+            return false;
+        }
+
+        String benefitCode = (String) benefitType.get("code");
+        if (isNull(benefitCode)) {
+            return false;
+        }
+
+        if (Benefit.UC.getShortName().equals(benefitCode)) {
+            List<Map<String, Object>> otherParties = (List<Map<String, Object>>) data.get("otherParties");
+            return otherParties != null && !otherParties.isEmpty();
+        } else {
+            return BENEFITS_VALID_FOR_NEW_FIELD.stream()
+                .anyMatch(benefit -> Objects.equals(benefit.getShortName(), benefitCode));
+        }
     }
 
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
