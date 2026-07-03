@@ -165,4 +165,91 @@ class ConfidentialityFlagMigrationTest {
         var result = confidentialityFlagMigration.migrate(caseDetails);
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
     }
+
+    @Test
+    void shouldSetUndeterminedPartyConfidentialityWhenBenefitIsValidAndAppellantConfidentialityIsMissing() {
+        Map<String, Object> benefitType = new HashMap<>();
+        benefitType.put("code", "childBenefit");
+        Map<String, Object> appellant = new HashMap<>();
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("benefitType", benefitType);
+        appeal.put("appellant", appellant);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+        assertThat(data.get("hasUndeterminedPartyConfidentiality")).isEqualTo("Yes");
+    }
+
+    @Test
+    void shouldSetUndeterminedPartyConfidentialityWhenBenefitIsUcAndHasOtherPartiesAndConfidentialityIsMissing() {
+        Map<String, Object> benefitType = new HashMap<>();
+        benefitType.put("code", "UC");
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "No");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("benefitType", benefitType);
+        appeal.put("appellant", appellant);
+        Map<String, Object> otherPartyValue = new HashMap<>();
+        Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        data.put("otherParties", otherParties);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+        assertThat(data.get("hasUndeterminedPartyConfidentiality")).isEqualTo("Yes");
+    }
+
+    @Test
+    void shouldNotSetUndeterminedPartyConfidentialityWhenBenefitIsNotValid() {
+        Map<String, Object> benefitType = new HashMap<>();
+        benefitType.put("code", "PIP");
+        Map<String, Object> appellant = new HashMap<>();
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("benefitType", benefitType);
+        appeal.put("appellant", appellant);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        assertThrows(IllegalStateException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
+        assertThat(data.containsKey("hasUndeterminedPartyConfidentiality")).isFalse();
+    }
+
+    @Test
+    void shouldNotSetUndeterminedPartyConfidentialityWhenBenefitIsUcAndHasNoOtherParties() {
+        Map<String, Object> benefitType = new HashMap<>();
+        benefitType.put("code", "UC");
+        Map<String, Object> appellant = new HashMap<>();
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("benefitType", benefitType);
+        appeal.put("appellant", appellant);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        assertThrows(IllegalStateException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
+        assertThat(data.containsKey("hasUndeterminedPartyConfidentiality")).isFalse();
+    }
 }
