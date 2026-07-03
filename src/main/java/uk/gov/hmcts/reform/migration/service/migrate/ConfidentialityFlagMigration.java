@@ -99,10 +99,10 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         if (data.containsKey("otherParties")) {
             List<Map<String, Object>> otherParties = (List<Map<String, Object>>) data.get("otherParties");
             for (Map<String, Object> op : otherParties) {
-               Map<String, Object> value = (Map<String, Object>) op.get("value");
-               if (nonNull(value) && isNull(value.get("confidentialityRequired"))) {
-                   confidentialityMissing = true;
-               }
+                Map<String, Object> value = (Map<String, Object>) op.get("value");
+                if (nonNull(value) && isNull(value.get("confidentialityRequired"))) {
+                    confidentialityMissing = true;
+                }
             }
         }
         return confidentialityMissing;
