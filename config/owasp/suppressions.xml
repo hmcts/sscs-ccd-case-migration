@@ -3,5 +3,7 @@
   <suppress until="2026-08-11">
     <cve>CVE-2025-15104</cve>
     <cve>CVE-2026-54515</cve>
+    <cve>CVE-2026-56149</cve>
+    <cve>CVE-2026-56148</cve>
   </suppress>
 </suppressions>
