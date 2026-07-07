@@ -28,8 +28,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
 
     static final String CONFIDENTIALITY_FLAG_MIGRATION_EVENT_ID = "migrateCase";
     static final String CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY
-        = "Confidentiality fields migrated successfully";
-    static final String CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION = "";
+        = "Appeal migrated following confidentiality release";
+    static final String CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION = "Appeal migrated following confidentiality release";
     static final String STATE_FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
     static final String DATE_FAILURE_MESSAGE
         = "Skipping Case (%s) for migration due to appeal being dormant for over 6 months.";
