@@ -211,6 +211,12 @@ dependencyManagement {
   dependencies {
     // CVE-2026-56148, CVE-2026-56149
     dependency group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.18'
+
+    // CVE-2026-54399, CVE-2026-54428
+    dependencySet(group: 'org.apache.httpcomponents.core5', version: '5.4.3') {
+      entry 'httpcore5'
+      entry 'httpcore5-h2'
+    }
   }
 }
 
