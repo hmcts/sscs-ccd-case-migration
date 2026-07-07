@@ -21,8 +21,8 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
 
     static final String INTERPRETER_MIGRATION_EVENT_ID = "migrateCase";
-    static final String INTERPRETER_MIGRATION_EVENT_SUMMARY = "Interpreter language code migration";
-    static final String INTERPRETER_MIGRATION_EVENT_DESCRIPTION = "Interpreter language code migration";
+    static final String INTERPRETER_MIGRATION_EVENT_SUMMARY = "Correct MRD interpreter language code added";
+    static final String INTERPRETER_MIGRATION_EVENT_DESCRIPTION = "Correct MRD interpreter language code added";
     static final String LANG_CODE = "code";
     static final List<String> HEARING_OPTIONS_LANG_CODE_PATH =
         List.of("appeal", "hearingOptions", "languagesList", "value");
