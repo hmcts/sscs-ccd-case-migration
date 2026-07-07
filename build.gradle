@@ -81,7 +81,7 @@ jacocoTestReport {
   }
 }
 
-project.tasks.named('sonar') {
+project.tasks.named('sonarqube') {
   dependsOn jacocoTestReport
 }
 
@@ -89,7 +89,7 @@ project.tasks.named('check') {
   dependsOn integrationTest
 }
 
-sonar {
+sonarqube {
   properties {
     property "sonar.organization", "hmcts"
     property "sonar.projectName", "sscs-ccd-case-migration"
@@ -136,7 +136,7 @@ ext {
   powermockVersion = '2.0.9'
   springCloudVersion = '2025.0.3'
   // CVE-2026-54515
-  // set('jackson-bom.version', '2.22.0')
+  set('jackson-bom.version', '2.21.5')
   set('log4j2.version', '2.26.1')
   set('commons-lang3.version', '3.20.0')
   set('spring-framework.version', '6.2.19')
