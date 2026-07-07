@@ -207,6 +207,11 @@ dependencyManagement {
     mavenBom "org.springframework.boot:spring-boot-dependencies:${springBoot.class.package.implementationVersion}"
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
+
+  dependencies {
+    // CVE-2026-56148, CVE-2026-56149
+    dependency group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.18'
+  }
 }
 
 dependencies {
@@ -224,7 +229,7 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-core'
   implementation group: 'org.springframework.security', name: 'spring-security-config'
 
-  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.4'
+  implementation group: 'com.github.hmcts', name: 'idam-java-client', version: '3.0.5'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.3'
   implementation group: 'com.github.hmcts', name: 'core-case-data-store-client', version: '5.2.0'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '8.0.0'
