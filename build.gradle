@@ -207,6 +207,17 @@ dependencyManagement {
     mavenBom "org.springframework.boot:spring-boot-dependencies:${springBoot.class.package.implementationVersion}"
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
+
+  dependencies {
+    // CVE-2026-56148, CVE-2026-56149
+    dependency group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.18'
+
+    // CVE-2026-54399, CVE-2026-54428
+    dependencySet(group: 'org.apache.httpcomponents.core5', version: '5.4.3') {
+      entry 'httpcore5'
+      entry 'httpcore5-h2'
+    }
+  }
 }
 
 dependencies {
@@ -248,12 +259,6 @@ dependencies {
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
-  testImplementation(group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: '5.4.3') {
-    because 'CVE-2026-54399'
-  }
-  testImplementation(group: 'org.apache.httpcomponents.core5', name: 'httpcore5-h2', version: '5.4.3') {
-    because 'CVE-2026-54428'
-  }
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
   testImplementation group: 'org.wiremock.integrations', name: 'wiremock-spring-boot', version: '3.10.6'
