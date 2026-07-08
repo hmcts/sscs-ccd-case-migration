@@ -61,7 +61,7 @@ tasks.register('smoke') { dependsOn smokeTest }
 
 tasks.register('fortifyScan', JavaExec) {
   mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
-  classpath += testing.suites.test.get().sources.runtimeClasspath
+  classpath += testing.suites.test.sources.runtimeClasspath
   jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
   ignoreExitValue = true
 }
