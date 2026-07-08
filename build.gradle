@@ -248,13 +248,11 @@ dependencies {
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
 
-  constraints {
-    testImplementation('org.apache.httpcomponents.core5:httpcore5:5.4.3') {
-      because 'CVE-2026-54399'
-    }
-    testImplementation('org.apache.httpcomponents.core5:httpcore5-h2:5.4.3') {
-      because 'CVE-2026-54428'
-    }
+  testImplementation(group: 'org.apache.httpcomponents.core5', name: 'httpcore5', version: '5.4.3') {
+    because 'CVE-2026-54399'
+  }
+  testImplementation(group: 'org.apache.httpcomponents.core5', name: 'httpcore5-h2', version: '5.4.3') {
+    because 'CVE-2026-54428'
   }
 
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
