@@ -135,6 +135,7 @@ repositories {
 ext {
   powermockVersion = '2.0.9'
   springCloudVersion = '2025.0.3'
+  restassuredVersion = '5.5.7'
   // CVE-2026-54515
   set('jackson-bom.version', '2.21.5')
   set('log4j2.version', '2.26.1')
@@ -197,9 +198,9 @@ dependencies {
 
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
   testImplementation 'org.wiremock.integrations:wiremock-spring-boot:3.10.6'
-  testImplementation 'io.rest-assured:rest-assured:5.5.7'
-  testImplementation 'io.rest-assured:xml-path:5.5.7'
-  testImplementation 'io.rest-assured:json-path:5.5.7'
+  testImplementation "io.rest-assured:rest-assured:${restassuredVersion}"
+  testImplementation "io.rest-assured:xml-path:${restassuredVersion}"
+  testImplementation "io.rest-assured:json-path:${restassuredVersion}"
   testImplementation 'org.mockito:mockito-junit-jupiter'
 
   testImplementation "org.powermock:powermock-api-mockito2:${powermockVersion}"
