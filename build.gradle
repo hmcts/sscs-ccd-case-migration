@@ -195,7 +195,8 @@ ext {
   junitPlatform = '1.13.4'
   powermockVersion = '2.0.9'
   springCloudVersion = '2025.0.0'
-  jacksonVersion = '2.20.0'
+  // CVE-2026-54515
+  set('jackson-bom.version', '2.21.5')
   set('log4j2.version', '2.26.0')
   set('commons-lang3.version', '3.20.0')
   set('spring-framework.version', '6.2.19')
@@ -206,6 +207,17 @@ dependencyManagement {
   imports {
     mavenBom "org.springframework.boot:spring-boot-dependencies:${springBoot.class.package.implementationVersion}"
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+  }
+
+  dependencies {
+    // CVE-2026-56148, CVE-2026-56149
+    dependency group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.18'
+
+    // CVE-2026-54399, CVE-2026-54428
+    dependencySet(group: 'org.apache.httpcomponents.core5', version: '5.4.3') {
+      entry 'httpcore5'
+      entry 'httpcore5-h2'
+    }
   }
 }
 
@@ -232,12 +244,12 @@ dependencies {
 
   implementation group: 'org.json', name: 'json', version: '20240303'
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '13.6'
-  implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.20'
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv'
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core'
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind'
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations'
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
+  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8'
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.13'
   implementation group: 'net.logstash.logback', name: 'logstash-logback-encoder', version: '8.1'
