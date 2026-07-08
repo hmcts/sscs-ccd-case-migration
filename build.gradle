@@ -207,6 +207,11 @@ dependencyManagement {
     mavenBom "org.springframework.boot:spring-boot-dependencies:${springBoot.class.package.implementationVersion}"
     mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
   }
+
+  dependencies {
+    // CVE-2026-56148, CVE-2026-56149
+    dependency group: 'org.elasticsearch', name: 'elasticsearch', version: '8.19.18'
+  }
 }
 
 dependencies {
