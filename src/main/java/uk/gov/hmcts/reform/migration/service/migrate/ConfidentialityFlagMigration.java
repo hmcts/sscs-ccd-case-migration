@@ -82,7 +82,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         if (data.containsKey("otherParties")) {
             List<Map<String, Object>> otherParties = (List<Map<String, Object>>) data.get("otherParties");
             for (Map<String, Object> op : otherParties) {
-                if (op.containsKey("value") && updateOtherParty((Map<String, Object>) op.get("value"))) {
+                if (op.containsKey("value") && updateOtherParty((Map<String, Object>) op.get("value"), caseId)) {
                     log.info("Updating other party confidentiality for case {}", caseId);
                     updateOtherParties = true;
                 }
@@ -91,13 +91,19 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         return updateOtherParties;
     }
 
-    private Boolean updateOtherParty(Map<String, Object> op) {
+    private Boolean updateOtherParty(Map<String, Object> op, Long caseId) {
         Boolean otherPartyUpdated = false;
         Object confidentialityRequired = op.get("confidentialityRequired");
         if (nonNull(confidentialityRequired)) {
-            op.put("confidentialityRequirement", confidentialityRequired.toString());
-            op.remove("confidentialityRequired");
-            return true;
+            if (!op.containsKey("confidentialityRequirement")) {
+                op.put("confidentialityRequirement", confidentialityRequired.toString());
+                op.remove("confidentialityRequired");
+                return true;
+            } else {
+                log.info("New confidentiality field is present for other party on case {}", caseId);
+                op.remove("confidentialityRequired");
+                return true;
+            }
         }
         return otherPartyUpdated;
     }
@@ -111,10 +117,18 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             if (nonNull(appellant)) {
                 Object confidentialityRequired = appellant.get("confidentialityRequired");
                 if (nonNull(confidentialityRequired)) {
-                    appellant.put("confidentialityRequirement", confidentialityRequired.toString());
-                    appellant.remove("confidentialityRequired");
-                    log.info("Updating Appellant confidentiality for case {}", caseId);
-                    return true;
+                    if (!appellant.containsKey("confidentialityRequirement")) {
+                        appellant.put("confidentialityRequirement", confidentialityRequired.toString());
+                        appellant.remove("confidentialityRequired");
+                        log.info("Updating Appellant confidentiality for case {}", caseId);
+                        return true;
+                    } else {
+                        appellant.remove("confidentialityRequired");
+                        log.info("Updating Appellant confidentiality, New confidentiality field for "
+                                     + "appellant is present on case {}", caseId);
+                        return true;
+
+                    }
                 }
             }
         }

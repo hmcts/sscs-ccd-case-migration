@@ -166,4 +166,48 @@ class ConfidentialityFlagMigrationTest {
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
     }
 
+    @Test
+    void shouldNotOverwriteAppellantConfidentialityRequirementIfAlreadyPresent() {
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "No");
+        appellant.put("confidentialityRequirement", "Yes");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+        assertThat(appellant.get("confidentialityRequirement")).isEqualTo("Yes");
+        assertThat(appellant.containsKey("confidentialityRequired")).isFalse();
+    }
+
+    @Test
+    void shouldNotOverwriteOtherPartiesConfidentialityRequirementIfAlreadyPresent() {
+        Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", "No");
+        otherPartyValue.put("confidentialityRequirement", "Yes");
+        Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        Map<String, Object> data = new HashMap<>();
+        data.put("otherParties", otherParties);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+        assertThat(otherPartyValue.get("confidentialityRequirement")).isEqualTo("Yes");
+        assertThat(otherPartyValue.containsKey("confidentialityRequired")).isFalse();
+    }
+
 }
