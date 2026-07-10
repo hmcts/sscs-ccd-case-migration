@@ -26,15 +26,11 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     static final String VENUE_MIGRATION_EVENT_SUMMARY =
         "London Tribunals Migration";
     static final String VENUE_MIGRATION_EVENT_DESCRIPTION = "London Tribunals Migration";
-    static final String VENUE_FIELD = "regionalCentre";
-    static final String VENUE_TO_MIGRATE = "Stirling";
+    static final String PROCESSING_VENUE_FIELD = "processingVenue";
+    static final String FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
     static final List<String> STATES_TO_SKIP = List.of(State.DORMANT_APPEAL_STATE.getId(), State.DRAFT_ARCHIVED.getId(),
                                                        State.HEARING.getId(), State.VOID_STATE.getId(),
                                                        State.WITH_UT.getId());
-    static final String NULL_VENUE_FAILURE_MSG = "Skipping Case (%s) for migration because no venue was found";
-    static final String INVALID_VENUE_FAILURE_MSG = "Skipping Case %s for migration because the "
-        + "venue is not %s";
-    static final String INVALID_STATE_FAILURE_MSG = "Skipping Case %s for migration because it is in state %s";
 
     private final String encodedDataString;
     private final RoboticsJsonMapper roboticsJsonMapper;
@@ -55,15 +51,16 @@ public class VenueMigrationService extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
 
-        validateCase(caseDetails);
+        // remove method validateCaseState after 30/03/2026 (after Fox Court to London Tribunals migration is complete)
+        validateCaseState(caseDetails);
 
         String venue = roboticsJsonMapper.findVenueName(convertToSscsCaseData(caseDetails.getData()))
             .orElseThrow(() -> {
-                String failureMsg = format(NULL_VENUE_FAILURE_MSG, caseDetails.getId());
+                String failureMsg = format(FAILURE_MSG, caseDetails.getId());
                 log.error(failureMsg);
                 return new RuntimeException(failureMsg);
             });
-        caseDetails.getData().put(VENUE_FIELD, venue);
+        caseDetails.getData().put(PROCESSING_VENUE_FIELD, venue);
         log.info("Setting processing venue to ({})", venue);
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
@@ -83,23 +80,9 @@ public class VenueMigrationService extends CaseMigrationProcessor {
         return VENUE_MIGRATION_EVENT_SUMMARY;
     }
 
-    private void validateCase(CaseDetails caseDetails) {
-        validateCaseProcessingVenue(caseDetails);
-        validateCaseState(caseDetails);
-    }
-
-    private void validateCaseProcessingVenue(CaseDetails caseDetails) {
-        if (nonNull(caseDetails.getData().get(VENUE_FIELD))
-            && !caseDetails.getData().get(VENUE_FIELD).equals(VENUE_TO_MIGRATE)) {
-            String skipMsg = format(INVALID_VENUE_FAILURE_MSG, caseDetails.getId(), VENUE_TO_MIGRATE);
-            log.info(skipMsg);
-            throw new IllegalStateException(skipMsg);
-        }
-    }
-
     private void validateCaseState(CaseDetails caseDetails) {
         if (nonNull(caseDetails.getState()) && STATES_TO_SKIP.contains(caseDetails.getState())) {
-            String skipMsg = format(INVALID_STATE_FAILURE_MSG, caseDetails.getId(),
+            String skipMsg = format("Skipping Case %s for migration because it is in state %s", caseDetails.getId(),
                                     caseDetails.getState());
             log.info(skipMsg);
             throw new IllegalStateException(skipMsg);
