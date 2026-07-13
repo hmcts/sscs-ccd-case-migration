@@ -37,60 +37,64 @@ migration:
   idam:
     password: ${IDAM_PASS:dummy_password}
     username: ${IDAM_USER:idam.user@email.com}
+  addHearingMigration:
+    enabled: ${ADD_HEARING_MIGRATION_ENABLED:false}
+    encoded-data-string: ${ADD_HEARING_MIGRATION_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  adjournmentFlag:
+    enabled: ${ADJOURNMENT_FLAG_MIGRATION_ENABLED:false}
+    encoded-data-string: ${ADJOURNMENT_FLAG_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   autoArchiveOldDrafts.enabled: ${ARCHIVE_OLD_DRAFTS_ENABLED:false}
-  wa.enabled: ${MIGRATION_WA_ENABLED:false}
-  dwp-enhancements.enabled: ${MIGRATION_DWP_ENABLED:false}
-  case-management-location.enabled: ${MIGRATION_CASE_MANAGERMENT_LOCATION_ENABLED:false}
+  awaitingConfidentialityReq:
+    enabled: ${AWAITING_CONFIDENTIALITY_REQ_MIGRATION_ENABLED:false}
+    encoded-data-string: ${AWAITING_CONFIDENTIALITY_REQ_ENCODED_STRING:==dummy++encoded--string==}
+  case-management-location:
+    enabled:${MIGRATION_CASE_MANAGERMENT_LOCATION_ENABLED:false}
+  caseOutcomeGapsMigration:
+    enabled: ${CASE_OUTCOME_GAPS_MIGRATION_ENABLED:false}
+    encoded-data-string: ${CASE_OUTCOME_GAPS_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  completedHearingsOutcomes:
+    enabled: ${COMPLETED_HEARINGS_OUTCOMES_ENABLED:false}
+    encoded-data-string: ${COMPLETED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
   defaultPanelComposition:
     enabled: ${DEFAULT_PANEL_COMPOSITION_ENABLED:false}
     use-pre-fetched-case-list: ${ULR_USE_PRE_FETCHED_CASE_LIST:false}
     encoded-data-string: ${DEFAULT_PANEL_COMPOSITION_ENCODED_STRING:==dummy++encoded--string==}
     exclusion-list-encoded-string: ${DEFAULT_PANEL_COMPOSITION_EXCLUDE_ENCODED_STRING:==dummy++encoded--string==}
-  updateListingReqsMissingAmendReason:
-    enabled: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON:false}
-    encoded-data-string: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON_ENCODED_STRING:==dummy++encoded--string==}
-  waFieldsRemoval:
-    enabled: ${MIGRATION_WA_FIELDS_REMOVAL_ENABLED:false}
-    encoded-data-string: ${WA_FIELDS_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  completedHearingsOutcomes:
-    enabled: ${COMPLETED_HEARINGS_OUTCOMES_ENABLED:false}
-    encoded-data-string: ${COMPLETED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  nonListedHearingsOutcomes:
-    enabled: ${NON_LISTED_HEARINGS_OUTCOMES_ENABLED:false}
-    encoded-data-string: ${NON_LISTED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  multipleHearingsOutcomes:
-    enabled: ${MULTIPLE_HEARINGS_OUTCOMES_ENABLED:false}
-    encoded-data-string: ${MULTIPLE_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  caseOutcomeGapsMigration:
-    enabled: ${CASE_OUTCOME_GAPS_MIGRATION_ENABLED:false}
-    encoded-data-string: ${CASE_OUTCOME_GAPS_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  hmctsDwpStateMigration:
-    enabled: ${HMCTS_DWP_STATE_MIGRATION_ENABLED:false}
-    encoded-data-string: ${HMCTS_DWP_STATE_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  addHearingMigration:
-    enabled: ${ADD_HEARING_MIGRATION_ENABLED:false}
-    encoded-data-string: ${ADD_HEARING_ENCODED_DATA_STRING:==dummy++encoded--string==}
-  processingVenue:
-    enabled: ${VENUE_MIGRATION_ENABLED:false}
-    encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
-  venueHearing:
-    enabled: ${VENUE_HEARING_MIGRATION_ENABLED:false}
-    encoded-string: ${VENUE_HEARING_ENCODED_STRING:==dummy++encoded--string==}
-  adjournmentFlag:
-    enabled: ${ADJOURNMENT_FLAG_MIGRATION_ENABLED:false}
-    encoded-data-string: ${ADJOURNMENT_FLAG_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
-  panelMemberCompositionMigration:
-    enabled: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED:false}
-    encoded-data-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  dwp-enhancements.enabled: ${MIGRATION_DWP_ENABLED:false}
   finalDecisionOutcomeMigration:
     enabled: ${FINAL_DECISION_OUTCOME_MIGRATION_ENABLED:false}
     encoded-string: ${FINAL_DECISION_OUTCOME_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  hmctsDwpStateMigration:
+    enabled: ${HMCTS_DWP_STATE_MIGRATION_ENABLED:false}
+    encoded-data-string: ${HMCTS_DWP_STATE_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  multipleHearingsOutcomes:
+    enabled: ${MULTIPLE_HEARINGS_OUTCOMES_ENABLED:false}
+    encoded-data-string: ${MULTIPLE_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  nonListedHearingsOutcomes:
+    enabled: ${NON_LISTED_HEARINGS_OUTCOMES_ENABLED:false}
+    encoded-data-string: ${NON_LISTED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  processingVenue:
+    enabled: ${VENUE_MIGRATION_ENABLED:false}
+    encoded-string: ${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  panelMemberCompositionMigration:
+    enabled: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENABLED:false}
+    encoded-data-string: ${PANEL_MEMBER_COMPOSITION_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   readyToList:
     enabled: ${READY_TO_LIST_MIGRATION_ENABLED:false}
     encoded-data-string: ${READY_TO_LIST_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
-  awaitingConfidentialityReq:
-    enabled: ${AWAITING_CONFIDENTIALITY_REQ_MIGRATION_ENABLED:false}
-    encoded-data-string: ${AWAITING_CONFIDENTIALITY_REQ_ENCODED_STRING:==dummy++encoded--string==}
+  rpc:
+    enabled: ${RPC_MIGRATION_ENABLED:false}
+    encoded-string: ${RPC_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  updateListingReqsMissingAmendReason:
+    enabled: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON:false}
+    encoded-data-string: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON_ENCODED_STRING:==dummy++encoded--string==}
+  venueHearing:
+    enabled: ${VENUE_HEARING_MIGRATION_ENABLED:false}
+    encoded-string: ${VENUE_HEARING_ENCODED_STRING:==dummy++encoded--string==}
+  wa.enabled: ${MIGRATION_WA_ENABLED:false}
+  waFieldsRemoval:
+    enabled: ${MIGRATION_WA_FIELDS_REMOVAL_ENABLED:false}
+    encoded-data-string: ${WA_FIELDS_ENCODED_DATA_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
