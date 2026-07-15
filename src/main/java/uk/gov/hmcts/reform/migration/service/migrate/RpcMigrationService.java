@@ -24,8 +24,8 @@ public class RpcMigrationService extends CaseMigrationProcessor {
 
     static final String RPC_MIGRATION_EVENT_ID = "migrateCase";
     static final String RPC_MIGRATION_EVENT_SUMMARY =
-        "Leeds RPC Migration";
-    static final String RPC_MIGRATION_EVENT_DESCRIPTION = "Leeds RPC Migration";
+        "Correct RPC assigned - Leeds";
+    static final String RPC_MIGRATION_EVENT_DESCRIPTION = "Correct RPC assigned - Leeds";
     static final String REGION_FIELD = "region";
     static final String RPC_FIELD = "regionalProcessingCenter";
     static final String REGION_TO_MIGRATE = "BRADFORD";
