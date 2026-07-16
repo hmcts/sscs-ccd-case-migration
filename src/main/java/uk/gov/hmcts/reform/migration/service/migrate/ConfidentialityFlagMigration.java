@@ -6,8 +6,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.OtherParty;
+import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
+import uk.gov.hmcts.reform.sscs.ccd.domain.YesNoUndetermined;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.time.LocalDateTime;
@@ -21,6 +24,7 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.fin
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT_ARCHIVED;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.YesNo.isYes;
 
 @Service
 @Slf4j
@@ -78,6 +82,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         var caseData = convertToSscsCaseData(data);
         YesNo undeterminedConfidentiality = caseData.hasUndeterminedPartyConfidentiality();
         String confidentialityTab = caseData.getConfidentialityTab();
+        YesNo isConfidentialValue = isConfidential(caseData);
+        data.put("isConfidentialCase", isConfidentialValue.getValue());
         if (nonNull(undeterminedConfidentiality)) {
             data.put("hasUndeterminedPartyConfidentiality", undeterminedConfidentiality.getValue());
         }
@@ -85,6 +91,18 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             data.put("confidentialityTab", confidentialityTab);
         }
         return new UpdateResult(getEventSummary(), getEventDescription());
+    }
+
+    private YesNo isConfidential(SscsCaseData caseData) {
+        if (caseData.getAppellantConfidentiality().orElse(null) == YesNoUndetermined.YES) {
+            return YesNo.YES;
+        }
+        if (nonNull(caseData.getOtherParties())) {
+            return caseData.getOtherParties().stream()
+                .anyMatch(op -> isYes(op.getValue().getConfidentialityRequired()))
+                ? YesNo.YES : YesNo.NO;
+        }
+        return YesNo.NO;
     }
 
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
