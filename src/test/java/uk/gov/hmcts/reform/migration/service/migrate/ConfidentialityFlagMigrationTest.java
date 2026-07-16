@@ -78,7 +78,7 @@ class ConfidentialityFlagMigrationTest {
 
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
         assertThat(appellant.get("confidentialityRequirement")).isEqualTo("Yes");
-        assertThat(appellant.containsKey("confidentialityRequired")).isFalse();
+        assertThat(appellant.containsKey("confidentialityRequired")).isTrue();
     }
 
     @Test
@@ -100,7 +100,7 @@ class ConfidentialityFlagMigrationTest {
 
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
         assertThat(otherPartyValue.get("confidentialityRequirement")).isEqualTo("Yes");
-        assertThat(otherPartyValue.containsKey("confidentialityRequired")).isFalse();
+        assertThat(otherPartyValue.containsKey("confidentialityRequired")).isTrue();
     }
 
     @Test
@@ -179,12 +179,7 @@ class ConfidentialityFlagMigrationTest {
             .id(123L)
             .data(data)
             .build();
-
-        var result = confidentialityFlagMigration.migrate(caseDetails);
-
-        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-        assertThat(appellant.get("confidentialityRequirement")).isEqualTo("Yes");
-        assertThat(appellant.containsKey("confidentialityRequired")).isFalse();
+        assertThrows(IllegalStateException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
     }
 
     @Test
@@ -202,12 +197,7 @@ class ConfidentialityFlagMigrationTest {
             .id(123L)
             .data(data)
             .build();
-
-        var result = confidentialityFlagMigration.migrate(caseDetails);
-
-        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-        assertThat(otherPartyValue.get("confidentialityRequirement")).isEqualTo("Yes");
-        assertThat(otherPartyValue.containsKey("confidentialityRequired")).isFalse();
+        assertThrows(IllegalStateException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
     }
 
 }

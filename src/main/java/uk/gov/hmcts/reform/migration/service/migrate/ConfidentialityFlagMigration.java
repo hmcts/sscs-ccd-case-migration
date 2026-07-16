@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.time.LocalDateTime;
@@ -74,6 +75,15 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
+        var caseData = convertToSscsCaseData(data);
+        YesNo undeterminedConfidentiality = caseData.hasUndeterminedPartyConfidentiality();
+        String confidentialityTab = caseData.getConfidentialityTab();
+        if (nonNull(undeterminedConfidentiality)) {
+            data.put("hasUndeterminedPartyConfidentiality", undeterminedConfidentiality.getValue());
+        }
+        if (nonNull(confidentialityTab)) {
+            data.put("confidentialityTab", confidentialityTab);
+        }
         return new UpdateResult(getEventSummary(), getEventDescription());
     }
 
@@ -97,12 +107,10 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         if (nonNull(confidentialityRequired)) {
             if (!op.containsKey("confidentialityRequirement")) {
                 op.put("confidentialityRequirement", confidentialityRequired.toString());
-                op.remove("confidentialityRequired");
                 return true;
             } else {
                 log.info("New confidentiality field is present for other party on case {}", caseId);
-                op.remove("confidentialityRequired");
-                return true;
+                return false;
             }
         }
         return otherPartyUpdated;
@@ -119,15 +127,11 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
                 if (nonNull(confidentialityRequired)) {
                     if (!appellant.containsKey("confidentialityRequirement")) {
                         appellant.put("confidentialityRequirement", confidentialityRequired.toString());
-                        appellant.remove("confidentialityRequired");
                         log.info("Updating Appellant confidentiality for case {}", caseId);
                         return true;
                     } else {
-                        appellant.remove("confidentialityRequired");
-                        log.info("Updating Appellant confidentiality, New confidentiality field for "
-                                     + "appellant is present on case {}", caseId);
-                        return true;
-
+                        log.info("New confidentiality field for appellant is present on case {}", caseId);
+                        return false;
                     }
                 }
             }
