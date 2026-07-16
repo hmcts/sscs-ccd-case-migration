@@ -55,6 +55,9 @@ migration:
   completedHearingsOutcomes:
     enabled: ${COMPLETED_HEARINGS_OUTCOMES_ENABLED:false}
     encoded-data-string: ${COMPLETED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  confidentialityFlag:
+    enabled: ${CONFIDENTIALITY_FLAG_MIGRATION_ENABLED:false}
+    encoded-data-string: ${CONFIDENTIALITY_FLAG_ENCODED_STRING:==dummy++encoded--string==}  
   defaultPanelComposition:
     enabled: ${DEFAULT_PANEL_COMPOSITION_ENABLED:false}
     use-pre-fetched-case-list: ${ULR_USE_PRE_FETCHED_CASE_LIST:false}
