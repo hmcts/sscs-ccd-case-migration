@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.migration.service.migrate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -62,7 +63,7 @@ class ConfidentialityFlagMigrationTest {
 
 
     @Test
-    void shouldMigrateWhenAppellantConfidentialityRequiredIsPresent() {
+    void shouldPopulateConfidentialityFieldsWhenAppellantConfidentialityRequiredIsPresent() {
         Map<String, Object> appellant = new HashMap<>();
         appellant.put("confidentialityRequired", "Yes");
         Map<String, Object> appeal = new HashMap<>();
@@ -75,14 +76,14 @@ class ConfidentialityFlagMigrationTest {
             .build();
 
         var result = confidentialityFlagMigration.migrate(caseDetails);
-
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
         assertThat(appellant.get("confidentialityRequirement")).isEqualTo("Yes");
         assertThat(appellant.containsKey("confidentialityRequired")).isTrue();
+        assertThat(data.get("isConfidentialCase")).isEqualTo("Yes");
     }
 
     @Test
-    void shouldMigrateWhenOtherPartiesConfidentialityRequiredIsPresent() {
+    void shouldPopulateConfidentialityFieldsWhenOtherPartiesConfidentialityRequiredIsPresent() {
         Map<String, Object> otherPartyValue = new HashMap<>();
         otherPartyValue.put("confidentialityRequired", "Yes");
         Map<String, Object> otherParty = new HashMap<>();
@@ -101,7 +102,107 @@ class ConfidentialityFlagMigrationTest {
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
         assertThat(otherPartyValue.get("confidentialityRequirement")).isEqualTo("Yes");
         assertThat(otherPartyValue.containsKey("confidentialityRequired")).isTrue();
+        assertThat(data.get("isConfidentialCase")).isEqualTo("Yes");
     }
+
+    @Test
+    void shouldPopulateIsConfidentialCaseAsNoWhenNoConfidentialityIsRequired() {
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "No");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data.get("isConfidentialCase")).isEqualTo("No");
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"childSupport, Child Support", "UC, Universal Credit"})
+    void shouldHandleConfidentialityTabForUcCm(String code, String description) {
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "Yes");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        Map<String, Object> benefitCode = new HashMap<>();
+        benefitCode.put("code", code);
+        benefitCode.put("description", description);
+        appeal.put("benefitType", benefitCode);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data.containsKey("confidentialityTab")).isTrue();
+    }
+
+    @Test
+    void shouldNotHandleConfidentialityTabWhenNotCmUc() {
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "Yes");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        Map<String, Object> benefitCode = new HashMap<>();
+        benefitCode.put("code", "taxCredit");
+        benefitCode.put("description", "Tax Credit");
+        appeal.put("benefitType", benefitCode);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data.containsKey("confidentialityTab")).isFalse();
+    }
+
+
+    @ParameterizedTest
+    @CsvSource(value = {"null, Yes", "No, No"}, nullValues = "null")
+    void shouldHandleUndeterminedConfidentialityForCm(String confidentialityRequired, String expectedResult) {
+        Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "Yes");
+        Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        Map<String, Object> benefitCode = new HashMap<>();
+        benefitCode.put("code", "childSupport");
+        benefitCode.put("description", "Child Support");
+        appeal.put("benefitType", benefitCode);
+        Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", confidentialityRequired);
+        Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        Map<String, Object> data = new HashMap<>();
+        data.put("otherParties", otherParties);
+        data.put("appeal", appeal);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data.containsKey("hasUndeterminedPartyConfidentiality")).isTrue();
+        assertThat(data.get("hasUndeterminedPartyConfidentiality")).isEqualTo(expectedResult);
+    }
+
 
     @Test
     void shouldThrowExceptionWhenNoConfidentialityFieldsPresent() {
