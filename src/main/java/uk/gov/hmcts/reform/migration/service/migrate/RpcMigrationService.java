@@ -15,6 +15,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
+import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 
 @Service
@@ -112,7 +113,7 @@ public class RpcMigrationService extends CaseMigrationProcessor {
             log.info(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
-        if (isNull(caseDetails.getData().get("hearingRoute")) && isNull(caseDetails.getData().get("caseReference"))) {
+        if (isNull(caseDetails.getData().get("hearingRoute")) && isEmpty(caseDetails.getData().get("caseReference"))) {
             String skipMsg = format(NULL_HEARING_ROUTE_FAILURE_MSG, caseDetails.getId());
             log.info(skipMsg);
             throw new IllegalStateException(skipMsg);
