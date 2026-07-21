@@ -82,9 +82,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         YesNo undeterminedConfidentiality = caseData.hasUndeterminedPartyConfidentiality();
         String confidentialityTab = caseData.getConfidentialityTab();
         YesNo isConfidentialValue = isConfidential(caseData);
-        if (nonNull(isConfidentialValue)) {
-            data.put("isConfidentialCase", isConfidentialValue.getValue());
-        }
+        data.put("isConfidentialCase", isConfidentialValue.getValue());
         if (nonNull(undeterminedConfidentiality)) {
             data.put("hasUndeterminedPartyConfidentiality", undeterminedConfidentiality.getValue());
         }

@@ -57,8 +57,7 @@ class ConfidentialityFlagMigrationTest {
             .build();
         List<SscsCaseDetails> migrationCases = confidentialityFlagMigration.fetchCasesToMigrate();
 
-        assertThat(migrationCases).hasSize(1);
-        assertThat(migrationCases).contains(migrationCase);
+        assertThat(migrationCases).hasSize(1).contains(migrationCase);
     }
 
 
@@ -77,9 +76,8 @@ class ConfidentialityFlagMigrationTest {
 
         var result = confidentialityFlagMigration.migrate(caseDetails);
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-        assertThat(appellant.get("confidentialityRequirement")).isEqualTo("Yes");
-        assertThat(appellant.containsKey("confidentialityRequired")).isTrue();
-        assertThat(data.get("isConfidentialCase")).isEqualTo("Yes");
+        assertThat(appellant).containsEntry("confidentialityRequirement", "Yes").containsKey("confidentialityRequired");
+        assertThat(data).containsEntry("isConfidentialCase", "Yes");
     }
 
     @Test
@@ -100,9 +98,10 @@ class ConfidentialityFlagMigrationTest {
         var result = confidentialityFlagMigration.migrate(caseDetails);
 
         assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-        assertThat(otherPartyValue.get("confidentialityRequirement")).isEqualTo("Yes");
-        assertThat(otherPartyValue.containsKey("confidentialityRequired")).isTrue();
-        assertThat(data.get("isConfidentialCase")).isEqualTo("Yes");
+        assertThat(otherPartyValue)
+            .containsEntry("confidentialityRequirement", "Yes")
+            .containsKey("confidentialityRequired");
+        assertThat(data).containsEntry("isConfidentialCase", "Yes");
     }
 
     @Test
@@ -120,7 +119,119 @@ class ConfidentialityFlagMigrationTest {
 
         confidentialityFlagMigration.migrate(caseDetails);
 
-        assertThat(data.get("isConfidentialCase")).isEqualTo("No");
+        assertThat(data).containsEntry("isConfidentialCase", "No");
+    }
+
+    @Test
+    void shouldPopulateIsConfidentialCaseAsNoWhenOtherPartyConfidentialityIsNo() {
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", "No");
+        final Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data).containsEntry("isConfidentialCase", "No");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenOtherPartyConfidentialityRequiredIsAbsent() {
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        final Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        final var exception = assertThrows(IllegalStateException.class,
+                                           () -> confidentialityFlagMigration.migrate(caseDetails));
+
+        assertThat(exception.getMessage())
+            .isEqualTo(String.format(ConfidentialityFlagMigration.NO_CONFIDENTIALITY_MESSAGE, 123L));
+        assertThat(otherPartyValue).doesNotContainKey("confidentialityRequirement");
+    }
+
+    @Test
+    void shouldSkipOtherPartyWhenValueKeyIsAbsent() {
+        final Map<String, Object> otherPartyWithoutValue = new HashMap<>();
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", "Yes");
+        final Map<String, Object> otherPartyWithValue = new HashMap<>();
+        otherPartyWithValue.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherPartyWithoutValue);
+        otherParties.add(otherPartyWithValue);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        assertThrows(IllegalArgumentException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
+
+        assertThat(otherPartyValue).containsEntry("confidentialityRequirement", "Yes");
+    }
+
+    @Test
+    void shouldNotUpdateAppellantWhenAppellantIsAbsent() {
+        final Map<String, Object> appeal = new HashMap<>();
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", "Yes");
+        final Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        final var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+        assertThat(appeal.containsKey("appellant")).isFalse();
+    }
+
+    @Test
+    void shouldNotUpdateAppellantWhenConfidentialityRequiredIsAbsent() {
+        final Map<String, Object> appellant = new HashMap<>();
+        final Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", "Yes");
+        final Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        final var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+        assertThat(appellant.containsKey("confidentialityRequirement")).isFalse();
     }
 
     @ParameterizedTest
@@ -144,7 +255,7 @@ class ConfidentialityFlagMigrationTest {
 
         confidentialityFlagMigration.migrate(caseDetails);
 
-        assertThat(data.containsKey("confidentialityTab")).isTrue();
+        assertThat(data).containsKey("confidentialityTab");
     }
 
     @Test
@@ -199,8 +310,9 @@ class ConfidentialityFlagMigrationTest {
 
         confidentialityFlagMigration.migrate(caseDetails);
 
-        assertThat(data.containsKey("hasUndeterminedPartyConfidentiality")).isTrue();
-        assertThat(data.get("hasUndeterminedPartyConfidentiality")).isEqualTo(expectedResult);
+        assertThat(data)
+            .containsKey("hasUndeterminedPartyConfidentiality")
+            .containsEntry("hasUndeterminedPartyConfidentiality", expectedResult);
     }
 
 
