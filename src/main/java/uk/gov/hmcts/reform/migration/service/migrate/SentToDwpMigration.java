@@ -1,12 +1,6 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import static java.util.Objects.isNull;
-import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
-import static uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -16,6 +10,13 @@ import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Benefit;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
+import static uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 @Service
 @Slf4j
@@ -63,7 +64,8 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
                 }
 
             } else {
-                throw new RuntimeException("Skipping case for migration due to " + DATE_SENT_TO_DWP + " is already set.");
+                throw new RuntimeException("Skipping case for migration due to " + DATE_SENT_TO_DWP
+                                               + " is already set");
             }
         } else {
             throw new RuntimeException("Skipping case for migration due to case data is empty.");

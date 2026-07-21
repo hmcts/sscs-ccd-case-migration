@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
-import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,9 +9,10 @@ import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
-
-import java.util.List;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
