@@ -60,7 +60,7 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
                 if (isNull(data.get(HMCTS_DWP_STATE))) {
                     data.put(HMCTS_DWP_STATE, SENT_TO_DWP);
                 } else {
-                    log.info("{} is already set for case {}", HMCTS_DWP_STATE, sscsCaseData.getCcdCaseId());
+                    log.info("{} is already set for case {}", HMCTS_DWP_STATE, sscsCaseData.getCaseReference());
                 }
 
             } else {
