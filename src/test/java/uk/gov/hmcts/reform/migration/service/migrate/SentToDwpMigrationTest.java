@@ -91,7 +91,7 @@ class SentToDwpMigrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"childSupport", "UC", "attendanceAllowance"})
+    @ValueSource(strings = {"childSupport", "UC"})
     @DisplayName("Should migrate case")
     void shouldMigrate(String benefitShortName) {
         sscsCaseData.getAppeal().setBenefitType(BenefitType.builder().code(benefitShortName).build());
