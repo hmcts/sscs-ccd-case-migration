@@ -57,7 +57,7 @@ migration:
     encoded-data-string: ${COMPLETED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
   confidentialityFlag:
     enabled: ${CONFIDENTIALITY_FLAG_MIGRATION_ENABLED:false}
-    encoded-data-string: ${CONFIDENTIALITY_FLAG_ENCODED_STRING:==dummy++encoded--string==}  
+    encoded-data-string: ${CONFIDENTIALITY_FLAG_ENCODED_STRING:==dummy++encoded--string==}
   defaultPanelComposition:
     enabled: ${DEFAULT_PANEL_COMPOSITION_ENABLED:false}
     use-pre-fetched-case-list: ${ULR_USE_PRE_FETCHED_CASE_LIST:false}
@@ -98,6 +98,9 @@ migration:
   waFieldsRemoval:
     enabled: ${MIGRATION_WA_FIELDS_REMOVAL_ENABLED:false}
     encoded-data-string: ${WA_FIELDS_ENCODED_DATA_STRING:==dummy++encoded--string==}
+  interpreterLanguageCode:
+    enabled: ${INTERPRETER_LANGUAGE_CODE_MIGRATION_ENABLED:false}
+    encoded-data-string: ${INTERPRETER_LANGUAGE_CODE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
 
 case-migration:
   elasticsearch.querySize: ${MIGRATION_QUERY_SIZE:10000}
