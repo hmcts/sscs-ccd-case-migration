@@ -151,10 +151,12 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
     public void updateLangCode(Map<String, Object> parentField, Map<String, Object> langListParent,
                                String oldLangCode, String fieldName) {
         if (parentField != null && LANGUAGE_CODE_MAP.containsKey(oldLangCode)) {
-            List<Map<String, Object>>  langList = (List<Map<String, Object>>) langListParent.get("list_items");
-            if (langList != null) {
-                langList.stream().filter(lang -> Objects.equals(lang.get(LANG_CODE), oldLangCode))
-                    .forEach(lang -> lang.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode)));
+            if (nonNull(langListParent)) {
+                List<Map<String, Object>> langList = (List<Map<String, Object>>) langListParent.get("list_items");
+                if (nonNull(langList)) {
+                    langList.stream().filter(lang -> Objects.equals(lang.get(LANG_CODE), oldLangCode))
+                        .forEach(lang -> lang.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode)));
+                }
             }
             parentField.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode));
             log.info("Updated language code of field {} from \"{}\" to \"{}\"",
