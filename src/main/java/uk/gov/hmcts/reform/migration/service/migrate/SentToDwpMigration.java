@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateRe
 @ConditionalOnProperty(value = "migration.sentToDwpMigration.enabled", havingValue = "true")
 public class SentToDwpMigration extends CaseMigrationProcessor {
 
-    public static final String SENT_TO_DWP_MIGRATION_EVENT_ID = "migrateCase";
+    public static final String SENT_TO_DWP_MIGRATION_EVENT_ID = "sentToDwp";
     public static final String SENT_TO_DWP_MIGRATION_EVENT_SUMMARY = "Migrate case for Sent to FTA";
     public static final String SENT_TO_DWP_MIGRATION_EVENT_DESCRIPTION = "Migrate case for Sent to FTA";
     public static final String HMCTS_DWP_STATE = "hmctsDwpState";
