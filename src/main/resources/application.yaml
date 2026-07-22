@@ -57,7 +57,7 @@ migration:
     encoded-data-string: ${COMPLETED_HEARINGS_OUTCOMES_ENCODED_DATA_STRING:==dummy++encoded--string==}
   confidentialityFlag:
     enabled: ${CONFIDENTIALITY_FLAG_MIGRATION_ENABLED:false}
-    encoded-data-string: ${CONFIDENTIALITY_FLAG_ENCODED_STRING:==dummy++encoded--string==}  
+    encoded-data-string: ${CONFIDENTIALITY_FLAG_ENCODED_STRING:==dummy++encoded--string==}
   defaultPanelComposition:
     enabled: ${DEFAULT_PANEL_COMPOSITION_ENABLED:false}
     use-pre-fetched-case-list: ${ULR_USE_PRE_FETCHED_CASE_LIST:false}
@@ -88,6 +88,9 @@ migration:
   rpc:
     enabled: ${RPC_MIGRATION_ENABLED:false}
     encoded-string: ${RPC_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
+  sentToDwpMigration:
+    enabled: ${SENT_TO_DWP_MIGRATION_ENABLED:false}
+    encoded-string: ${SENT_TO_DWP_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
   updateListingReqsMissingAmendReason:
     enabled: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON:false}
     encoded-data-string: ${UPDATE_LISTING_REQS_MISSING_AMEND_REASON_ENCODED_STRING:==dummy++encoded--string==}
@@ -112,4 +115,8 @@ judicial-ref.api.url: ${JUDICIAL_REF_API_URL:http://localhost:8084}
 feature.elinksV2.enabled: ${ELINKS_V2_FEATURE_ENABLED:false}
 hmc.url: ${HMC_API_URL:http://localhost:8084}
 
-
+dwp:
+  response:
+    due:
+      days: ${DWP_RESPONSE_DUE_DAYS:28}
+      days-child-support: ${DWP_RESPONSE_DUE_DAYS_CHILD_SUPPORT:42}
