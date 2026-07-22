@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,7 +39,8 @@ class InterpreterLanguageCodeMigrationTest {
     private final String albanianMrdCode = "sqi";
     private final String spanishMrdCode = "sqi";
     private final DynamicList albanianLegacy = new DynamicList(
-        new DynamicListItem(albanianLegacyCode, "Albanian"), Collections.emptyList());
+        new DynamicListItem(albanianLegacyCode, "Albanian"),
+        List.of(new DynamicListItem(albanianLegacyCode, "Albanian")));
     private final DynamicList albanianMrd = new DynamicList(
         new DynamicListItem(albanianMrdCode, "Albanian"), Collections.emptyList());
     private final DynamicList spanish = new DynamicList(
@@ -110,6 +112,10 @@ class InterpreterLanguageCodeMigrationTest {
             .getAppellantInterpreter().getInterpreterLanguage().getValue().getCode());
         assertNull(migratedcase.getData().getSchedulingAndListingFields().getDefaultListingValues()
                        .getAppellantInterpreter().getInterpreterLanguage());
+        assertThat(migratedcase.getData().getAppeal().getHearingOptions().getLanguagesList().getListItems()
+                       .stream().noneMatch(lang -> Objects.equals(lang.getCode(), albanianLegacyCode))).isTrue();
+        assertThat(migratedcase.getData().getAppeal().getHearingOptions().getLanguagesList().getListItems()
+                       .stream().anyMatch(lang -> Objects.equals(lang.getCode(), albanianMrdCode))).isTrue();
     }
 
     @Test

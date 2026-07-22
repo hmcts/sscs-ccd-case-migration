@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
@@ -30,6 +31,12 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
         List.of("overrideFields", "appellantInterpreter", "interpreterLanguage", "value");
     static final List<String> DEFAULT_LISTING_LANG_CODE_PATH =
         List.of("defaultListingValues", "appellantInterpreter", "interpreterLanguage", "value");
+    static final List<String> HEARING_OPTIONS_LANG_LIST_PARENT_PATH =
+        List.of("appeal", "hearingOptions", "languagesList");
+    static final List<String> OVERRIDE_FIELDS_LANG_LIST_PARENT_PATH =
+        List.of("overrideFields", "appellantInterpreter", "interpreterLanguage");
+    static final List<String> DEFAULT_LISTING_LANG_LIST_PARENT_PATH =
+        List.of("defaultListingValues", "appellantInterpreter", "interpreterLanguage");
     static final Map<String, String> LANGUAGE_CODE_MAP = Map.of(
         "acc-fey", "kur-fey",
         "acc-hki", "zho-hok",
@@ -79,9 +86,19 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
                 throw new RuntimeException(skipMigrationMsg);
             }
 
-            updateLangCode(hearingOptionsLang, hearingOptionLangCode, "languagesList in hearingOptions");
-            updateLangCode(overrideFieldLang, overrideFieldLangCode, "interpreterLanguage in overrideFields");
-            updateLangCode(defaultListingLang, defaultListingLangCode, "interpreterLanguage in defaultListingValues");
+            Map<String, Object> defaultListingLangListParent =
+                getParentField(data, DEFAULT_LISTING_LANG_LIST_PARENT_PATH);
+            Map<String, Object> overrideFieldLangListParent =
+                getParentField(data, OVERRIDE_FIELDS_LANG_LIST_PARENT_PATH);
+            Map<String, Object> hearingOptionLangListParent =
+                getParentField(data, HEARING_OPTIONS_LANG_LIST_PARENT_PATH);
+
+            updateLangCode(hearingOptionsLang,hearingOptionLangListParent,
+                           hearingOptionLangCode, "languagesList in hearingOptions");
+            updateLangCode(overrideFieldLang, overrideFieldLangListParent,
+                           overrideFieldLangCode, "interpreterLanguage in overrideFields");
+            updateLangCode(defaultListingLang, defaultListingLangListParent,
+                           defaultListingLangCode, "interpreterLanguage in defaultListingValues");
         }
 
         log.info("Case {} was updated", caseDetails.getId());
@@ -131,8 +148,14 @@ public class InterpreterLanguageCodeMigration extends CaseMigrationProcessor {
             : null;
     }
 
-    public void updateLangCode(Map<String, Object> parentField, String oldLangCode, String fieldName) {
+    public void updateLangCode(Map<String, Object> parentField, Map<String, Object> langListParent,
+                               String oldLangCode, String fieldName) {
         if (parentField != null && LANGUAGE_CODE_MAP.containsKey(oldLangCode)) {
+            List<Map<String, Object>>  langList = (List<Map<String, Object>>) langListParent.get("list_items");
+            if (langList != null) {
+                langList.stream().filter(lang -> Objects.equals(lang.get(LANG_CODE), oldLangCode))
+                    .forEach(lang -> lang.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode)));
+            }
             parentField.put(LANG_CODE, LANGUAGE_CODE_MAP.get(oldLangCode));
             log.info("Updated language code of field {} from \"{}\" to \"{}\"",
                      fieldName, oldLangCode, parentField.get(LANG_CODE));
