@@ -21,7 +21,6 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_MIGRATION_EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY;
-import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.NON_CHILD_SUPPORT_WITH_NO_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 
 class ConfidentialityFlagMigrationTest {
@@ -68,7 +67,6 @@ class ConfidentialityFlagMigrationTest {
         appellant.put("confidentialityRequired", "Yes");
         Map<String, Object> appeal = new HashMap<>();
         appeal.put("appellant", appellant);
-        appeal.put("benefitType", childSupportBenefitCode());
         Map<String, Object> data = new HashMap<>();
         data.put("appeal", appeal);
         CaseDetails caseDetails = CaseDetails.builder()
@@ -112,7 +110,6 @@ class ConfidentialityFlagMigrationTest {
         appellant.put("confidentialityRequired", "No");
         Map<String, Object> appeal = new HashMap<>();
         appeal.put("appellant", appellant);
-        appeal.put("benefitType", childSupportBenefitCode());
         Map<String, Object> data = new HashMap<>();
         data.put("appeal", appeal);
         CaseDetails caseDetails = CaseDetails.builder()
@@ -250,7 +247,6 @@ class ConfidentialityFlagMigrationTest {
         appeal.put("benefitType", benefitCode);
         Map<String, Object> data = new HashMap<>();
         data.put("appeal", appeal);
-        data.put("otherParties", otherPartiesWithConfidentialityRequired("Yes"));
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -274,7 +270,6 @@ class ConfidentialityFlagMigrationTest {
         appeal.put("benefitType", benefitCode);
         Map<String, Object> data = new HashMap<>();
         data.put("appeal", appeal);
-        data.put("otherParties", otherPartiesWithConfidentialityRequired("Yes"));
 
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -322,60 +317,10 @@ class ConfidentialityFlagMigrationTest {
 
 
     @Test
-    void shouldThrowExceptionWhenNonChildSupportCaseHasNoOtherParties() {
+    void shouldThrowExceptionWhenNoConfidentialityFieldsPresent() {
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .data(new HashMap<>())
-            .build();
-
-        var exception = assertThrows(IllegalStateException.class,
-                                     () -> confidentialityFlagMigration.migrate(caseDetails));
-
-        assertThat(exception.getMessage())
-            .isEqualTo(String.format(NON_CHILD_SUPPORT_WITH_NO_OTHER_PARTIES, 123L));
-    }
-
-    @Test
-    void shouldNotThrowNonChildSupportExceptionWhenBenefitIsChildSupport() {
-        Map<String, Object> appeal = new HashMap<>();
-        appeal.put("benefitType", childSupportBenefitCode());
-        Map<String, Object> data = new HashMap<>();
-        data.put("appeal", appeal);
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(data)
-            .build();
-
-        var exception = assertThrows(IllegalStateException.class,
-                                     () -> confidentialityFlagMigration.migrate(caseDetails));
-
-        assertThat(exception.getMessage())
-            .isEqualTo(String.format(ConfidentialityFlagMigration.NO_CONFIDENTIALITY_MESSAGE, 123L));
-    }
-
-    @Test
-    void shouldNotThrowNonChildSupportExceptionWhenOtherPartiesArePresent() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("otherParties", otherPartiesWithConfidentialityRequired("Yes"));
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(data)
-            .build();
-
-        var result = confidentialityFlagMigration.migrate(caseDetails);
-
-        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenNoConfidentialityFieldsPresent() {
-        Map<String, Object> appeal = new HashMap<>();
-        appeal.put("benefitType", childSupportBenefitCode());
-        Map<String, Object> data = new HashMap<>();
-        data.put("appeal", appeal);
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(data)
             .build();
 
         var exception = assertThrows(IllegalStateException.class,
@@ -417,12 +362,11 @@ class ConfidentialityFlagMigrationTest {
 
     @Test
     void shouldMigrateWhenCaseIsDormantAndLessThan6Months() {
+        Map<String, Object> data = new HashMap<>();
         Map<String, Object> appellant = new HashMap<>();
         appellant.put("confidentialityRequired", "Yes");
         Map<String, Object> appeal = new HashMap<>();
         appeal.put("appellant", appellant);
-        appeal.put("benefitType", childSupportBenefitCode());
-        Map<String, Object> data = new HashMap<>();
         data.put("appeal", appeal);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
@@ -442,19 +386,13 @@ class ConfidentialityFlagMigrationTest {
         appellant.put("confidentialityRequirement", "Yes");
         Map<String, Object> appeal = new HashMap<>();
         appeal.put("appellant", appellant);
-        appeal.put("benefitType", childSupportBenefitCode());
         Map<String, Object> data = new HashMap<>();
         data.put("appeal", appeal);
         CaseDetails caseDetails = CaseDetails.builder()
             .id(123L)
             .data(data)
             .build();
-
-        var exception = assertThrows(IllegalStateException.class,
-                                     () -> confidentialityFlagMigration.migrate(caseDetails));
-
-        assertThat(exception.getMessage())
-            .isEqualTo(String.format(ConfidentialityFlagMigration.NO_CONFIDENTIALITY_MESSAGE, 123L));
+        assertThrows(IllegalStateException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
     }
 
     @Test
@@ -472,29 +410,7 @@ class ConfidentialityFlagMigrationTest {
             .id(123L)
             .data(data)
             .build();
-
-        var exception = assertThrows(IllegalStateException.class,
-                                     () -> confidentialityFlagMigration.migrate(caseDetails));
-
-        assertThat(exception.getMessage())
-            .isEqualTo(String.format(ConfidentialityFlagMigration.NO_CONFIDENTIALITY_MESSAGE, 123L));
-    }
-
-    private static Map<String, Object> childSupportBenefitCode() {
-        Map<String, Object> benefitCode = new HashMap<>();
-        benefitCode.put("code", "childSupport");
-        benefitCode.put("description", "Child Support");
-        return benefitCode;
-    }
-
-    private static List<Map<String, Object>> otherPartiesWithConfidentialityRequired(String confidentialityRequired) {
-        Map<String, Object> otherPartyValue = new HashMap<>();
-        otherPartyValue.put("confidentialityRequired", confidentialityRequired);
-        Map<String, Object> otherParty = new HashMap<>();
-        otherParty.put("value", otherPartyValue);
-        List<Map<String, Object>> otherParties = new ArrayList<>();
-        otherParties.add(otherParty);
-        return otherParties;
+        assertThrows(IllegalStateException.class, () -> confidentialityFlagMigration.migrate(caseDetails));
     }
 
 }
