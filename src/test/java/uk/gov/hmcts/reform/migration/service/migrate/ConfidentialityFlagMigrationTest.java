@@ -124,6 +124,31 @@ class ConfidentialityFlagMigrationTest {
 
     @Test
     void shouldPopulateIsConfidentialCaseAsNoWhenOtherPartyConfidentialityIsNo() {
+        final Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "No");
+        final Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        otherPartyValue.put("confidentialityRequired", "No");
+        final Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data).containsEntry("isConfidentialCase", "No");
+    }
+
+    @Test
+    void shouldNotPopulateIsConfidentialCaseWhenAppellantIsAbsentAndOtherPartyConfidentialityIsNo() {
         final Map<String, Object> otherPartyValue = new HashMap<>();
         otherPartyValue.put("confidentialityRequired", "No");
         final Map<String, Object> otherParty = new HashMap<>();
@@ -139,7 +164,31 @@ class ConfidentialityFlagMigrationTest {
 
         confidentialityFlagMigration.migrate(caseDetails);
 
-        assertThat(data).containsEntry("isConfidentialCase", "No");
+        assertThat(data).doesNotContainKey("isConfidentialCase");
+    }
+
+    @Test
+    void shouldNotPopulateIsConfidentialCaseWhenAppellantIsNoAndOtherPartyConfidentialityIsAbsent() {
+        final Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "No");
+        final Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        final Map<String, Object> otherPartyValue = new HashMap<>();
+        final Map<String, Object> otherParty = new HashMap<>();
+        otherParty.put("value", otherPartyValue);
+        final List<Map<String, Object>> otherParties = new ArrayList<>();
+        otherParties.add(otherParty);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        data.put("otherParties", otherParties);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(data)
+            .build();
+
+        confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(data).doesNotContainKey("isConfidentialCase");
     }
 
     @Test

@@ -6,24 +6,25 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Party;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
-import uk.gov.hmcts.reform.sscs.ccd.domain.YesNoUndetermined;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT_ARCHIVED;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.YesNo.isYes;
 
 @Service
 @Slf4j
@@ -82,7 +83,9 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         YesNo undeterminedConfidentiality = caseData.hasUndeterminedPartyConfidentiality();
         String confidentialityTab = caseData.getConfidentialityTab();
         YesNo isConfidentialValue = isConfidential(caseData);
-        data.put("isConfidentialCase", isConfidentialValue.getValue());
+        if (nonNull(isConfidentialValue)) {
+            data.put("isConfidentialCase", isConfidentialValue.getValue());
+        }
         if (nonNull(undeterminedConfidentiality)) {
             data.put("hasUndeterminedPartyConfidentiality", undeterminedConfidentiality.getValue());
         }
@@ -93,15 +96,24 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     }
 
     private YesNo isConfidential(SscsCaseData caseData) {
-        if (caseData.getAppellantConfidentiality().orElse(null) == YesNoUndetermined.YES) {
+        Optional<YesNo> appellantConfidentiality = caseData.getAppellant().map(Party::getConfidentialityRequired);
+        List<YesNo> otherPartiesConfidentiality = Optional.ofNullable(caseData.getOtherParties())
+            .orElse(emptyList())
+            .stream()
+            .map(op -> op.getValue().getConfidentialityRequired())
+            .toList();
+
+        if (appellantConfidentiality.filter(YesNo.YES::equals).isPresent()
+            || otherPartiesConfidentiality.contains(YesNo.YES)) {
             return YesNo.YES;
         }
-        if (nonNull(caseData.getOtherParties())) {
-            return caseData.getOtherParties().stream()
-                .anyMatch(op -> isYes(op.getValue().getConfidentialityRequired()))
-                ? YesNo.YES : YesNo.NO;
+
+        if (appellantConfidentiality.filter(YesNo.NO::equals).isPresent()
+            && otherPartiesConfidentiality.stream().allMatch(YesNo.NO::equals)) {
+            return YesNo.NO;
         }
-        return YesNo.NO;
+
+        return null;
     }
 
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
