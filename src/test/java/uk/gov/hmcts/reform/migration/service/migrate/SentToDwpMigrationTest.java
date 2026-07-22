@@ -108,17 +108,4 @@ class SentToDwpMigrationTest {
             ? dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString() : dueDate.minusDays(RESPONSE_DUE_DAYS).toString();
         assertEquals(expectedSentDate, caseDetails.getData().get(DATE_SENT_TO_DWP));
     }
-
-    @Test
-    @DisplayName("Should migrate case and not overwrite hmctsDwpSate")
-    void shouldMigrateAndKeepExistingHmctsDwpSate() {
-        LocalDate dueDate = LocalDate.now().plusDays(13);
-        sscsCaseData.setDwpDueDate(dueDate.toString());
-        sscsCaseData.setHmctsDwpState("someState");
-        caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
-
-        sentToDwpMigration.migrate(caseDetails);
-
-        assertEquals("someState", caseDetails.getData().get(HMCTS_DWP_STATE));
-    }
 }

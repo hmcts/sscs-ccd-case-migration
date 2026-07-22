@@ -57,12 +57,7 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
 
             if (isNull(data.get(DATE_SENT_TO_DWP))) {
                 data.put(DATE_SENT_TO_DWP,calculateSentToDwpDate(sscsCaseData));
-                if (isNull(data.get(HMCTS_DWP_STATE))) {
-                    data.put(HMCTS_DWP_STATE, SENT_TO_DWP);
-                } else {
-                    log.info("{} is already set for case {}", HMCTS_DWP_STATE, caseDetails.getId());
-                }
-
+                data.put(HMCTS_DWP_STATE, SENT_TO_DWP);
             } else {
                 throw new RuntimeException("Skipping case for migration due to " + DATE_SENT_TO_DWP
                                                + " is already set");
