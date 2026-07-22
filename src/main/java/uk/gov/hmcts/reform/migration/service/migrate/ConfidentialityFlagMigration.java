@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Benefit;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
@@ -19,6 +20,7 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT_ARCHIVED;
@@ -37,6 +39,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     static final String STATE_FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
     static final String DATE_FAILURE_MESSAGE
         = "Skipping Case (%s) for migration due to appeal being dormant for over 6 months.";
+    static final String NON_CHILD_SUPPORT_WITH_NO_OTHER_PARTIES
+        = "Skipping Case (%s) for migration due to appeal being a non child support case and no other parties.";
     static final String NO_CONFIDENTIALITY_MESSAGE
         = "Skipping Case (%s) for migration due to no confidentiality fields.";
     static final LocalDateTime dormantCutOffDate = LocalDateTime.now().minusMonths(6);
@@ -67,9 +71,16 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             String skipMsg = format(DATE_FAILURE_MESSAGE, caseId);
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
-
         }
+
         Map<String, Object> data = caseDetails.getData();
+
+        if (!isChildSupport(data) && isEmpty((List<Map<String, Object>>) data.get("otherParties"))) {
+            String skipMsg = format(NON_CHILD_SUPPORT_WITH_NO_OTHER_PARTIES, caseId);
+            log.error(skipMsg);
+            throw new IllegalStateException(skipMsg);
+        }
+
         Boolean appellantUpdated = updateAppellant(data, caseId);
         Boolean otherPartiesUpdated = updateOtherParties(data, caseId);
 
@@ -90,6 +101,23 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
             data.put("confidentialityTab", confidentialityTab);
         }
         return new UpdateResult(getEventSummary(), getEventDescription());
+    }
+
+    private boolean isChildSupport(Map<String, Object> data) {
+        String code = getNestedValue(data, "appeal", "benefitType", "code");
+        return Benefit.CHILD_SUPPORT.getShortName().equalsIgnoreCase(code);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T getNestedValue(Map<String, Object> data, String... keys) {
+        Object current = data;
+        for (String key : keys) {
+            if (!(current instanceof Map<?, ?> map)) {
+                return null;
+            }
+            current = map.get(key);
+        }
+        return (T) current;
     }
 
     private YesNo isConfidential(SscsCaseData caseData) {
@@ -136,6 +164,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
 
     private Boolean updateAppellant(Map<String, Object> data, Long caseId) {
         Boolean appellantUpdated = false;
+
         Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
         if (nonNull(appeal)) {
             Map<String, Object> appellant = (Map<String, Object>) appeal.get("appellant");
