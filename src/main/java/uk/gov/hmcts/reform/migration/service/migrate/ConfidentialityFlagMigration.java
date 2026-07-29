@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
+import uk.gov.hmcts.reform.sscs.ccd.domain.Benefit;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Party;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
@@ -19,6 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
+import static java.time.LocalDateTime.now;
+import static java.time.ZoneId.systemDefault;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
@@ -40,7 +43,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         = "Skipping Case (%s) for migration due to appeal being dormant for over 6 months.";
     static final String NO_CONFIDENTIALITY_MESSAGE
         = "Skipping Case (%s) for migration due to no confidentiality fields.";
-    static final LocalDateTime dormantCutOffDate = LocalDateTime.now().minusMonths(6);
+    static final LocalDateTime dormantCutOffDate = now(systemDefault()).minusMonths(6);
+    private static final String CONFIDENTIALITY_REQUIREMENT = "confidentialityRequirement";
 
 
     private final String encodedDataString;
@@ -58,21 +62,22 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     @Override
     public UpdateResult migrate(CaseDetails caseDetails) {
         Long caseId = caseDetails.getId();
+        final Map<String, Object> data = caseDetails.getData();
+
         if (Objects.equals(caseDetails.getState(), VOID_STATE.toString())
             || Objects.equals(caseDetails.getState(), DRAFT_ARCHIVED.toString())) {
             String skipMsg = format(STATE_FAILURE_MSG, caseId, caseDetails.getState());
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
-        } else if (Objects.equals(caseDetails.getState(), DORMANT_APPEAL_STATE.toString())
+        } else if (!isChildSupport(data) && Objects.equals(caseDetails.getState(), DORMANT_APPEAL_STATE.toString())
             && dormantCutOffDate.isAfter(caseDetails.getLastModified())) {
             String skipMsg = format(DATE_FAILURE_MESSAGE, caseId);
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
-
         }
-        Map<String, Object> data = caseDetails.getData();
-        Boolean appellantUpdated = updateAppellant(data, caseId);
-        Boolean otherPartiesUpdated = updateOtherParties(data, caseId);
+
+        boolean appellantUpdated = updateAppellant(data, caseId);
+        boolean otherPartiesUpdated = updateOtherParties(data, caseId);
 
         if (!appellantUpdated && !otherPartiesUpdated) {
             String skipMsg = format(NO_CONFIDENTIALITY_MESSAGE, caseDetails.getId());
@@ -117,7 +122,7 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     }
 
     private Boolean updateOtherParties(Map<String, Object> data, Long caseId) {
-        Boolean updateOtherParties = false;
+        boolean updateOtherParties = false;
         if (data.containsKey("otherParties")) {
             List<Map<String, Object>> otherParties = (List<Map<String, Object>>) data.get("otherParties");
             for (Map<String, Object> op : otherParties) {
@@ -134,8 +139,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         Boolean otherPartyUpdated = false;
         Object confidentialityRequired = op.get("confidentialityRequired");
         if (nonNull(confidentialityRequired)) {
-            if (!op.containsKey("confidentialityRequirement")) {
-                op.put("confidentialityRequirement", confidentialityRequired.toString());
+            if (!op.containsKey(CONFIDENTIALITY_REQUIREMENT)) {
+                op.put(CONFIDENTIALITY_REQUIREMENT, confidentialityRequired.toString());
                 return true;
             } else {
                 log.info("New confidentiality field is present for other party on case {}", caseId);
@@ -146,16 +151,15 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     }
 
 
-    private Boolean updateAppellant(Map<String, Object> data, Long caseId) {
-        Boolean appellantUpdated = false;
+    private boolean updateAppellant(Map<String, Object> data, Long caseId) {
         Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
         if (nonNull(appeal)) {
             Map<String, Object> appellant = (Map<String, Object>) appeal.get("appellant");
             if (nonNull(appellant)) {
                 Object confidentialityRequired = appellant.get("confidentialityRequired");
                 if (nonNull(confidentialityRequired)) {
-                    if (!appellant.containsKey("confidentialityRequirement")) {
-                        appellant.put("confidentialityRequirement", confidentialityRequired.toString());
+                    if (!appellant.containsKey(CONFIDENTIALITY_REQUIREMENT)) {
+                        appellant.put(CONFIDENTIALITY_REQUIREMENT, confidentialityRequired.toString());
                         log.info("Updating Appellant confidentiality for case {}", caseId);
                         return true;
                     } else {
@@ -165,7 +169,24 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
                 }
             }
         }
-        return appellantUpdated;
+        return false;
+    }
+
+    private boolean isChildSupport(Map<String, Object> data) {
+        String code = getNestedValue(data, "appeal", "benefitType", "code");
+        return Benefit.CHILD_SUPPORT.getShortName().equalsIgnoreCase(code);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T getNestedValue(Map<String, Object> data, String... keys) {
+        Object current = data;
+        for (String key : keys) {
+            if (!(current instanceof Map<?, ?> map)) {
+                return null;
+            }
+            current = map.get(key);
+        }
+        return (T) current;
     }
 
     @Override

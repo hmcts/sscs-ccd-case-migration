@@ -429,6 +429,30 @@ class ConfidentialityFlagMigrationTest {
     }
 
     @Test
+    void shouldMigrateWhenChildSupportCaseIsDormantAndOlderThan6Months() {
+        final Map<String, Object> appellant = new HashMap<>();
+        appellant.put("confidentialityRequired", "Yes");
+        final Map<String, Object> appeal = new HashMap<>();
+        appeal.put("appellant", appellant);
+        final Map<String, Object> benefitCode = new HashMap<>();
+        benefitCode.put("code", "childSupport");
+        benefitCode.put("description", "Child Support");
+        appeal.put("benefitType", benefitCode);
+        final Map<String, Object> data = new HashMap<>();
+        data.put("appeal", appeal);
+        final CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(DORMANT_APPEAL_STATE.toString())
+            .lastModified(LocalDateTime.now().minusMonths(7))
+            .data(data)
+            .build();
+
+        final var result = confidentialityFlagMigration.migrate(caseDetails);
+
+        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
+    }
+
+    @Test
     void shouldNotOverwriteAppellantConfidentialityRequirementIfAlreadyPresent() {
         Map<String, Object> appellant = new HashMap<>();
         appellant.put("confidentialityRequired", "No");
