@@ -6,26 +6,21 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.migration.service.CaseMigrationProcessor;
-import uk.gov.hmcts.reform.sscs.ccd.domain.Benefit;
 import uk.gov.hmcts.reform.sscs.ccd.domain.Party;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.YesNo;
 import uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import static java.lang.String.format;
-import static java.time.LocalDateTime.now;
-import static java.time.ZoneId.systemDefault;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DRAFT_ARCHIVED;
 import static uk.gov.hmcts.reform.sscs.ccd.domain.State.VOID_STATE;
 
@@ -39,11 +34,8 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         = "Appeal migrated following confidentiality release";
     static final String CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION = "Appeal migrated following confidentiality release";
     static final String STATE_FAILURE_MSG = "Skipping Case (%s) for migration due to incorrect state: (%s)";
-    static final String DATE_FAILURE_MESSAGE
-        = "Skipping Case (%s) for migration due to appeal being dormant for over 6 months.";
     static final String NO_CONFIDENTIALITY_MESSAGE
         = "Skipping Case (%s) for migration due to no confidentiality fields.";
-    static final LocalDateTime dormantCutOffDate = now(systemDefault()).minusMonths(6);
     private static final String CONFIDENTIALITY_REQUIREMENT = "confidentialityRequirement";
 
 
@@ -67,11 +59,6 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
         if (Objects.equals(caseDetails.getState(), VOID_STATE.toString())
             || Objects.equals(caseDetails.getState(), DRAFT_ARCHIVED.toString())) {
             String skipMsg = format(STATE_FAILURE_MSG, caseId, caseDetails.getState());
-            log.error(skipMsg);
-            throw new IllegalStateException(skipMsg);
-        } else if (!isChildSupport(data) && Objects.equals(caseDetails.getState(), DORMANT_APPEAL_STATE.toString())
-            && dormantCutOffDate.isAfter(caseDetails.getLastModified())) {
-            String skipMsg = format(DATE_FAILURE_MESSAGE, caseId);
             log.error(skipMsg);
             throw new IllegalStateException(skipMsg);
         }
@@ -166,20 +153,6 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
                         log.info("New confidentiality field for appellant is present on case {}", caseId);
                         return false;
                     }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isChildSupport(Map<String, Object> data) {
-        if (nonNull(data)) {
-            final Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
-            if (nonNull(appeal)) {
-                Map<String, Object> benefitType = (Map<String, Object>) appeal.get("benefitType");
-                if (nonNull(benefitType)) {
-                    String code = (String) benefitType.get("code");
-                    return Benefit.CHILD_SUPPORT.getShortName().equalsIgnoreCase(code);
                 }
             }
         }

@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseDetails;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,6 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_MIGRATION_EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.ConfidentialityFlagMigration.CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY;
-import static uk.gov.hmcts.reform.sscs.ccd.domain.State.DORMANT_APPEAL_STATE;
 
 class ConfidentialityFlagMigrationTest {
 
@@ -392,64 +390,6 @@ class ConfidentialityFlagMigrationTest {
 
         assertThat(exception.getMessage())
             .isEqualTo(String.format(ConfidentialityFlagMigration.STATE_FAILURE_MSG, 123L, state));
-    }
-
-    @Test
-    void shouldThrowExceptionWhenCaseIsDormantAndOlderThan6Months() {
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .state(DORMANT_APPEAL_STATE.toString())
-            .lastModified(LocalDateTime.now().minusMonths(7))
-            .build();
-
-        var exception = assertThrows(IllegalStateException.class,
-                                     () -> confidentialityFlagMigration.migrate(caseDetails));
-
-        assertThat(exception.getMessage())
-            .isEqualTo(String.format(ConfidentialityFlagMigration.DATE_FAILURE_MESSAGE, 123L));
-    }
-
-    @Test
-    void shouldMigrateWhenCaseIsDormantAndLessThan6Months() {
-        Map<String, Object> data = new HashMap<>();
-        Map<String, Object> appellant = new HashMap<>();
-        appellant.put("confidentialityRequired", "Yes");
-        Map<String, Object> appeal = new HashMap<>();
-        appeal.put("appellant", appellant);
-        data.put("appeal", appeal);
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .state(DORMANT_APPEAL_STATE.toString())
-            .lastModified(LocalDateTime.now().minusMonths(5))
-            .data(data)
-            .build();
-
-        var result = confidentialityFlagMigration.migrate(caseDetails);
-        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
-    }
-
-    @Test
-    void shouldMigrateWhenChildSupportCaseIsDormantAndOlderThan6Months() {
-        final Map<String, Object> appellant = new HashMap<>();
-        appellant.put("confidentialityRequired", "Yes");
-        final Map<String, Object> appeal = new HashMap<>();
-        appeal.put("appellant", appellant);
-        final Map<String, Object> benefitCode = new HashMap<>();
-        benefitCode.put("code", "childSupport");
-        benefitCode.put("description", "Child Support");
-        appeal.put("benefitType", benefitCode);
-        final Map<String, Object> data = new HashMap<>();
-        data.put("appeal", appeal);
-        final CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .state(DORMANT_APPEAL_STATE.toString())
-            .lastModified(LocalDateTime.now().minusMonths(7))
-            .data(data)
-            .build();
-
-        final var result = confidentialityFlagMigration.migrate(caseDetails);
-
-        assertThat(result.summary()).isEqualTo(CONFIDENTIALITY_FLAG_MIGRATION_EVENT_SUMMARY);
     }
 
     @Test
