@@ -98,6 +98,15 @@ class RpcMigrationServiceTest {
     }
 
     @Test
+    void shouldSkipCaseWithNullHearingRouteAndEmptyScReference() {
+        var caseData = new HashMap<>(Map.of(REGION_FIELD, (Object) REGION_TO_MIGRATE, "caseReference", ""));
+        var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
+        var exception = assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo(String.format(NULL_HEARING_ROUTE_FAILURE_MSG, 1234L));
+        assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+    }
+
+    @Test
     void shouldGetEventId() {
         assertThat(underTest.getEventId()).isEqualTo(RPC_MIGRATION_EVENT_ID);
     }
