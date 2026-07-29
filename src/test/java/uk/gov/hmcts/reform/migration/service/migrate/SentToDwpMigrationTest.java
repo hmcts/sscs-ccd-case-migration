@@ -71,8 +71,18 @@ class SentToDwpMigrationTest {
     }
 
     @Test
-    @DisplayName("Skip if dwpDueDate is correct")
+    @DisplayName("Skip if dwpDueDate is null")
     void shouldThrowErrorWhenDwpDueDateIsNull() {
+        sscsCaseData.setDwpDueDate(null);
+        caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+
+        assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
+            .hasMessageContaining("FTA response due date is empty");
+    }
+
+    @Test
+    @DisplayName("Skip if dateSentToDwp is correct")
+    void shouldThrowErrorWhenDateSentToDwpIsCorrect() {
         LocalDate dueDate = LocalDate.now().plusDays(5);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setDateSentToDwp(dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString());
