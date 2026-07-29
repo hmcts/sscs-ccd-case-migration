@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.sscs.ccd.domain.BenefitType;
 import uk.gov.hmcts.reform.sscs.ccd.domain.SscsCaseData;
@@ -71,33 +71,32 @@ class SentToDwpMigrationTest {
     }
 
     @Test
-    @DisplayName("Skip if dwpDueDate is null")
+    @DisplayName("Skip if dwpDueDate is correct")
     void shouldThrowErrorWhenDwpDueDateIsNull() {
+        LocalDate dueDate = LocalDate.now().plusDays(5);
+        sscsCaseData.setDwpDueDate(dueDate.toString());
+        sscsCaseData.setDateSentToDwp(dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString());
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
 
         assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
-            .hasMessageContaining("FTA response due date is empty");
-    }
-
-    @Test
-    @DisplayName("Skip if dateSentToDwp is already set")
-    void shouldThrowErrorWhenDateSentToDwpIsSet() {
-        LocalDate sentToDwpDate = LocalDate.now().minusDays(15);
-        sscsCaseData.setDateSentToDwp(sentToDwpDate.toString());
-        caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
-
-        assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
-            .hasMessageContaining(DATE_SENT_TO_DWP + " is already set");
+            .hasMessageContaining("dateSentToDwp is correct");
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"childSupport", "UC"})
+    @CsvSource({
+        "childSupport, null",
+        "childSupport, 136",
+        "UC, null"
+    })
     @DisplayName("Should migrate case")
-    void shouldMigrate(String benefitShortName) {
+    void shouldMigrate(String benefitShortName, String sentToDateDifference) {
         sscsCaseData.getAppeal().setBenefitType(BenefitType.builder().code(benefitShortName).build());
         LocalDate dueDate = LocalDate.now().plusDays(25);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setHmctsDwpState(null);
+        sscsCaseData.setDateSentToDwp(sentToDateDifference.equals("null")
+                                          ? null
+                                          : dueDate.minusDays(Long.parseLong(sentToDateDifference)).toString());
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
 
         sentToDwpMigration.migrate(caseDetails);

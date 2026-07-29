@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.migration.service.migrate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.temporal.ChronoUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -29,6 +30,7 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
     public static final String HMCTS_DWP_STATE = "hmctsDwpState";
     public static final String SENT_TO_DWP = "sentToDwp";
     public static final String DATE_SENT_TO_DWP = "dateSentToDwp";
+    public static final String DWP_DUE_DATE = "dwpDueDate";
 
     private final ObjectMapper objectMapper;
     private final String encodedDataString;
@@ -54,13 +56,16 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
         var data = caseDetails.getData();
         if (data != null) {
             SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
+            if (isNull(data.get(DWP_DUE_DATE))) {
+                throw new RuntimeException("Skipping migration as FTA response due date is empty");
+            }
 
-            if (isNull(data.get(DATE_SENT_TO_DWP))) {
-                data.put(DATE_SENT_TO_DWP,calculateSentToDwpDate(sscsCaseData));
+            if (shouldMigrate(sscsCaseData, caseDetails.getId().toString())) {
+                data.put(DATE_SENT_TO_DWP, calculateSentToDwpDate(sscsCaseData));
                 data.put(HMCTS_DWP_STATE, SENT_TO_DWP);
             } else {
                 throw new RuntimeException("Skipping case for migration due to " + DATE_SENT_TO_DWP
-                                               + " is already set");
+                                               + " is correct");
             }
         } else {
             throw new RuntimeException("Skipping case for migration due to case data is empty.");
@@ -92,11 +97,22 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
 
     private String calculateSentToDwpDate(SscsCaseData caseData) {
         int numberOfDays = getResponseDueDays(caseData);
-        if (isNull(caseData.getDwpDueDate())) {
-            throw new RuntimeException("Skipping migration due to FTA response due date is empty");
-        }
-
         LocalDate dwpDueDate = LocalDate.parse(caseData.getDwpDueDate());
         return dwpDueDate.minusDays(numberOfDays).toString();
+    }
+
+    private boolean shouldMigrate(SscsCaseData caseData, String caseReference) {
+        if (isNull(caseData.getDateSentToDwp())) {
+            log.info("Date evidence sent to FTA is not set for case {}", caseReference);
+            return true;
+        }
+
+        int expectedDifferenceInDays = getResponseDueDays(caseData);
+        LocalDate dwpDueDate = LocalDate.parse(caseData.getDwpDueDate());
+        LocalDate sentToFtaDate = LocalDate.parse(caseData.getDateSentToDwp());
+        long differenceInDays = ChronoUnit.DAYS.between(sentToFtaDate, dwpDueDate);
+        log.info("Difference in days between dwpDueDate and dateSentToDwp: {} for case {}",
+                 differenceInDays, caseReference);
+        return differenceInDays != expectedDifferenceInDays;
     }
 }
