@@ -173,20 +173,17 @@ public class ConfidentialityFlagMigration extends CaseMigrationProcessor {
     }
 
     private boolean isChildSupport(Map<String, Object> data) {
-        String code = getNestedValue(data, "appeal", "benefitType", "code");
-        return Benefit.CHILD_SUPPORT.getShortName().equalsIgnoreCase(code);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> T getNestedValue(Map<String, Object> data, String... keys) {
-        Object current = data;
-        for (String key : keys) {
-            if (!(current instanceof Map<?, ?> map)) {
-                return null;
+        if (nonNull(data)) {
+            final Map<String, Object> appeal = (Map<String, Object>) data.get("appeal");
+            if (nonNull(appeal)) {
+                Map<String, Object> benefitType = (Map<String, Object>) appeal.get("benefitType");
+                if (nonNull(benefitType)) {
+                    String code = (String) benefitType.get("code");
+                    return Benefit.CHILD_SUPPORT.getShortName().equalsIgnoreCase(code);
+                }
             }
-            current = map.get(key);
         }
-        return (T) current;
+        return false;
     }
 
     @Override
