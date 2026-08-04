@@ -25,8 +25,8 @@ import static uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateRe
 public class SentToDwpMigration extends CaseMigrationProcessor {
 
     public static final String SENT_TO_DWP_MIGRATION_EVENT_ID = "sentToDwp";
-    public static final String SENT_TO_DWP_MIGRATION_EVENT_SUMMARY = "Migrate case for Sent to FTA";
-    public static final String SENT_TO_DWP_MIGRATION_EVENT_DESCRIPTION = "Migrate case for Sent to FTA";
+    public static final String SENT_TO_DWP_MIGRATION_EVENT_SUMMARY = "To update data fields in Appeal details tab";
+    public static final String SENT_TO_DWP_MIGRATION_EVENT_DESCRIPTION = "To update data fields in Appeal details tab";
     public static final String HMCTS_DWP_STATE = "hmctsDwpState";
     public static final String SENT_TO_DWP = "sentToDwp";
     public static final String DATE_SENT_TO_DWP = "dateSentToDwp";
