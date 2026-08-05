@@ -4,5 +4,7 @@
     <cve>CVE-2025-15104</cve>
     <cve>CVE-2026-54399</cve>
     <cve>CVE-2026-54428</cve>
+    <cve>CVE-2026-63263</cve>
+    <cve>CVE-2026-63144</cve>
   </suppress>
 </suppressions>
