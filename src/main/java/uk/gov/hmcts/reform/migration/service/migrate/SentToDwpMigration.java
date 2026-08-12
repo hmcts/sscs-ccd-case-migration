@@ -58,11 +58,11 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
         if (data != null) {
             SscsCaseData sscsCaseData = objectMapper.convertValue(data, SscsCaseData.class);
             if (isNull(data.get(DWP_DUE_DATE))) {
-                throw new RuntimeException("Skipping migration as FTA response due date is empty");
+                throw new IllegalStateException("Skipping migration as FTA response due date is empty");
             }
 
             if (!RESPONSE_RECEIVED.equals(sscsCaseData.getState())) {
-                throw new RuntimeException("Skipping migration as case state is " + sscsCaseData.getState().getId());
+                throw new IllegalStateException("Skipping migration as case state is " + sscsCaseData.getState().getId());
             }
 
             if (shouldMigrate(sscsCaseData, caseDetails.getId().toString())) {
@@ -74,11 +74,11 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
                     log.info("hmctsDwpState is already set to {}", sscsCaseData.getHmctsDwpState());
                 }
             } else {
-                throw new RuntimeException("Skipping case for migration due to " + DATE_SENT_TO_DWP
+                throw new IllegalStateException("Skipping case for migration due to " + DATE_SENT_TO_DWP
                                                + " is correct");
             }
         } else {
-            throw new RuntimeException("Skipping case for migration due to case data is empty.");
+            throw new IllegalStateException("Skipping case for migration due to case data is empty.");
         }
 
         return new UpdateResult(getEventSummary(), getEventDescription());
