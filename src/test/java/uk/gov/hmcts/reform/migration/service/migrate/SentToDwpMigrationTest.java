@@ -22,9 +22,12 @@ import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
 import static uk.gov.hmcts.reform.migration.service.migrate.SentToDwpMigration.DATE_SENT_TO_DWP;
 import static uk.gov.hmcts.reform.migration.service.migrate.SentToDwpMigration.HMCTS_DWP_STATE;
+import static uk.gov.hmcts.reform.migration.service.migrate.SentToDwpMigration.SENT_TO_DWP;
 import static uk.gov.hmcts.reform.migration.service.migrate.SentToDwpMigration.SENT_TO_DWP_MIGRATION_EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.SentToDwpMigration.SENT_TO_DWP_MIGRATION_EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.SentToDwpMigration.SENT_TO_DWP_MIGRATION_EVENT_SUMMARY;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.RESPONSE_RECEIVED;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.WITH_DWP;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseData;
 import static uk.gov.hmcts.reform.sscs.ccd.util.CaseDataUtils.buildCaseDataMap;
 
@@ -73,6 +76,7 @@ class SentToDwpMigrationTest {
     @Test
     @DisplayName("Skip if dwpDueDate is null")
     void shouldThrowErrorWhenDwpDueDateIsNull() {
+        sscsCaseData.setState(RESPONSE_RECEIVED);
         sscsCaseData.setDwpDueDate(null);
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
 
@@ -81,15 +85,45 @@ class SentToDwpMigrationTest {
     }
 
     @Test
+    @DisplayName("Skip if case state is not Response received")
+    void shouldThrowErrorWhenCaseStateIsNotResponseReceived() {
+        sscsCaseData.setState(WITH_DWP);
+        sscsCaseData.setDwpDueDate(LocalDate.now().toString());
+        caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+
+        assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
+            .hasMessageContaining("Skipping migration as case state is");
+    }
+
+    @Test
     @DisplayName("Skip if dateSentToDwp is correct")
     void shouldThrowErrorWhenDateSentToDwpIsCorrect() {
         LocalDate dueDate = LocalDate.now().plusDays(5);
+        sscsCaseData.setState(RESPONSE_RECEIVED);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setDateSentToDwp(dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString());
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
 
         assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
             .hasMessageContaining("dateSentToDwp is correct");
+    }
+
+    @Test
+    @DisplayName("Should not overwrite hmctsDwpState when migrating case")
+    void shouldNotChangeHmctsDwpStateIfSet() {
+        sscsCaseData.setState(RESPONSE_RECEIVED);
+        LocalDate dueDate = LocalDate.now().plusDays(32);
+        sscsCaseData.setDwpDueDate(dueDate.toString());
+        sscsCaseData.setHmctsDwpState("someHmctsDwpState");
+        sscsCaseData.setDateSentToDwp(null);
+        caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+
+        sentToDwpMigration.migrate(caseDetails);
+
+        assertNotNull(caseDetails.getData().get(HMCTS_DWP_STATE));
+        assertNotNull(caseDetails.getData().get(DATE_SENT_TO_DWP));
+        assertEquals(dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString(), caseDetails.getData().get(DATE_SENT_TO_DWP));
+        assertEquals("someHmctsDwpState", caseDetails.getData().get(HMCTS_DWP_STATE));
     }
 
     @ParameterizedTest
@@ -101,6 +135,7 @@ class SentToDwpMigrationTest {
     @DisplayName("Should migrate case")
     void shouldMigrate(String benefitShortName, String sentToDateDifference) {
         sscsCaseData.getAppeal().setBenefitType(BenefitType.builder().code(benefitShortName).build());
+        sscsCaseData.setState(RESPONSE_RECEIVED);
         LocalDate dueDate = LocalDate.now().plusDays(25);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setHmctsDwpState(null);
@@ -116,5 +151,6 @@ class SentToDwpMigrationTest {
         String expectedSentDate = benefitShortName.equals("childSupport")
             ? dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString() : dueDate.minusDays(RESPONSE_DUE_DAYS).toString();
         assertEquals(expectedSentDate, caseDetails.getData().get(DATE_SENT_TO_DWP));
+        assertEquals(SENT_TO_DWP, caseDetails.getData().get(HMCTS_DWP_STATE));
     }
 }

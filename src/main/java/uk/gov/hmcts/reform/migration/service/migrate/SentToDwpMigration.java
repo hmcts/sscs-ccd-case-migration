@@ -17,6 +17,7 @@ import java.util.List;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseList.findCases;
+import static uk.gov.hmcts.reform.sscs.ccd.domain.State.RESPONSE_RECEIVED;
 import static uk.gov.hmcts.reform.sscs.ccd.service.UpdateCcdCaseService.UpdateResult;
 
 @Service
@@ -60,9 +61,18 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
                 throw new RuntimeException("Skipping migration as FTA response due date is empty");
             }
 
+            if (!RESPONSE_RECEIVED.equals(sscsCaseData.getState())) {
+                throw new RuntimeException("Skipping migration as case state is " + sscsCaseData.getState().getId());
+            }
+
             if (shouldMigrate(sscsCaseData, caseDetails.getId().toString())) {
                 data.put(DATE_SENT_TO_DWP, calculateSentToDwpDate(sscsCaseData));
-                data.put(HMCTS_DWP_STATE, SENT_TO_DWP);
+                if (isNull(sscsCaseData.getHmctsDwpState())) {
+                    data.put(HMCTS_DWP_STATE, SENT_TO_DWP);
+                    log.info("Setting hmctsDwpState to {}", SENT_TO_DWP);
+                } else {
+                    log.info("hmctsDwpState is already set to {}", sscsCaseData.getHmctsDwpState());
+                }
             } else {
                 throw new RuntimeException("Skipping case for migration due to " + DATE_SENT_TO_DWP
                                                + " is correct");
