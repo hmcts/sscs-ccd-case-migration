@@ -76,9 +76,9 @@ class SentToDwpMigrationTest {
     @Test
     @DisplayName("Skip if dwpDueDate is null")
     void shouldThrowErrorWhenDwpDueDateIsNull() {
-        sscsCaseData.setState(RESPONSE_RECEIVED);
         sscsCaseData.setDwpDueDate(null);
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+        caseDetails.setState(RESPONSE_RECEIVED.getId());
 
         assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
             .hasMessageContaining("FTA response due date is empty");
@@ -87,9 +87,9 @@ class SentToDwpMigrationTest {
     @Test
     @DisplayName("Skip if case state is not Response received")
     void shouldThrowErrorWhenCaseStateIsNotResponseReceived() {
-        sscsCaseData.setState(WITH_DWP);
         sscsCaseData.setDwpDueDate(LocalDate.now().toString());
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+        caseDetails.setState(WITH_DWP.getId());
 
         assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
             .hasMessageContaining("Skipping migration as case state is");
@@ -99,10 +99,10 @@ class SentToDwpMigrationTest {
     @DisplayName("Skip if dateSentToDwp is correct")
     void shouldThrowErrorWhenDateSentToDwpIsCorrect() {
         LocalDate dueDate = LocalDate.now().plusDays(5);
-        sscsCaseData.setState(RESPONSE_RECEIVED);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setDateSentToDwp(dueDate.minusDays(RESPONSE_DUE_DAYS_CM).toString());
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+        caseDetails.setState(RESPONSE_RECEIVED.getId());
 
         assertThatThrownBy(() -> sentToDwpMigration.migrate(caseDetails))
             .hasMessageContaining("dateSentToDwp is correct");
@@ -111,12 +111,12 @@ class SentToDwpMigrationTest {
     @Test
     @DisplayName("Should not overwrite hmctsDwpState when migrating case")
     void shouldNotChangeHmctsDwpStateIfSet() {
-        sscsCaseData.setState(RESPONSE_RECEIVED);
         LocalDate dueDate = LocalDate.now().plusDays(32);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setHmctsDwpState("someHmctsDwpState");
         sscsCaseData.setDateSentToDwp(null);
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+        caseDetails.setState(RESPONSE_RECEIVED.getId());
 
         sentToDwpMigration.migrate(caseDetails);
 
@@ -135,7 +135,6 @@ class SentToDwpMigrationTest {
     @DisplayName("Should migrate case")
     void shouldMigrate(String benefitShortName, String sentToDateDifference) {
         sscsCaseData.getAppeal().setBenefitType(BenefitType.builder().code(benefitShortName).build());
-        sscsCaseData.setState(RESPONSE_RECEIVED);
         LocalDate dueDate = LocalDate.now().plusDays(25);
         sscsCaseData.setDwpDueDate(dueDate.toString());
         sscsCaseData.setHmctsDwpState(null);
@@ -143,6 +142,7 @@ class SentToDwpMigrationTest {
                                           ? null
                                           : dueDate.minusDays(Long.parseLong(sentToDateDifference)).toString());
         caseDetails = CaseDetails.builder().data(buildCaseDataMap(sscsCaseData)).id(1234L).build();
+        caseDetails.setState(RESPONSE_RECEIVED.getId());
 
         sentToDwpMigration.migrate(caseDetails);
 

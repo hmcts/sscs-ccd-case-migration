@@ -61,9 +61,8 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
                 throw new IllegalStateException("Skipping migration as FTA response due date is empty");
             }
 
-            if (!RESPONSE_RECEIVED.equals(sscsCaseData.getState())) {
-                throw new IllegalStateException("Skipping migration as case state is "
-                                                    + sscsCaseData.getState().getId());
+            if (!RESPONSE_RECEIVED.getId().equals(caseDetails.getState())) {
+                throw new IllegalStateException("Skipping migration as case state is " + caseDetails.getState());
             }
 
             if (shouldMigrate(sscsCaseData, caseDetails.getId().toString())) {
