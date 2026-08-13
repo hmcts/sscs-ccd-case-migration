@@ -62,7 +62,8 @@ public class SentToDwpMigration extends CaseMigrationProcessor {
             }
 
             if (!RESPONSE_RECEIVED.equals(sscsCaseData.getState())) {
-                throw new IllegalStateException("Skipping migration as case state is " + sscsCaseData.getState().getId());
+                throw new IllegalStateException("Skipping migration as case state is "
+                                                    + sscsCaseData.getState().getId());
             }
 
             if (shouldMigrate(sscsCaseData, caseDetails.getId().toString())) {
