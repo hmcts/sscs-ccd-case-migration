@@ -15,6 +15,9 @@ feign.client.config.default:
 
 idam:
   api.url: ${IDAM_API_URL:http://localhost:5062}
+  oidc:
+    use_oidc_api: ${IDAM_USE_OIDC_API:true}
+    url: ${IDAM_OIDC_URL:http://localhost:5062}
   client:
     id: ${IDAM_CLIENT_ID:ccd_gateway}
     secret: ${IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET:ccd_gateway_secret}
