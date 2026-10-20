@@ -174,11 +174,11 @@ dependencies {
   implementation 'org.springframework.security:spring-security-oauth2-core'
   implementation 'org.springframework.security:spring-security-config'
 
-  implementation 'com.github.hmcts:idam-java-client:3.0.5'
+  implementation 'com.github.hmcts:idam-java-client:3.1.0'
   implementation 'com.github.hmcts:service-auth-provider-java-client:5.3.4'
   implementation 'com.github.hmcts:core-case-data-store-client:5.3.0'
   implementation 'com.github.hmcts.java-logging:logging:8.0.0'
-  implementation 'com.github.hmcts:sscs-common:6.3.61'
+  implementation 'com.github.hmcts:sscs-common:6.3.64'
 
   implementation 'org.json:json:20260522'
   implementation 'io.github.openfeign:feign-jackson:13.6'
