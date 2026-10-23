@@ -96,19 +96,23 @@ You'll use this string as a migration property (when running locally) or as a ke
 
 Set the following in `application.properties`, replacing `<env>` with `aat` or `demo`:
 
-CCD_DATA_STORE_API_BASE_URL AS http://ccd-data-store-api-<env>.service.core-compute-<env>.internal
-IDAM_OIDC_URL AS https://idam-web-public.<env>.platform.hmcts.net
-IDAM_S2S_URL AS http://rpe-service-auth-provider-<env>.service.core-compute-<env>.internal
-IDAM_API_URL AS https://idam-api.<env>.platform.hmcts.net
-HMC_API_URL AS http://hmc-cft-hearing-service-<env>.service.core-compute-<env>.internal
+```properties
+CCD_DATA_STORE_API_BASE_URL=http://ccd-data-store-api-<env>.service.core-compute-<env>.internal
+IDAM_OIDC_URL=https://idam-web-public.<env>.platform.hmcts.net
+IDAM_S2S_URL=http://rpe-service-auth-provider-<env>.service.core-compute-<env>.internal
+IDAM_API_URL=https://idam-api.<env>.platform.hmcts.net
+HMC_API_URL=http://hmc-cft-hearing-service-<env>.service.core-compute-<env>.internal
+```
 
 **For Preview:** use `aat` as `<env>` for every URL except `CCD_DATA_STORE_API_BASE_URL`, which should point at your PR's preview data store:
 
-CCD_DATA_STORE_API_BASE_URL AS https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
+```properties
+CCD_DATA_STORE_API_BASE_URL=https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
+```
 
 ### 2. Set the credentials
 
-Get these from the key vault for the target environment and set them in `application.properties`
+Get these from the key vault for the target environment and set them in `application.properties`.
 
 - `IDAM_SSCS_SYSTEMUPDATE_USER`
 - `IDAM_SSCS_SYSTEMUPDATE_PASSWORD`
@@ -146,27 +150,27 @@ All config changes in steps 2-4 below are made in the `cnp-flux-config` reposito
 
    a. Set the schedule in `spec.values.job.schedule`. This uses standard cron format.
 
-```yaml
-      schedule: "15 15 13 10 *"     # Once, at 15:15 on 13 October
-      schedule: "*/15 15 13 10 *"   # Every 15 minutes between 15:00 and 15:59 on 13 October
-```
+  ```yaml
+        schedule: "15 15 13 10 *"     # Once a year, at 15:15 on 13 October
+        schedule: "*/15 15 13 10 *"   # Every 15 minutes between 15:00 and 15:59 on 13 October
+  ```
 
-b. If your migration takes data, add the key vault secret name and its alias (if not already present):
+  b. If your migration takes data, add the key vault secret name and its alias (if not already present):
 
-```yaml
-      - name: encoded-string-ready-to-list
-        alias: READY_TO_LIST_MIGRATION_ENCODED_STRING
-```
+  ```yaml
+        - name: encoded-string-ready-to-list
+          alias: READY_TO_LIST_MIGRATION_ENCODED_STRING
+  ```
 
-c. Add the migration's enable flag (if not already present) and set it to `true`. After the migration is complete, you can remove it to keep the config clean.
+  c. Add the migration's enable flag (if not already present) and set it to `true`. After the migration is complete, you can remove it to keep the config clean.
 
-```yaml
-      READY_TO_LIST_MIGRATION_ENABLED: true
-```
+  ```yaml
+        READY_TO_LIST_MIGRATION_ENABLED: true
+  ```
 
 3. **Update `sscs-ccd-case-migration.yaml`** with the secret name and alias as in step 2b, if not already present.
 
-4. **Update `00.yaml` or `01.yaml`** in the relevant environment folder, applying the same changes as steps 2.
+4. **Update `00.yaml` or `01.yaml`** in the relevant environment folder, applying the same changes as step 2.
 
 ---
 

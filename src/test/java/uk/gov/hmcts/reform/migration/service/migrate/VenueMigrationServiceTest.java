@@ -25,8 +25,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
+import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.INVALID_PROCESSING_VENUE_FAILURE_MSG;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.INVALID_STATE_FAILURE_MSG;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.STATES_TO_SKIP;
+import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.UNCHANGED_VENUE_FAILURE_MSG;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUES_TO_MIGRATE;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUE_MIGRATION_EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUE_MIGRATION_EVENT_ID;
@@ -79,7 +81,6 @@ class VenueMigrationServiceTest {
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
 
-
     @MethodSource("getStatesToSkip")
     @ParameterizedTest
     void shouldSkipCaseInInvalidState(String state) {
@@ -87,6 +88,27 @@ class VenueMigrationServiceTest {
         var caseDetails = CaseDetails.builder().data(caseData).state(state).id(1234L).build();
         var exception = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
         assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_STATE_FAILURE_MSG, 1234L, state));
+    }
+
+    @MethodSource("getInvalidVenues")
+    @ParameterizedTest
+    void shouldSkipCaseAtInvalidVenue(String venue) {
+        var caseData = new HashMap<String, Object>();
+        caseData.put("processingVenue", venue);
+        var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
+        var exception = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_PROCESSING_VENUE_FAILURE_MSG, 1234L, venue, VENUES_TO_MIGRATE));
+    }
+
+    @MethodSource("getVenuesToMigrate")
+    @ParameterizedTest
+    void shouldSkipCaseWhenVenueUnchanged(String venueToMigrate) {
+        var caseData = new HashMap<>(Map.of("processingVenue", (Object) venueToMigrate));
+        var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
+        when(roboticsJsonMapper.findVenueName(any(SscsCaseData.class))).thenReturn(Optional.of(venueToMigrate));
+
+        var exception = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo(String.format(UNCHANGED_VENUE_FAILURE_MSG, 1234L, venueToMigrate));
     }
 
     @Test
@@ -110,5 +132,9 @@ class VenueMigrationServiceTest {
 
     static Stream<String> getStatesToSkip() {
         return STATES_TO_SKIP.stream();
+    }
+
+    static Stream<String> getInvalidVenues() {
+        return Stream.of(null, "invalidVenue");
     }
 }
