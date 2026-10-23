@@ -96,8 +96,10 @@ class VenueMigrationServiceTest {
         var caseData = new HashMap<String, Object>();
         caseData.put("processingVenue", venue);
         var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
+
         var exception = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
-        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_PROCESSING_VENUE_FAILURE_MSG, 1234L, venue, VENUES_TO_MIGRATE));
+        assertThat(exception.getMessage())
+            .isEqualTo(String.format(INVALID_PROCESSING_VENUE_FAILURE_MSG, 1234L, venue, VENUES_TO_MIGRATE));
     }
 
     @MethodSource("getVenuesToMigrate")

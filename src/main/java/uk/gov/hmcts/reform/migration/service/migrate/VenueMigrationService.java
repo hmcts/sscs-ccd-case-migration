@@ -108,7 +108,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
         if (isNull(currentVenue) || !VENUES_TO_MIGRATE.contains(currentVenue)) {
             String skipMsg = format(INVALID_PROCESSING_VENUE_FAILURE_MSG,
                                     caseDetails.getId(),
-                                    caseDetails.getData().get(PROCESSING_VENUE_FIELD),
+                                    currentVenue,
                                     VENUES_TO_MIGRATE
             );
             log.info(skipMsg);

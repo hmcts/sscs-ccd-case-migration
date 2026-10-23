@@ -150,23 +150,23 @@ All config changes in steps 2-4 below are made in the `cnp-flux-config` reposito
 
    a. Set the schedule in `spec.values.job.schedule`. This uses standard cron format.
 
-  ```yaml
-        schedule: "15 15 13 10 *"     # Once a year, at 15:15 on 13 October
-        schedule: "*/15 15 13 10 *"   # Every 15 minutes between 15:00 and 15:59 on 13 October
-  ```
+    ```yaml
+          schedule: "15 15 13 10 *"     # Once a year, at 15:15 on 13 October
+          schedule: "*/15 15 13 10 *"   # Every 15 minutes between 15:00 and 15:59 on 13 October
+    ```
 
-  b. If your migration takes data, add the key vault secret name and its alias (if not already present):
+    b. If your migration takes data, add the key vault secret name and its alias (if not already present):
 
-  ```yaml
-        - name: encoded-string-ready-to-list
-          alias: READY_TO_LIST_MIGRATION_ENCODED_STRING
-  ```
+    ```yaml
+          - name: encoded-string-ready-to-list
+            alias: READY_TO_LIST_MIGRATION_ENCODED_STRING
+    ```
 
-  c. Add the migration's enable flag (if not already present) and set it to `true`. After the migration is complete, you can remove it to keep the config clean.
+    c. Add the migration's enable flag (if not already present) and set it to `true`. After the migration is complete, you can remove it to keep the config clean.
 
-  ```yaml
-        READY_TO_LIST_MIGRATION_ENABLED: true
-  ```
+    ```yaml
+          READY_TO_LIST_MIGRATION_ENABLED: true
+    ```
 
 3. **Update `sscs-ccd-case-migration.yaml`** with the secret name and alias as in step 2b, if not already present.
 
