@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,6 +25,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_CASE_ID;
 import static uk.gov.hmcts.reform.migration.repository.EncodedStringCaseListTest.ENCODED_STRING;
+import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.INVALID_STATE_FAILURE_MSG;
+import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.STATES_TO_SKIP;
+import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUES_TO_MIGRATE;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUE_MIGRATION_EVENT_DESCRIPTION;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUE_MIGRATION_EVENT_ID;
 import static uk.gov.hmcts.reform.migration.service.migrate.VenueMigrationService.VENUE_MIGRATION_EVENT_SUMMARY;
@@ -50,34 +54,39 @@ class VenueMigrationServiceTest {
         assertThat(migrationCases).contains(migrationCase);
     }
 
-    @Test
-    void shouldUpdateVenue() {
-        var caseData = new HashMap<>(Map.of("processingVenue", (Object)"Bradford"));
+    @MethodSource("getVenuesToMigrate")
+    @ParameterizedTest
+    void shouldUpdateVenue(String venueToMigrate) {
+        var caseData = new HashMap<>(Map.of("processingVenue", (Object)venueToMigrate));
         var caseDetails = CaseDetails.builder().data(caseData).build();
         when(roboticsJsonMapper.findVenueName(any(SscsCaseData.class))).thenReturn(Optional.of("Leeds"));
 
-        underTest.migrate(caseDetails);
+        var result = underTest.migrate(caseDetails);
 
         assertThat(caseData.get("processingVenue")).isEqualTo("Leeds");
+        assertThat(result.summary()).isEqualTo(String.format(VENUE_MIGRATION_EVENT_SUMMARY, "Leeds"));
+        assertThat(result.description()).isEqualTo(String.format(VENUE_MIGRATION_EVENT_DESCRIPTION, "Leeds"));
     }
 
-    @Test
-    void shouldThrowException() {
-        var caseData = new HashMap<>(Map.of("processingVenue", (Object)"Bradford"));
+    @MethodSource("getVenuesToMigrate")
+    @ParameterizedTest
+    void shouldThrowException(String venueToMigrate) {
+        var caseData = new HashMap<>(Map.of("processingVenue", (Object)venueToMigrate));
         var caseDetails = CaseDetails.builder().data(caseData).id(1234L).build();
-        var sscsCaseData = SscsCaseData.builder().processingVenue("Bradford").build();
+        var sscsCaseData = SscsCaseData.builder().processingVenue(venueToMigrate).build();
         when(roboticsJsonMapper.findVenueName(eq(sscsCaseData))).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
     }
 
-    // remove test for skipping states after 30/03/2026 (after Fox Court (S) to London Tribunals migration is complete)
+
+    @MethodSource("getStatesToSkip")
     @ParameterizedTest
-    @ValueSource(strings = {"dormantAppealState", "draftArchived", "hearing", "voidState", "withUt"})
-    void shouldSkipCaseInDormantAppealState(String state) {
-        var caseData = new HashMap<>(Map.of("processingVenue", (Object) "Bradford"));
+    void shouldSkipCaseInInvalidState(String state) {
+        var caseData = new HashMap<>(Map.of("processingVenue", (Object) VENUES_TO_MIGRATE.getFirst()));
         var caseDetails = CaseDetails.builder().data(caseData).state(state).id(1234L).build();
-        assertThrows(RuntimeException.class, () -> underTest.migrate(caseDetails));
+        var exception = assertThrows(IllegalStateException.class, () -> underTest.migrate(caseDetails));
+        assertThat(exception.getMessage()).isEqualTo(String.format(INVALID_STATE_FAILURE_MSG, 1234L, state));
     }
 
     @Test
@@ -93,5 +102,13 @@ class VenueMigrationServiceTest {
     @Test
     void shouldGetEventSummary() {
         assertThat(underTest.getEventSummary()).isEqualTo(VENUE_MIGRATION_EVENT_SUMMARY);
+    }
+
+    static Stream<String> getVenuesToMigrate() {
+        return VENUES_TO_MIGRATE.stream();
+    }
+
+    static Stream<String> getStatesToSkip() {
+        return STATES_TO_SKIP.stream();
     }
 }
