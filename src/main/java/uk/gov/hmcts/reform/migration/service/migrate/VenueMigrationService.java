@@ -25,8 +25,7 @@ public class VenueMigrationService extends CaseMigrationProcessor {
 
     static final List<String> VENUES_TO_MIGRATE = List.of("Kirkcaldy", "Dunfermline");
     static final List<String> STATES_TO_SKIP = List.of(State.DORMANT_APPEAL_STATE.getId(), State.DRAFT_ARCHIVED.getId(),
-                                                       State.HEARING.getId(), State.VOID_STATE.getId(),
-                                                       State.WITH_UT.getId());
+                                                       State.HEARING.getId(), State.VOID_STATE.getId());
 
     static final String VENUE_MIGRATION_EVENT_ID = "migrateCase";
     static final String VENUE_MIGRATION_EVENT_SUMMARY = "Processing (hearing) venue changed to %s";
