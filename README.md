@@ -101,34 +101,35 @@ Copy `src/main/resources/application-local.properties.example` to `src/main/reso
 Set the following in `application-local.properties`, replacing `<env>` with `aat` or `demo`:
 
 ```properties
-CCD_DATA_STORE_API_BASE_URL=http://ccd-data-store-api-<env>.service.core-compute-<env>.internal
-IDAM_OIDC_URL=https://idam-web-public.<env>.platform.hmcts.net
-IDAM_S2S_URL=http://rpe-service-auth-provider-<env>.service.core-compute-<env>.internal
-IDAM_API_URL=https://idam-api.<env>.platform.hmcts.net
-HMC_API_URL=http://hmc-cft-hearing-service-<env>.service.core-compute-<env>.internal
+core_case_data.api.url=http://ccd-data-store-api-<env>.service.core-compute-<env>.internal
+idam.oidc.url=https://idam-web-public.<env>.platform.hmcts.net
+idam.s2s-auth.url=http://rpe-service-auth-provider-<env>.service.core-compute-<env>.internal
+idam.api.url=https://idam-api.<env>.platform.hmcts.net
+hmc.url=http://hmc-cft-hearing-service-<env>.service.core-compute-<env>.internal
 ```
 
-**For Preview:** use `aat` as `<env>` for every URL except `CCD_DATA_STORE_API_BASE_URL`, which should point at your PR's preview data store:
+**For Preview:** use `aat` as `<env>` for every URL except `core_case_data.api.url`, which should point at your PR's preview data store:
 
 ```properties
-CCD_DATA_STORE_API_BASE_URL=https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
+core_case_data.api.url=https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
 ```
 
 ### 3. Set the credentials
 
 Get these from the key vault for the target environment and set them in `application-local.properties`.
 
-- `IDAM_SSCS_SYSTEMUPDATE_USER`
-- `IDAM_SSCS_SYSTEMUPDATE_PASSWORD`
-- `DATA_STORE_IDAM_KEY`
-- `IDAM_USER`
-- `IDAM_PASS`
+- `idam.oauth2.user.email`
+- `idam.oauth2.user.password`
+- `idam.s2s-auth.totp_secret`
+- `idam.client.secret`
+- `migration.idam.username`
+- `migration.idam.password`
 
 > ⚠️ Don't commit these values to the repository. application-local.properties is ignored by Git, so you can safely store them there for local development.
 
 ### 4. Enable the migration
 
-Set the properties in `application.properties` for the migration you want to run. For example, for `VenueMigrationService`:
+Set the properties for the migration you want to run. For example, for `VenueMigrationService`:
 
 ```
 VENUE_MIGRATION_ENABLED=true
