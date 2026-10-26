@@ -77,6 +77,116 @@ case-migration.elasticsearch.querySize= # Elasticsearch query size limit
 case-migration.processing.limit= # Migration processing size limit
 ```
 
+## Encoding a data string
+
+Many migrations need an encoded data string passed to the migration service. Use the `MigrationDataEncoderApp` class to generate one:
+
+1. Edit `testMigrationSourceFile.csv`:
+- **Row 1:** the data name (header). Separate multiple names with commas.
+- **Rows 2+:** the data to be encoded. Separate multiple values with commas. Each row will be encoded as a separate object in the resulting JSON array.
+2. Run `MigrationDataEncoderApp`. The encoded string is written to a file in encodedStringOutput under the project root directory.
+
+You'll use this string as a migration property (when running locally) or as a key vault secret (when running via cron job).
+
+---
+
+## Running locally against Preview, AAT or Demo
+
+### 1. Create your local config
+
+Copy `src/main/resources/application-local.properties.example` to `src/main/resources/application-local.properties` (gitignored, so your personal values never get committed).
+
+### 2. Set the service URLs
+
+Set the following in `application-local.properties`, replacing `<env>` with `aat` or `demo`:
+
+```properties
+core_case_data.api.url=http://ccd-data-store-api-<env>.service.core-compute-<env>.internal
+idam.oidc.url=https://idam-web-public.<env>.platform.hmcts.net
+idam.s2s-auth.url=http://rpe-service-auth-provider-<env>.service.core-compute-<env>.internal
+idam.api.url=https://idam-api.<env>.platform.hmcts.net
+hmc.url=http://hmc-cft-hearing-service-<env>.service.core-compute-<env>.internal
+```
+
+**For Preview:** use `aat` as `<env>` for every URL except `core_case_data.api.url`, which should point at your PR's preview data store:
+
+```properties
+core_case_data.api.url=https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
+```
+
+### 3. Set the credentials
+
+Get these from the key vault for the target environment and set them in `application-local.properties`.
+
+- `idam.oauth2.user.email`
+- `idam.oauth2.user.password`
+- `idam.s2s-auth.totp_secret`
+- `idam.client.secret`
+- `migration.idam.username`
+- `migration.idam.password`
+
+> ⚠️ Don't commit these values to the repository. application-local.properties is ignored by Git, so you can safely store them there for local development.
+
+### 4. Enable the migration
+
+Set the properties for the migration you want to run. For example, for `VenueMigrationService`:
+
+```
+migration.processingVenue.enabled=true
+migration.processingVenue.encoded-string=<encoded data string>
+```
+
+### 5. Run
+
+```bash
+./gradlew bootRun
+```
+
+---
+
+## Running as a cron job against AAT or Demo
+
+All config changes in steps 2-4 below are made in the `cnp-flux-config` repository, under `apps/sscs/sscs-ccd-case-migration`.
+
+1. **Store the encoded data (if your migration takes data).**
+   Update the relevant azure key vault secret with the encoded data string.
+
+2. **Update `<env>.yaml`** (e.g. `aat.yaml`, `demo.yaml`):
+
+   a. Set the schedule in `spec.values.job.schedule`. This uses standard cron format.
+
+    ```yaml
+          schedule: "15 15 13 10 *"     # Once a year, at 15:15 on 13 October
+          schedule: "*/15 15 13 10 *"   # Every 15 minutes between 15:00 and 15:59 on 13 October
+    ```
+
+    b. If your migration takes data, add the key vault secret name and its alias (if not already present):
+
+    ```yaml
+          - name: encoded-string-ready-to-list
+            alias: READY_TO_LIST_MIGRATION_ENCODED_STRING
+    ```
+
+    c. Add the migration's enable flag (if not already present) and set it to `true`. After the migration is complete, you can remove it to keep the config clean.
+
+    ```yaml
+          READY_TO_LIST_MIGRATION_ENABLED: true
+    ```
+
+3. **Update `sscs-ccd-case-migration.yaml`** with the secret name and alias as in step 2b, if not already present.
+
+4. **Update `00.yaml` or `01.yaml`** in the relevant environment folder, applying the same changes as step 2.
+
+---
+
+## Running as a cron job against Prod
+
+Follow steps 1–3 from [Running as a cron job against AAT or Demo](#running-as-a-cron-job-against-aat-or-demo), then check the following before scheduling:
+
+- **Case limit:** a single migration run on Prod can process at most **1,200 cases**.
+- **Caseloader:** make sure the migration isn't scheduled to overlap with the caseloader job.
+- **Draft Archive Migrations:** If doing multiple runs of a migration in one night, consider setting `ARCHIVE_OLD_DRAFTS_ENABLED` to `false` for the duration, and re-enable it once all migrations have finished.
+
 ## Unit tests
 
 To run all unit tests please execute following command :-
