@@ -132,8 +132,8 @@ Get these from the key vault for the target environment and set them in `applica
 Set the properties for the migration you want to run. For example, for `VenueMigrationService`:
 
 ```
-VENUE_MIGRATION_ENABLED=true
-VENUE_MIGRATION_DATA=<encoded data string>
+migration.processingVenue.enabled=true
+migration.processingVenue.encoded-string=<encoded data string>
 ```
 
 ### 5. Run

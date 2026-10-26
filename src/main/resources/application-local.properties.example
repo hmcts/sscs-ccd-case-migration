@@ -1,16 +1,16 @@
 # Example development config for preview
 # Copy this file to application-local.properties (gitignored) and fill in your own values.
 
-idam.client.id=sscs
 core_case_data.api.url=https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
 idam.oidc.url=https://idam-web-public.aat.platform.hmcts.net
 idam.s2s-auth.url=http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
 idam.api.url=https://idam-api.aat.platform.hmcts.net
 hmc.url=http://hmc-cft-hearing-service-aat.service.core-compute-aat.internal
 idam.oauth2.user.email=${IDAM_SSCS_SYSTEMUPDATE_USER:system.update@hmcts.net}
-idam.oauth2.user.password= ${IDAM_SSCS_SYSTEMUPDATE_PASSWORD:Pa55word11}
+idam.oauth2.user.password=${IDAM_SSCS_SYSTEMUPDATE_PASSWORD:Pa55word11}
 idam.s2s-auth.totp_secret=${DATA_STORE_IDAM_KEY:AAAAAAAAAAAAAAAB}
 idam.client.secret=${IDAM_OAUTH2_DATA_STORE_CLIENT_SECRET:test}
+idam.client.id=sscs
 migration.idam.username=${IDAM_USER:idam.user@email.com}
 migration.idam.password=${IDAM_PASS:dummy_password}
 
