@@ -92,7 +92,11 @@ You'll use this string as a migration property (when running locally) or as a ke
 
 ## Running locally against Preview, AAT or Demo
 
-### 1. Set the service URLs
+### 1. Create your local config
+
+Copy `src/main/resources/application-local.properties.example` to `src/main/resources/application-local.properties` (gitignored, so your personal values never get committed).
+
+### 2. Set the service URLs
 
 Set the following in `application-local.properties`, replacing `<env>` with `aat` or `demo`:
 
@@ -110,7 +114,7 @@ HMC_API_URL=http://hmc-cft-hearing-service-<env>.service.core-compute-<env>.inte
 CCD_DATA_STORE_API_BASE_URL=https://ccd-data-store-api-sscs-tribunals-api-pr-<prNumber>.preview.platform.hmcts.net
 ```
 
-### 2. Set the credentials
+### 3. Set the credentials
 
 Get these from the key vault for the target environment and set them in `application-local.properties`.
 
@@ -122,7 +126,7 @@ Get these from the key vault for the target environment and set them in `applica
 
 > ⚠️ Don't commit these values to the repository. application-local.properties is ignored by Git, so you can safely store them there for local development.
 
-### 3. Enable the migration
+### 4. Enable the migration
 
 Set the properties in `application.properties` for the migration you want to run. For example, for `VenueMigrationService`:
 
@@ -131,7 +135,7 @@ VENUE_MIGRATION_ENABLED=true
 VENUE_MIGRATION_DATA=<encoded data string>
 ```
 
-### 4. Run
+### 5. Run
 
 ```bash
 ./gradlew bootRun
