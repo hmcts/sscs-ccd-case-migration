@@ -17,5 +17,5 @@ migration.idam.password=${IDAM_PASS:dummy_password}
 
 #Example migration values
 
-migration.processingVenue.enabled=${VENUE_MIGRATION_ENABLED:true}
+migration.processingVenue.enabled=${VENUE_MIGRATION_ENABLED:false}
 migration.processingVenue.encoded-string=${VENUE_MIGRATION_ENCODED_STRING:==dummy++encoded--string==}
