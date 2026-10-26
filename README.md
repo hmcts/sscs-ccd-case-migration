@@ -94,7 +94,7 @@ You'll use this string as a migration property (when running locally) or as a ke
 
 ### 1. Set the service URLs
 
-Set the following in `application.properties`, replacing `<env>` with `aat` or `demo`:
+Set the following in `application-local.properties`, replacing `<env>` with `aat` or `demo`:
 
 ```properties
 CCD_DATA_STORE_API_BASE_URL=http://ccd-data-store-api-<env>.service.core-compute-<env>.internal
@@ -112,7 +112,7 @@ CCD_DATA_STORE_API_BASE_URL=https://ccd-data-store-api-sscs-tribunals-api-pr-<pr
 
 ### 2. Set the credentials
 
-Get these from the key vault for the target environment and set them in `application.properties`.
+Get these from the key vault for the target environment and set them in `application-local.properties`.
 
 - `IDAM_SSCS_SYSTEMUPDATE_USER`
 - `IDAM_SSCS_SYSTEMUPDATE_PASSWORD`
@@ -120,7 +120,7 @@ Get these from the key vault for the target environment and set them in `applica
 - `IDAM_USER`
 - `IDAM_PASS`
 
-> ⚠️ Don't commit these values to the repository.
+> ⚠️ Don't commit these values to the repository. application-local.properties is ignored by Git, so you can safely store them there for local development.
 
 ### 3. Enable the migration
 

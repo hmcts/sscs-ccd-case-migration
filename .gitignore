@@ -25,3 +25,4 @@ applicationinsights-agent-*.jar
 *.log
 
 /encodedStringOutput/
+src/main/resources/application-local.properties

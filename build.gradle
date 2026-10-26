@@ -217,6 +217,10 @@ bootJar {
   archiveVersion = project.version.toString()
 }
 
+bootRun {
+  systemProperty 'spring.profiles.active', 'local'
+}
+
 wrapper {
   distributionType = Wrapper.DistributionType.ALL
 }
