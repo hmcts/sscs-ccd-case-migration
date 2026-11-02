@@ -178,7 +178,7 @@ dependencies {
   implementation 'com.github.hmcts:service-auth-provider-java-client:5.3.4'
   implementation 'com.github.hmcts:core-case-data-store-client:5.3.0'
   implementation 'com.github.hmcts.java-logging:logging:8.0.0'
-  implementation 'com.github.hmcts:sscs-common:6.3.64'
+  implementation 'com.github.hmcts:sscs-common:fa9beed'
 
   implementation 'org.json:json:20260522'
   implementation 'io.github.openfeign:feign-jackson:13.6'
@@ -215,6 +215,10 @@ bootJar {
   archiveFileName = 'sscs-ccd-case-migration.jar'
   archiveBaseName = 'sscs-ccd-case-migration'
   archiveVersion = project.version.toString()
+}
+
+bootRun {
+  systemProperty 'spring.profiles.active', 'local'
 }
 
 wrapper {

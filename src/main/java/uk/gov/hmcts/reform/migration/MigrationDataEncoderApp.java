@@ -23,6 +23,7 @@ public class MigrationDataEncoderApp {
 
     public static final String MIGRATION_FILE = "testMigrationSourceFile.csv";
     public static final String ENCODED_STR_FILE = "ENCODED_" + MIGRATION_FILE.replace(".csv", ".txt");
+    public static final String ENCODED_STR_DIR = "encodedStringOutput";
 
     private MigrationDataEncoderApp() {
     }
@@ -43,7 +44,8 @@ public class MigrationDataEncoderApp {
             JSONArray migrationDataJson = new JSONArray(migrationData);
 
             String encodedMigrationData = compressAndB64Encode(migrationDataJson.toString());
-            Path path = Paths.get(LocalDate.now().toString().replace("-", "")
+            Path dir = Files.createDirectories(Paths.get(ENCODED_STR_DIR));
+            Path path = dir.resolve(LocalDate.now().toString().replace("-", "")
                 .concat("_" + ENCODED_STR_FILE));
             Files.write(path, encodedMigrationData.getBytes());
 
